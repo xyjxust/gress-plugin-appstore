@@ -1,0 +1,123 @@
+# 应用商店插件配置
+appstore:
+  # 应用商店基本信息
+  store-name: Gress 应用商店（开发环境）
+  store-url: http://localhost:8081/
+  
+  # 应用商店 API 配置
+  api:
+    # API 基础地址（指向 gress-plugin-appstore-admin 提供的 API）
+    base-url: http://localhost:8081/gress/plugins/appstore-admin/api/appstore
+    
+    # API 认证密钥（开发环境暂不需要）
+    secret-key: 
+    
+    # API 超时时间（毫秒）
+    timeout: 30000
+    
+    # 重试次数
+    max-retries: 3
+    
+    # 是否启用 API 调用
+    enabled: true
+  
+  # 应用下载配置
+  download:
+    # 下载目录（开发环境使用相对路径）
+    directory: ./downloads/plugins
+    
+    # 下载超时时间（毫秒）
+    timeout: 300000
+    
+    # 最大并发下载数
+    max-concurrent: 3
+    
+    # 下载完成后是否自动安装（开发环境建议手动安装）
+    auto-install: false
+    
+    # 下载失败后是否自动重试
+    auto-retry: true
+  
+  # 应用信息同步配置
+  sync:
+    # 是否启用自动同步（开发环境可以禁用）
+    enabled: false
+    
+    # 同步间隔（秒）
+    interval: 3600
+    
+    # 同步时间（Cron 表达式，每天凌晨2点）
+    cron: 0 0 2 * * ?
+    
+    # 同步失败后重试次数
+    max-retries: 3
+  
+  # 缓存配置
+  cache:
+    # 是否启用缓存（开发环境可以禁用以便调试）
+    enabled: false
+    
+    # 缓存过期时间（秒）
+    expire-seconds: 3600
+    
+    # 最大缓存条目数
+    max-size: 1000
+  
+  # 安全配置
+  security:
+    # 是否验证应用签名（开发环境可以禁用）
+    verify-signature: false
+    
+    # 是否检查应用来源（开发环境可以禁用）
+    check-source: false
+    
+    # 允许的应用来源列表
+    allowed-sources:
+      - http://localhost:8080
+      - https://store.gress.io
+      - https://plugins.gress.io
+    
+    # 是否启用应用沙箱
+    enable-sandbox: false
+  
+  # 应用类型配置
+  application-types:
+    # 允许的应用类型
+    allowed:
+      - WORKFLOW
+      - APPLICATION
+      - TRIGGER
+      - TASK
+    
+    # 默认应用类型
+    default: APPLICATION
+  
+  # 通知配置
+  notification:
+    # 是否启用通知（开发环境可以禁用）
+    enabled: false
+    
+    # 通知方式（email, webhook, system）
+    methods:
+      - system
+    
+    # 通知事件
+    events:
+      - application.installed
+      - application.upgraded
+      - application.uninstalled
+      - application.failed
+  
+  # 自定义属性
+  custom-properties:
+    # 功能开关
+    feature.new-ui: enabled
+    feature.beta-test: enabled
+    
+    # 限制配置
+    max-upload-size: 100MB
+    max-applications: 100
+    
+    # 其他配置
+    default-language: zh-CN
+    support-email: support@gress.io

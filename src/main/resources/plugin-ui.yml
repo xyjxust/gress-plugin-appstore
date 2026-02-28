@@ -1,0 +1,214 @@
+# App Store 插件 UI 配置
+# 应用管理功能
+
+plugin:
+  id: appstore
+  name: 应用商店
+  version: 1.0.0
+
+# ============================================================
+# 菜单配置（一站式配置：菜单+路由+权限+按钮）
+# ============================================================
+menus:
+  # 应用管理菜单
+  - id: applications
+    title: 应用管理
+    icon: Cube
+    path: /plugins/appstore/applications
+    component: ApplicationManagement
+    order: 50
+    
+    # API 前缀（自动关联所有匹配的 API）
+    apiPrefix: /api/v2/plugins/appstore/applications
+    
+    # 操作权限
+    operations:
+      - VIEW    # 查看菜单和访问页面
+      - MANAGE  # 管理应用（增删改）
+    
+    # 页面按钮（自动创建 BUTTON 资源）
+    buttons:
+      # 本地应用操作
+      - id: upload
+        label: 上传安装
+        # 约定：POST /api/v2/plugins/appstore/applications/upload
+        
+      - id: enable
+        label: 启用
+        # 约定：POST /api/v2/plugins/appstore/applications/{id}/enable
+        
+      - id: disable
+        label: 禁用
+        # 约定：POST /api/v2/plugins/appstore/applications/{id}/disable
+        
+      - id: upgrade
+        label: 升级
+        # 约定：POST /api/v2/plugins/appstore/applications/{id}/upgrade
+        
+      - id: uninstall
+        label: 卸载
+        # 约定：DELETE /api/v2/plugins/appstore/applications/{id}
+      
+      # 远程应用商店操作
+      - id: remote-install
+        label: 从应用商店安装
+        path: POST:/api/v2/plugins/appstore/applications/remote/install
+        # 自定义：不在 apiPrefix 下的路径
+      
+      - id: refresh-remote
+        label: 刷新远程列表
+        path: GET:/api/v2/plugins/appstore/applications/remote
+        # 自定义：GET 方法
+  
+  # 操作日志菜单
+  - id: operation-logs
+    title: 操作日志
+    icon: DocumentText
+    path: /plugins/appstore/operation-logs
+    component: OperationLog
+    order: 51
+    
+    # API 前缀（自动关联所有匹配的 API）
+    apiPrefix: /api/v2/plugins/appstore/applications/operation-logs
+    
+    # 操作权限
+    operations:
+      - VIEW    # 查看操作日志
+    
+    # 页面按钮（自动创建 BUTTON 资源）
+    buttons:
+      - id: refresh
+        label: 刷新
+        # 约定：GET /api/v2/plugins/appstore/applications/operation-logs
+      
+      - id: view-detail
+        label: 查看详情
+        # 约定：GET /api/v2/plugins/appstore/applications/operation-logs/{id}
+
+  # 中间件管理菜单
+  - id: middlewares
+    title: 中间件管理
+    icon: Server
+    path: /plugins/appstore/middlewares
+    component: MiddlewareManagement
+    order: 52
+
+    # API 前缀（自动关联所有匹配的 API）
+    apiPrefix: /api/v2/plugins/appstore/middlewares
+
+    operations:
+      - VIEW
+      - MANAGE
+
+    buttons:
+      - id: upload
+        label: 上传安装
+        # 约定：POST /api/v2/plugins/appstore/middlewares/upload
+      - id: health
+        label: 健康检查
+        path: GET:/api/v2/plugins/appstore/middlewares/{middlewareId}/health
+      - id: uninstall
+        label: 卸载
+        path: POST:/api/v2/plugins/appstore/middlewares/{middlewareId}/uninstall
+
+  # 节点管理菜单
+  - id: nodes
+    title: 节点管理
+    icon: ServerOutline
+    path: /plugins/appstore/nodes
+    component: NodeManagement
+    order: 53
+
+    # API 前缀（自动关联所有匹配的 API）
+    apiPrefix: /api/v2/plugins/appstore/nodes
+
+    operations:
+      - VIEW
+      - MANAGE
+
+    buttons:
+      - id: create
+        label: 新增节点
+        # 约定：POST /api/v2/plugins/appstore/nodes
+      - id: edit
+        label: 编辑节点
+        # 约定：PUT /api/v2/plugins/appstore/nodes/{nodeId}
+      - id: delete
+        label: 删除节点
+        # 约定：DELETE /api/v2/plugins/appstore/nodes/{nodeId}
+      - id: test
+        label: 测试连接
+        path: POST:/api/v2/plugins/appstore/nodes/{nodeId}/test
+
+  # 插件监控菜单
+  - id: plugin-monitor
+    title: 插件监控
+    icon: Activity
+    path: /plugins/appstore/monitor
+    component: PluginMonitorDashboard
+    order: 54
+
+    # API 前缀（自动关联所有匹配的 API）
+    apiPrefix: /api/plugins/appstore/monitor
+
+    operations:
+      - VIEW    # 查看监控数据
+
+    buttons:
+      - id: refresh
+        label: 刷新
+        # 约定：GET /api/plugins/appstore/monitor/status
+      - id: view-detail
+        label: 查看详情
+        # 约定：GET /api/plugins/appstore/monitor/status/{pluginId}
+      - id: view-history
+        label: 查看历史
+        # 约定：GET /api/plugins/appstore/monitor/history/{pluginId}
+
+# ============================================================
+# 数据资源（可选）
+# ============================================================
+data:
+  - id: application-info
+    name: 应用信息
+    operations:
+      - READ
+      - WRITE
+
+# ============================================================
+# 预定义角色
+# ============================================================
+roles:
+  - code: viewer
+    name: 应用查看者
+    description: 只能查看应用列表和详情，不能进行任何操作
+    permissions:
+      - applications:VIEW
+      - operation-logs:VIEW
+      - plugin-monitor:VIEW
+      
+  - code: user
+    name: 应用普通用户
+    description: 可以查看应用、启用/禁用应用
+    permissions:
+      - applications:VIEW
+      - applications.enable
+      - applications.disable
+      - operation-logs:VIEW
+      - plugin-monitor:VIEW
+      - plugin-monitor.*  # 所有监控按钮权限
+      
+  - code: admin
+    name: 应用管理员
+    description: 拥有应用管理的完整权限
+    permissions:
+      - applications:VIEW,MANAGE
+      - applications.*  # 所有按钮权限
+      - operation-logs:VIEW
+      - operation-logs.*  # 所有操作日志按钮权限
+      - middlewares:VIEW,MANAGE
+      - middlewares.*  # 所有中间件按钮权限
+      - nodes:VIEW,MANAGE
+      - nodes.*  # 所有节点管理按钮权限
+      - plugin-monitor:VIEW
+      - plugin-monitor.*  # 所有监控按钮权限

@@ -1,0 +1,33 @@
+{
+  "name": "@keqi.gress/plugin-appstore-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gress App Store plugin frontend (UMD)",
+  "main": "dist/appstore-frontend.umd.cjs",
+  "module": "dist/appstore-frontend.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "gress-dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "dependencies": {
+    "@keqi.gress/plugin-bridge": "^1.0.0",
+    "@keqi.gress/plugin-ui": "^1.0.1",
+    "@keqi.gress/shared-utils": "^1.0.2",
+    "echarts": "^6.0.0",
+    "naive-ui": "^2.38.0",
+    "vue": "^3.3.0",
+    "vue-echarts": "^8.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@keqi.gress/plugin-dev-server": "^1.0.13",
+    "sass": "^1.72.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.0.0"
+  }
+}
