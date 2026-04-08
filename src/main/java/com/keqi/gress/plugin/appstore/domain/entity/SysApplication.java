@@ -85,6 +85,11 @@ public class SysApplication {
     @TableField("plugin_type")
     private String pluginType;
     
+    /** 应用图标 */
+    @Schema(description = "应用图标")
+    @TableField("icon")
+    private String icon;
+
     /** 扩展配置（JSON格式） */
     @Schema(description = "扩展配置（JSON格式），用于存储应用的额外配置信息")
     @TableField("extension_config")

@@ -5,14 +5,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 
   var __vite_style__ = document.createElement("style");
   __vite_style__.textContent = `@charset "UTF-8";
-.application-management-page[data-v-6096b87c] {
+.application-management-page[data-v-c8ddb4c1] {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: #f5f5f5;
 }
-.page-content[data-v-6096b87c] {
+.page-content[data-v-c8ddb4c1] {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
@@ -22,14 +22,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 }
 
 /* 加载和空状态 */
-.loading-state[data-v-6096b87c] {
+.loading-state[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
   padding: 60px;
 }
-.empty-state[data-v-6096b87c] {
+.empty-state[data-v-c8ddb4c1] {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,21 +40,21 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   color: #999;
   gap: 16px;
 }
-.empty-state__icon[data-v-6096b87c] {
+.empty-state__icon[data-v-c8ddb4c1] {
   opacity: 0.5;
 }
-.empty-state__text[data-v-6096b87c] {
+.empty-state__text[data-v-c8ddb4c1] {
   font-size: 14px;
 }
 
 /* 应用列表 */
-.app-list[data-v-6096b87c] {
+.app-list[data-v-c8ddb4c1] {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 16px;
   margin-top: 12px;
 }
-.app-card[data-v-6096b87c] {
+.app-card[data-v-c8ddb4c1] {
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -62,17 +62,17 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   display: flex;
   flex-direction: column;
 }
-.app-card[data-v-6096b87c] .n-card {
+.app-card[data-v-c8ddb4c1] .n-card {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
-.app-card[data-v-6096b87c]:hover {
+.app-card[data-v-c8ddb4c1]:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   z-index: 2;
 }
-.app-card[data-v-6096b87c] .n-card__content {
+.app-card[data-v-c8ddb4c1] .n-card__content {
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -81,13 +81,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 }
 
 /* 应用卡片头部 */
-.app-header[data-v-6096b87c] {
+.app-header[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
 }
-.app-icon[data-v-6096b87c] {
+.app-icon[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,19 +96,30 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   border-radius: 8px;
   flex-shrink: 0;
 }
-.app-icon--integrated[data-v-6096b87c] {
+.app-icon--integrated[data-v-c8ddb4c1] {
   background: rgba(99, 102, 241, 0.1);
   color: #6366f1;
 }
-.app-icon--plugin[data-v-6096b87c] {
+.app-icon--plugin[data-v-c8ddb4c1] {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
 }
-.app-info[data-v-6096b87c] {
+.app-icon--aggregated[data-v-c8ddb4c1] {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+.app-icon__img[data-v-c8ddb4c1] {
+  width: fit-content;
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.app-info[data-v-c8ddb4c1] {
   flex: 1;
   min-width: 0;
 }
-.app-name[data-v-6096b87c] {
+.app-name[data-v-c8ddb4c1] {
   font-size: 15px;
   font-weight: 600;
   color: #1f2937;
@@ -119,7 +130,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   display: flex;
   align-items: center;
 }
-.app-code[data-v-6096b87c] {
+.app-code[data-v-c8ddb4c1] {
   font-size: 12px;
   color: #6b7280;
   font-family: monospace;
@@ -127,38 +138,38 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.app-status[data-v-6096b87c] {
+.app-status[data-v-c8ddb4c1] {
   flex-shrink: 0;
 }
 
 /* 应用卡片主体 */
-.app-body[data-v-6096b87c] {
+.app-body[data-v-c8ddb4c1] {
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex: 1;
 }
-.app-meta[data-v-6096b87c] {
+.app-meta[data-v-c8ddb4c1] {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.meta-item[data-v-6096b87c] {
+.meta-item[data-v-c8ddb4c1] {
   font-size: 13px;
   color: #6b7280;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.meta-label[data-v-6096b87c] {
+.meta-label[data-v-c8ddb4c1] {
   color: #9ca3af;
 }
-.meta-value[data-v-6096b87c] {
+.meta-value[data-v-c8ddb4c1] {
   color: #1f2937;
   font-family: monospace;
   font-size: 12px;
 }
-.app-description[data-v-6096b87c] {
+.app-description[data-v-c8ddb4c1] {
   font-size: 13px;
   color: #6b7280;
   line-height: 1.5;
@@ -170,7 +181,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 }
 
 /* 应用卡片底部 */
-.app-footer[data-v-6096b87c] {
+.app-footer[data-v-c8ddb4c1] {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -181,19 +192,19 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   margin-top: auto;
   flex-shrink: 0;
 }
-.app-time[data-v-6096b87c] {
+.app-time[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.app-actions[data-v-6096b87c] {
+.app-actions[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 /* 分页 */
-.pagination[data-v-6096b87c] {
+.pagination[data-v-c8ddb4c1] {
   display: flex;
   justify-content: flex-end;
   padding: 16px 0;
@@ -201,148 +212,148 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 }
 
 /* 详情抽屉 */
-.app-detail[data-v-6096b87c] {
+.app-detail[data-v-c8ddb4c1] {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-.detail-section[data-v-6096b87c] {
+.detail-section[data-v-c8ddb4c1] {
   margin-bottom: 16px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-.page-content[data-v-6096b87c] {
+.page-content[data-v-c8ddb4c1] {
     padding: 12px;
 }
-.app-list[data-v-6096b87c] {
+.app-list[data-v-c8ddb4c1] {
     grid-template-columns: 1fr;
 }
 }
 
 /* 升级信息弹窗 */
-.upgrade-info[data-v-6096b87c] {
+.upgrade-info[data-v-c8ddb4c1] {
   padding: 4px 0;
 }
-.upgrade-info[data-v-6096b87c] .n-descriptions {
+.upgrade-info[data-v-c8ddb4c1] .n-descriptions {
   margin-top: 0;
 }
-.upgrade-info[data-v-6096b87c] .n-descriptions-item-label {
+.upgrade-info[data-v-c8ddb4c1] .n-descriptions-item-label {
   font-weight: 500;
 }
-.upgrade-log-list[data-v-6096b87c] {
+.upgrade-log-list[data-v-c8ddb4c1] {
   max-height: 480px;
   overflow-y: auto;
   padding-right: 4px;
 }
-.upgrade-log-item[data-v-6096b87c] {
+.upgrade-log-item[data-v-c8ddb4c1] {
   margin-top: 4px;
   font-size: 13px;
   color: #4b5563;
 }
-.upgrade-log-row[data-v-6096b87c] {
+.upgrade-log-row[data-v-c8ddb4c1] {
   display: flex;
   gap: 4px;
   line-height: 1.6;
 }
 
 /* 配置对话框样式 */
-.config-modal-content[data-v-6096b87c] {
+.config-modal-content[data-v-c8ddb4c1] {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding-right: 8px; /* 为滚动条留出空间 */
 }
-.app-info-card[data-v-6096b87c] {
+.app-info-card[data-v-c8ddb4c1] {
   background: #f8f9fa;
 }
-.app-info-row[data-v-6096b87c] {
+.app-info-row[data-v-c8ddb4c1] {
   display: flex;
   gap: 32px;
   flex-wrap: wrap;
 }
-.app-info-item[data-v-6096b87c] {
+.app-info-item[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
 }
-.info-label[data-v-6096b87c] {
+.info-label[data-v-c8ddb4c1] {
   color: #6b7280;
   font-weight: 500;
 }
-.info-value[data-v-6096b87c] {
+.info-value[data-v-c8ddb4c1] {
   color: #1f2937;
   font-weight: 600;
 }
-.config-section[data-v-6096b87c] {
+.config-section[data-v-c8ddb4c1] {
   margin-bottom: 0;
 }
-.advanced-config-grid[data-v-6096b87c] {
+.advanced-config-grid[data-v-c8ddb4c1] {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px 24px;
   margin-bottom: 16px;
 }
-.advanced-config-grid[data-v-6096b87c] .n-form-item {
+.advanced-config-grid[data-v-c8ddb4c1] .n-form-item {
   margin-bottom: 0;
 }
-.advanced-config-grid[data-v-6096b87c] .n-form-item-label {
+.advanced-config-grid[data-v-c8ddb4c1] .n-form-item-label {
   font-size: 13px;
 }
 
 /* 滚动条样式优化 */
-[data-v-6096b87c] .n-scrollbar-rail {
+[data-v-c8ddb4c1] .n-scrollbar-rail {
   right: 0;
 }
-[data-v-6096b87c] .n-scrollbar-rail__scrollbar {
+[data-v-c8ddb4c1] .n-scrollbar-rail__scrollbar {
   width: 6px;
   border-radius: 3px;
 }
 
 /* 操作日志样式 */
-.operation-log-list[data-v-6096b87c] {
+.operation-log-list[data-v-c8ddb4c1] {
   padding: 16px 0;
 }
-.log-header[data-v-6096b87c] {
+.log-header[data-v-c8ddb4c1] {
   display: flex;
   align-items: center;
   font-size: 14px;
 }
-.log-content[data-v-6096b87c] {
+.log-content[data-v-c8ddb4c1] {
   margin-top: 8px;
   font-size: 13px;
 }
-.log-row[data-v-6096b87c] {
+.log-row[data-v-c8ddb4c1] {
   display: flex;
   gap: 8px;
   margin-bottom: 4px;
   line-height: 1.6;
 }
-.log-label[data-v-6096b87c] {
+.log-label[data-v-c8ddb4c1] {
   color: #9ca3af;
   font-weight: 500;
   min-width: 60px;
 }
-.log-value[data-v-6096b87c] {
+.log-value[data-v-c8ddb4c1] {
   color: #1f2937;
   flex: 1;
 }
-.config-diff[data-v-6096b87c] {
+.config-diff[data-v-c8ddb4c1] {
   margin-top: 12px;
 }
-.config-compare[data-v-6096b87c] {
+.config-compare[data-v-c8ddb4c1] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 8px;
 }
-.config-column[data-v-6096b87c] {
+.config-column[data-v-c8ddb4c1] {
   border: 1px solid #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
 }
-.config-title[data-v-6096b87c] {
+.config-title[data-v-c8ddb4c1] {
   background: #f3f4f6;
   padding: 8px 12px;
   font-weight: 600;
@@ -350,7 +361,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   color: #374151;
   border-bottom: 1px solid #e5e7eb;
 }
-.config-content[data-v-6096b87c] {
+.config-content[data-v-c8ddb4c1] {
   padding: 12px;
   margin: 0;
   font-size: 12px;
@@ -361,15 +372,111 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   overflow-y: auto;
 }
 @media (max-width: 768px) {
-.advanced-config-grid[data-v-6096b87c] {
+.advanced-config-grid[data-v-c8ddb4c1] {
     grid-template-columns: 1fr;
 }
-.config-modal-content[data-v-6096b87c] {
+.config-modal-content[data-v-c8ddb4c1] {
     padding-right: 4px;
 }
-.config-compare[data-v-6096b87c] {
+.config-compare[data-v-c8ddb4c1] {
     grid-template-columns: 1fr;
 }
+}
+
+.aggregate-application-page[data-v-c1075c77] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+.page-header-wrapper[data-v-c1075c77] {
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+.page-content[data-v-c1075c77] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow: auto;
+}
+.form-card[data-v-c1075c77] {
+  max-width: 920px;
+}
+.hint-alert[data-v-c1075c77] {
+  max-width: 920px;
+}
+.list-card[data-v-c1075c77] {
+  max-width: 1180px;
+}
+.aggregate-grid[data-v-c1075c77] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.aggregate-item-card[data-v-c1075c77] {
+  min-height: 120px;
+  position: relative;
+  padding-bottom: 44px;
+}
+.empty-hint[data-v-c1075c77] {
+  color: #999;
+  font-size: 12px;
+}
+.aggregate-row[data-v-c1075c77] {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+.aggregate-row__main[data-v-c1075c77] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.aggregate-row__text[data-v-c1075c77] {
+  min-width: 0;
+}
+.aggregate-row__title[data-v-c1075c77] {
+  font-weight: 600;
+}
+.aggregate-row__order[data-v-c1075c77] {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.aggregate-row__plugins[data-v-c1075c77] {
+  font-size: 12px;
+  color: #999;
+}
+.aggregate-actions[data-v-c1075c77] {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+}
+.aggregate-card-icon-wrap[data-v-c1075c77] {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  overflow: hidden;
+}
+.aggregate-card-icon-wrap--default[data-v-c1075c77] {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.aggregate-card-icon-img[data-v-c1075c77] {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .operation-log-page[data-v-1f12c0f3] {
@@ -935,7 +1042,50 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 .overview-card[data-v-9372efef] .n-statistic .n-statistic-label {
     font-size: 13px;
 }
-}/*$vite$:1*/`;
+}
+.plugin-stats-widget[data-v-5097c4cb] {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+.stats-grid[data-v-5097c4cb] {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: space-around;
+}
+.stat-item[data-v-5097c4cb] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-value[data-v-5097c4cb] {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--n-text-color);
+}
+.stat-label[data-v-5097c4cb] {
+  font-size: 12px;
+  color: var(--n-text-color-3);
+}
+.running .stat-value[data-v-5097c4cb] {
+  color: #18a058;
+}
+.error .stat-value[data-v-5097c4cb] {
+  color: var(--n-text-color-3);
+}
+.error.has-error .stat-value[data-v-5097c4cb] {
+  color: #d03050;
+}
+
+.appstore-test-shared-field[data-v-cd59a00a] {
+  width: 100%;
+}
+/*$vite$:1*/`;
   document.head.appendChild(__vite_style__);
   var PluginPermission = /* @__PURE__ */ ((PluginPermission2) => {
     PluginPermission2["NETWORK_ACCESS"] = "network:access";
@@ -3892,64 +4042,45 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           fullUrl = `${url}?${queryString}`;
         }
       }
-      try {
-        const response = await bridge.http.get(fullUrl);
-        if (response && response.success === false) {
-          const errorMessage = response.message || "请求失败";
-          throw new Error(errorMessage);
-        }
-        return response;
-      } catch (error2) {
-        throw error2;
-      }
+      return bridge.http.get(fullUrl);
     },
     /**
      * POST请求
+     * @param url 请求URL
+     * @param data 请求数据
+     * @param config Axios配置（可选），支持 headers、onUploadProgress 等
      */
-    async post(url, data) {
+    async post(url, data, config) {
       const bridge = getGressBridge();
-      try {
-        const response = await bridge.http.post(url, data);
-        if (response && response.success === false) {
-          const errorMessage = response.message || "请求失败";
-          throw new Error(errorMessage);
-        }
-        return response;
-      } catch (error2) {
-        throw error2;
-      }
+      return bridge.http.post(url, data, config);
     },
     /**
      * PUT请求
      */
-    async put(url, data) {
+    async put(url, data, config) {
       const bridge = getGressBridge();
-      try {
-        const response = await bridge.http.put(url, data);
-        if (response && response.success === false) {
-          const errorMessage = response.message || "请求失败";
-          throw new Error(errorMessage);
-        }
-        return response;
-      } catch (error2) {
-        throw error2;
-      }
+      return bridge.http.put(url, data, config);
     },
     /**
      * DELETE请求
      */
-    async delete(url) {
+    async delete(url, config) {
       const bridge = getGressBridge();
-      try {
-        const response = await bridge.http.delete(url);
-        if (response && response.success === false) {
-          const errorMessage = response.message || "请求失败";
-          throw new Error(errorMessage);
-        }
-        return response;
-      } catch (error2) {
-        throw error2;
-      }
+      return bridge.http.delete(url, config);
+    },
+    /**
+     * PATCH请求
+     */
+    async patch(url, data, config) {
+      const bridge = getGressBridge();
+      return bridge.http.patch(url, data, config);
+    },
+    /**
+     * 通用请求方法
+     */
+    async request(config) {
+      const bridge = getGressBridge();
+      return bridge.http.request(config);
     }
   };
   const API_BASE$3 = "/plugins/appstore";
@@ -3976,7 +4107,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
      * 卸载应用
      */
     uninstall(id, data) {
-      return http.delete(`${API_BASE$3}/applications/${id}`, data);
+      return http.delete(`${API_BASE$3}/applications/${id}`, { data });
     },
     /**
      * 启用应用
@@ -3998,26 +4129,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     },
     /**
      * 上传并安装应用包
-     * 注意：使用原生 fetch API，因为 GressBridge 不支持 FormData
      */
     async uploadAndInstall(formData) {
-      const response = await fetch(`/api/${API_BASE$3}/applications/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-        // 包含 cookies
+      await http.post(`${API_BASE$3}/applications/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-      const result = await response.json().catch(() => ({
-        success: false,
-        errorMessage: "解析响应失败"
-      }));
-      if (result.success === false) {
-        throw new Error(result.errorMessage || "上传失败");
-      }
-      if (!response.ok) {
-        throw new Error(result.errorMessage || `HTTP ${response.status}`);
-      }
-      return result.data;
     },
     /**
      * 从远程应用商店安装应用
@@ -4067,6 +4183,24 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return http.put(`${API_BASE$3}/applications/${id}/config`, data);
     },
     /**
+     * 聚合应用管理
+     */
+    listAggregates() {
+      return http.get(`${API_BASE$3}/applications/aggregates`);
+    },
+    listAggregatablePlugins() {
+      return http.get(`${API_BASE$3}/applications/aggregates/available-plugins`);
+    },
+    createAggregate(data) {
+      return http.post(`${API_BASE$3}/applications/aggregates`, data);
+    },
+    updateAggregate(id, data) {
+      return http.put(`${API_BASE$3}/applications/aggregates/${id}`, data);
+    },
+    deleteAggregate(id) {
+      return http.delete(`${API_BASE$3}/applications/aggregates/${id}`);
+    },
+    /**
      * 查询应用操作日志
      */
     getOperationLogs(id, page = 1, size = 20, operationType) {
@@ -4083,189 +4217,191 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return http.get(`${API_BASE$3}/applications/operation-logs`, params);
     }
   };
-  const _hoisted_1$6 = { class: "application-management-page" };
-  const _hoisted_2$6 = { class: "page-content" };
-  const _hoisted_3$6 = {
+  const _hoisted_1$9 = { class: "application-management-page" };
+  const _hoisted_2$8 = { class: "page-content" };
+  const _hoisted_3$8 = {
     key: 0,
     class: "loading-state"
   };
-  const _hoisted_4$4 = {
+  const _hoisted_4$6 = {
     key: 1,
     class: "empty-state"
   };
-  const _hoisted_5$3 = { class: "empty-state__icon" };
-  const _hoisted_6$3 = { class: "empty-state__text" };
-  const _hoisted_7$2 = {
+  const _hoisted_5$5 = { class: "empty-state__icon" };
+  const _hoisted_6$5 = { class: "empty-state__text" };
+  const _hoisted_7$4 = {
     key: 2,
     class: "app-list"
   };
-  const _hoisted_8$2 = { class: "app-header" };
-  const _hoisted_9$2 = { class: "app-info" };
-  const _hoisted_10$2 = { class: "app-name" };
-  const _hoisted_11$2 = { class: "app-code" };
-  const _hoisted_12$1 = { class: "app-status" };
-  const _hoisted_13$1 = { class: "app-body" };
-  const _hoisted_14$1 = { class: "app-meta" };
-  const _hoisted_15$1 = { class: "meta-item" };
-  const _hoisted_16$1 = { class: "meta-value" };
-  const _hoisted_17$1 = { class: "meta-item" };
-  const _hoisted_18$1 = { class: "meta-value" };
-  const _hoisted_19$1 = { class: "meta-item" };
-  const _hoisted_20$1 = {
-    key: 0,
-    class: "meta-item"
-  };
+  const _hoisted_8$3 = { class: "app-header" };
+  const _hoisted_9$3 = ["src"];
+  const _hoisted_10$3 = { class: "app-info" };
+  const _hoisted_11$3 = { class: "app-name" };
+  const _hoisted_12$2 = { class: "app-code" };
+  const _hoisted_13$2 = { class: "app-status" };
+  const _hoisted_14$2 = { class: "app-body" };
+  const _hoisted_15$2 = { class: "app-meta" };
+  const _hoisted_16$1 = { class: "meta-item" };
+  const _hoisted_17$1 = { class: "meta-value" };
+  const _hoisted_18$1 = { class: "meta-item" };
+  const _hoisted_19$1 = { class: "meta-value" };
+  const _hoisted_20$1 = { class: "meta-item" };
   const _hoisted_21$1 = {
     key: 0,
+    class: "meta-item"
+  };
+  const _hoisted_22$1 = {
+    key: 0,
     class: "app-description"
   };
-  const _hoisted_22$1 = { class: "app-footer" };
-  const _hoisted_23$1 = { class: "app-time" };
-  const _hoisted_24$1 = { class: "app-actions" };
-  const _hoisted_25$1 = {
+  const _hoisted_23$1 = { class: "app-footer" };
+  const _hoisted_24$1 = { class: "app-time" };
+  const _hoisted_25$1 = { class: "app-actions" };
+  const _hoisted_26$1 = {
     key: 3,
     class: "pagination"
   };
-  const _hoisted_26$1 = {
+  const _hoisted_27$1 = {
     key: 0,
     class: "loading-state"
   };
-  const _hoisted_27$1 = {
+  const _hoisted_28$1 = {
     key: 1,
     class: "empty-state"
   };
-  const _hoisted_28$1 = { class: "empty-state__icon" };
-  const _hoisted_29$1 = { class: "empty-state__text" };
-  const _hoisted_30$1 = {
+  const _hoisted_29$1 = { class: "empty-state__icon" };
+  const _hoisted_30$1 = { class: "empty-state__text" };
+  const _hoisted_31$1 = {
     key: 2,
     class: "app-list"
   };
-  const _hoisted_31$1 = { class: "app-header" };
-  const _hoisted_32$1 = { class: "app-icon app-icon--plugin" };
-  const _hoisted_33$1 = { class: "app-info" };
-  const _hoisted_34$1 = { class: "app-name" };
-  const _hoisted_35$1 = { class: "app-code" };
-  const _hoisted_36$1 = { class: "app-status" };
-  const _hoisted_37$1 = { class: "app-body" };
-  const _hoisted_38 = { class: "app-meta" };
-  const _hoisted_39 = { class: "meta-item" };
-  const _hoisted_40 = { class: "meta-value" };
-  const _hoisted_41 = { class: "meta-item" };
-  const _hoisted_42 = { class: "meta-value" };
-  const _hoisted_43 = {
+  const _hoisted_32$1 = { class: "app-header" };
+  const _hoisted_33$1 = { class: "app-icon app-icon--plugin" };
+  const _hoisted_34$1 = { class: "app-info" };
+  const _hoisted_35$1 = { class: "app-name" };
+  const _hoisted_36$1 = { class: "app-code" };
+  const _hoisted_37$1 = { class: "app-status" };
+  const _hoisted_38 = { class: "app-body" };
+  const _hoisted_39 = { class: "app-meta" };
+  const _hoisted_40 = { class: "meta-item" };
+  const _hoisted_41 = { class: "meta-value" };
+  const _hoisted_42 = { class: "meta-item" };
+  const _hoisted_43 = { class: "meta-value" };
+  const _hoisted_44 = {
     key: 0,
     class: "meta-item"
   };
-  const _hoisted_44 = { class: "meta-value" };
-  const _hoisted_45 = {
+  const _hoisted_45 = { class: "meta-value" };
+  const _hoisted_46 = {
     key: 1,
     class: "meta-item"
   };
-  const _hoisted_46 = { class: "meta-value" };
-  const _hoisted_47 = {
+  const _hoisted_47 = { class: "meta-value" };
+  const _hoisted_48 = {
     key: 0,
     class: "app-description"
   };
-  const _hoisted_48 = { class: "app-footer" };
-  const _hoisted_49 = { class: "app-time" };
-  const _hoisted_50 = { class: "app-actions" };
-  const _hoisted_51 = {
+  const _hoisted_49 = { class: "app-footer" };
+  const _hoisted_50 = { class: "app-time" };
+  const _hoisted_51 = { class: "app-actions" };
+  const _hoisted_52 = {
     key: 3,
     class: "pagination"
   };
-  const _hoisted_52 = { class: "app-detail" };
-  const _hoisted_53 = { key: 1 };
-  const _hoisted_54 = ["href"];
-  const _hoisted_55 = {
+  const _hoisted_53 = { class: "app-detail" };
+  const _hoisted_54 = { key: 1 };
+  const _hoisted_55 = ["href"];
+  const _hoisted_56 = {
     key: 0,
     class: "loading-state"
   };
-  const _hoisted_56 = {
+  const _hoisted_57 = {
     key: 1,
     class: "empty-state"
   };
-  const _hoisted_57 = {
+  const _hoisted_58 = {
     key: 2,
     class: "operation-log-list"
   };
-  const _hoisted_58 = { class: "log-header" };
-  const _hoisted_59 = { style: { "margin-left": "8px", "color": "#666" } };
-  const _hoisted_60 = { class: "log-content" };
-  const _hoisted_61 = {
+  const _hoisted_59 = { class: "log-header" };
+  const _hoisted_60 = { style: { "margin-left": "8px", "color": "#666" } };
+  const _hoisted_61 = { class: "log-content" };
+  const _hoisted_62 = {
     key: 0,
     class: "log-row"
   };
-  const _hoisted_62 = { class: "log-value" };
-  const _hoisted_63 = {
+  const _hoisted_63 = { class: "log-value" };
+  const _hoisted_64 = {
     key: 1,
     class: "log-row"
   };
-  const _hoisted_64 = { class: "log-value" };
-  const _hoisted_65 = {
+  const _hoisted_65 = { class: "log-value" };
+  const _hoisted_66 = {
     key: 2,
     class: "log-row"
   };
-  const _hoisted_66 = { class: "log-value" };
-  const _hoisted_67 = {
+  const _hoisted_67 = { class: "log-value" };
+  const _hoisted_68 = {
     key: 3,
     class: "config-diff"
   };
-  const _hoisted_68 = { class: "config-compare" };
-  const _hoisted_69 = { class: "config-column" };
-  const _hoisted_70 = { class: "config-content" };
-  const _hoisted_71 = { class: "config-column" };
-  const _hoisted_72 = { class: "config-content" };
-  const _hoisted_73 = {
+  const _hoisted_69 = { class: "config-compare" };
+  const _hoisted_70 = { class: "config-column" };
+  const _hoisted_71 = { class: "config-content" };
+  const _hoisted_72 = { class: "config-column" };
+  const _hoisted_73 = { class: "config-content" };
+  const _hoisted_74 = {
     key: 0,
     class: "pagination",
     style: { "margin-top": "16px" }
   };
-  const _hoisted_74 = {
+  const _hoisted_75 = {
     key: 0,
     class: "upgrade-info"
   };
-  const _hoisted_75 = { style: { "display": "flex", "align-items": "center", "gap": "8px" } };
-  const _hoisted_76 = { style: { "font-weight": "600" } };
-  const _hoisted_77 = {
+  const _hoisted_76 = { style: { "display": "flex", "align-items": "center", "gap": "8px" } };
+  const _hoisted_77 = { style: { "font-weight": "600" } };
+  const _hoisted_78 = {
     key: 0,
     class: "loading-state"
   };
-  const _hoisted_78 = { key: 1 };
-  const _hoisted_79 = {
+  const _hoisted_79 = { key: 1 };
+  const _hoisted_80 = {
     key: 0,
     class: "empty-state"
   };
-  const _hoisted_80 = {
+  const _hoisted_81 = {
     key: 1,
     class: "upgrade-log-list"
   };
-  const _hoisted_81 = { class: "upgrade-log-item" };
-  const _hoisted_82 = { class: "upgrade-log-row" };
-  const _hoisted_83 = { class: "meta-value" };
-  const _hoisted_84 = {
+  const _hoisted_82 = { class: "upgrade-log-item" };
+  const _hoisted_83 = { class: "upgrade-log-row" };
+  const _hoisted_84 = { class: "meta-value" };
+  const _hoisted_85 = {
     key: 0,
     class: "upgrade-log-row"
   };
-  const _hoisted_85 = { class: "meta-value" };
-  const _hoisted_86 = {
+  const _hoisted_86 = { class: "meta-value" };
+  const _hoisted_87 = {
     key: 1,
     class: "upgrade-log-row"
   };
-  const _hoisted_87 = { class: "meta-value" };
-  const _hoisted_88 = {
+  const _hoisted_88 = { class: "meta-value" };
+  const _hoisted_89 = {
     key: 2,
     class: "upgrade-log-row"
   };
-  const _hoisted_89 = { class: "meta-value" };
-  const _hoisted_90 = { class: "config-modal-content" };
-  const _hoisted_91 = { class: "app-info-row" };
-  const _hoisted_92 = { class: "app-info-item" };
-  const _hoisted_93 = { class: "info-value" };
-  const _hoisted_94 = { class: "app-info-item" };
-  const _hoisted_95 = { class: "advanced-config-grid" };
-  const _hoisted_96 = { style: { "margin-bottom": "12px" } };
-  const _hoisted_97 = { style: { "margin-top": "8px" } };
-  const _sfc_main$6 = /* @__PURE__ */ vue.defineComponent({
+  const _hoisted_90 = { class: "meta-value" };
+  const _hoisted_91 = { class: "config-modal-content" };
+  const _hoisted_92 = { class: "app-info-row" };
+  const _hoisted_93 = { class: "app-info-item" };
+  const _hoisted_94 = { class: "info-value" };
+  const _hoisted_95 = { class: "app-info-item" };
+  const _hoisted_96 = { class: "advanced-config-grid" };
+  const _hoisted_97 = { style: { "margin-bottom": "12px" } };
+  const _hoisted_98 = { style: { "margin-top": "8px" } };
+  const AGGREGATE_PAGE = "/plugins/appstore/aggregate-applications";
+  const _sfc_main$9 = /* @__PURE__ */ vue.defineComponent({
     __name: "ApplicationManagement",
     setup(__props) {
       const Refresh = useIcon("RefreshOutline");
@@ -4280,6 +4416,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const TimeOutline = useIcon("TimeOutline");
       const RocketOutline = useIcon("RocketOutline");
       const EllipsisHorizontalOutline = useIcon("EllipsisHorizontalOutline");
+      const LayersOutline = useIcon("LayersOutline");
       const message = useMessage();
       const dialog = naiveUi.useDialog();
       const showStartConfirm = vue.ref(false);
@@ -4360,6 +4497,28 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const uploadForm = vue.reactive({});
       const uploadFile = vue.ref(null);
       const uploading = vue.ref(false);
+      function goToAggregateManagement() {
+        var _a2;
+        const router = (_a2 = vue.getCurrentInstance()) == null ? void 0 : _a2.appContext.config.globalProperties.$router;
+        if (router == null ? void 0 : router.push) {
+          router.push(AGGREGATE_PAGE);
+        } else {
+          window.location.assign(AGGREGATE_PAGE);
+        }
+      }
+      function useAggregateIconImg(app) {
+        var _a2;
+        return Boolean(app.aggregateApp && ((_a2 = app.icon) == null ? void 0 : _a2.trim()));
+      }
+      function localAppIconModifierClass(app) {
+        if (app.aggregateApp) return "app-icon--aggregated";
+        return `app-icon--${app.applicationType}`;
+      }
+      function localAppIconComponent(app) {
+        if (app.aggregateApp) return LayersOutline;
+        if (app.applicationType === "integrated") return CubeOutline;
+        return ExtensionPuzzleOutline;
+      }
       const showUpgradeLogModal = vue.ref(false);
       const upgradeLogsLoading = vue.ref(false);
       const upgradeLogs = vue.ref([]);
@@ -4378,6 +4537,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const configFormRef = vue.ref(null);
       const configTargetApp = vue.ref(null);
       const configForm = vue.reactive({
+        hasFrontend: false,
         autoLoad: false,
         loadOnStartup: false,
         startPriority: 50,
@@ -4413,7 +4573,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           options: [
             { label: "全部", value: null },
             { label: "集成应用", value: "integrated" },
-            { label: "插件应用", value: "plugin" }
+            { label: "插件应用", value: "plugin" },
+            { label: "聚合应用", value: "aggregated" }
           ]
         }
       ];
@@ -4878,6 +5039,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
       };
       const handleShowConfig = async (app) => {
+        var _a2;
         configTargetApp.value = app;
         configMetadata.value = [];
         configMetadataLoading.value = true;
@@ -4897,6 +5059,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         configLoading.value = true;
         try {
           const config = await applicationApi.getConfig(app.id);
+          configForm.hasFrontend = ((_a2 = config.extensionConfig) == null ? void 0 : _a2.hasFrontend) || false;
           configForm.autoLoad = config.autoLoad || false;
           configForm.loadOnStartup = config.loadOnStartup || false;
           configForm.startPriority = config.startPriority || 50;
@@ -4911,6 +5074,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           });
         } catch (error2) {
           console.error("加载应用配置失败:", error2);
+          configForm.hasFrontend = false;
           configForm.autoLoad = false;
           configForm.loadOnStartup = false;
           configForm.startPriority = 50;
@@ -4927,6 +5091,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         configLoading.value = true;
         try {
           const extensionConfigToSave = { ...configForm.extensionConfig };
+          extensionConfigToSave.hasFrontend = configForm.hasFrontend;
           console.log("[ApplicationManagement] 保存配置:", {
             appId: configTargetApp.value.id,
             appName: configTargetApp.value.applicationName,
@@ -4960,7 +5125,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         actions2.push({
           label: "降级",
           key: "rollback",
-          disabled: app.applicationType === "integrated"
+          disabled: app.applicationType === "integrated" || app.aggregateApp
         });
         actions2.push({
           label: "详情",
@@ -4980,7 +5145,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         actions2.push({
           label: "卸载",
           key: "uninstall",
-          disabled: app.isDefault === 1 || app.applicationType === "integrated"
+          disabled: app.isDefault === 1 || app.applicationType === "integrated" || app.aggregateApp
         });
         return actions2;
       };
@@ -5011,6 +5176,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           return "info";
         } else if (type === "plugin") {
           return "success";
+        } else if (type === "aggregated") {
+          return "warning";
         }
         return "default";
       };
@@ -5080,7 +5247,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const _component_FilterPanel = vue.resolveComponent("FilterPanel");
         const _component_DynamicFormRenderer = vue.resolveComponent("DynamicFormRenderer");
         const _directive_copy = vue.resolveDirective("copy");
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$6, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$9, [
           vue.createVNode(_component_PageHeader, {
             title: "应用管理",
             subtitle: "管理已安装的应用插件"
@@ -5088,6 +5255,23 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             actions: vue.withCtx(() => [
               activeTab.value === "local" ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NButton), {
                 key: 0,
+                onClick: goToAggregateManagement
+              }, {
+                icon: vue.withCtx(() => [
+                  vue.createVNode(vue.unref(naiveUi.NIcon), null, {
+                    default: vue.withCtx(() => [
+                      (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(AppsOutline))))
+                    ]),
+                    _: 1
+                  })
+                ]),
+                default: vue.withCtx(() => [
+                  _cache[34] || (_cache[34] = vue.createTextVNode(" 聚合应用管理 ", -1))
+                ]),
+                _: 1
+              })) : vue.createCommentVNode("", true),
+              activeTab.value === "local" ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NButton), {
+                key: 1,
                 type: "primary",
                 onClick: handleUploadClick
               }, {
@@ -5100,7 +5284,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                   })
                 ]),
                 default: vue.withCtx(() => [
-                  _cache[33] || (_cache[33] = vue.createTextVNode(" 上传应用包 ", -1))
+                  _cache[35] || (_cache[35] = vue.createTextVNode(" 上传应用包 ", -1))
                 ]),
                 _: 1
               })) : vue.createCommentVNode("", true),
@@ -5117,14 +5301,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                   })
                 ]),
                 default: vue.withCtx(() => [
-                  _cache[34] || (_cache[34] = vue.createTextVNode(" 刷新 ", -1))
+                  _cache[36] || (_cache[36] = vue.createTextVNode(" 刷新 ", -1))
                 ]),
                 _: 1
               }, 8, ["loading"])
             ]),
             _: 1
           }),
-          vue.createElementVNode("div", _hoisted_2$6, [
+          vue.createElementVNode("div", _hoisted_2$8, [
             vue.createVNode(vue.unref(naiveUi.NTabs), {
               value: activeTab.value,
               "onUpdate:value": [
@@ -5148,10 +5332,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                       onSearch: handleSearch,
                       onReset: handleReset
                     }, null, 8, ["filters", "show-advanced"]),
-                    loading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$6, [
+                    loading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$8, [
                       vue.createVNode(vue.unref(naiveUi.NSpin), { size: "large" })
-                    ])) : tableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_4$4, [
-                      vue.createElementVNode("div", _hoisted_5$3, [
+                    ])) : tableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_4$6, [
+                      vue.createElementVNode("div", _hoisted_5$5, [
                         vue.createVNode(vue.unref(naiveUi.NIcon), { size: "48" }, {
                           default: vue.withCtx(() => [
                             (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(AppsOutline))))
@@ -5159,8 +5343,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           _: 1
                         })
                       ]),
-                      vue.createElementVNode("div", _hoisted_6$3, vue.toDisplayString(filters.value.keyword ? "未找到匹配的应用" : "暂无应用信息"), 1)
-                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_7$2, [
+                      vue.createElementVNode("div", _hoisted_6$5, vue.toDisplayString(filters.value.keyword ? "未找到匹配的应用" : "暂无应用信息"), 1)
+                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_7$4, [
                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tableData.value, (app) => {
                         return vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NCard), {
                           key: app.id,
@@ -5169,35 +5353,54 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           onClick: ($event) => handleViewDetail(app)
                         }, {
                           default: vue.withCtx(() => [
-                            vue.createElementVNode("div", _hoisted_8$2, [
+                            vue.createElementVNode("div", _hoisted_8$3, [
                               vue.createElementVNode("div", {
-                                class: vue.normalizeClass(["app-icon", `app-icon--${app.applicationType}`])
+                                class: vue.normalizeClass(["app-icon", localAppIconModifierClass(app)])
                               }, [
-                                vue.createVNode(vue.unref(naiveUi.NIcon), { size: "24" }, {
+                                useAggregateIconImg(app) ? (vue.openBlock(), vue.createElementBlock("img", {
+                                  key: 0,
+                                  src: app.icon.trim(),
+                                  alt: "",
+                                  class: "app-icon__img"
+                                }, null, 8, _hoisted_9$3)) : (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NIcon), {
+                                  key: 1,
+                                  size: "24"
+                                }, {
                                   default: vue.withCtx(() => [
-                                    (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(app.applicationType === "integrated" ? vue.unref(CubeOutline) : vue.unref(ExtensionPuzzleOutline))))
+                                    (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(localAppIconComponent(app))))
                                   ]),
                                   _: 2
-                                }, 1024)
+                                }, 1024))
                               ], 2),
-                              vue.createElementVNode("div", _hoisted_9$2, [
-                                vue.createElementVNode("div", _hoisted_10$2, [
+                              vue.createElementVNode("div", _hoisted_10$3, [
+                                vue.createElementVNode("div", _hoisted_11$3, [
                                   vue.createTextVNode(vue.toDisplayString(app.applicationName) + " ", 1),
-                                  app.isDefault === 1 ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTag), {
+                                  app.aggregateApp ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTag), {
                                     key: 0,
+                                    type: "info",
+                                    size: "small",
+                                    style: { "margin-left": "8px" }
+                                  }, {
+                                    default: vue.withCtx(() => [..._cache[37] || (_cache[37] = [
+                                      vue.createTextVNode(" 聚合 ", -1)
+                                    ])]),
+                                    _: 1
+                                  })) : vue.createCommentVNode("", true),
+                                  app.isDefault === 1 ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTag), {
+                                    key: 1,
                                     type: "warning",
                                     size: "small",
                                     style: { "margin-left": "8px" }
                                   }, {
-                                    default: vue.withCtx(() => [..._cache[35] || (_cache[35] = [
+                                    default: vue.withCtx(() => [..._cache[38] || (_cache[38] = [
                                       vue.createTextVNode(" 默认 ", -1)
                                     ])]),
                                     _: 1
                                   })) : vue.createCommentVNode("", true)
                                 ]),
-                                vue.createElementVNode("div", _hoisted_11$2, vue.toDisplayString(app.applicationCode), 1)
+                                vue.createElementVNode("div", _hoisted_12$2, vue.toDisplayString(app.applicationCode), 1)
                               ]),
-                              vue.createElementVNode("div", _hoisted_12$1, [
+                              vue.createElementVNode("div", _hoisted_13$2, [
                                 vue.createVNode(vue.unref(naiveUi.NTag), {
                                   type: app.status === 1 ? "success" : "error",
                                   size: "small"
@@ -5209,17 +5412,17 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                 }, 1032, ["type"])
                               ])
                             ]),
-                            vue.createElementVNode("div", _hoisted_13$1, [
-                              vue.createElementVNode("div", _hoisted_14$1, [
-                                vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", _hoisted_15$1, [
-                                  _cache[36] || (_cache[36] = vue.createElementVNode("span", { class: "meta-label" }, "插件ID：", -1)),
-                                  vue.createElementVNode("span", _hoisted_16$1, vue.toDisplayString(app.pluginId), 1)
+                            vue.createElementVNode("div", _hoisted_14$2, [
+                              vue.createElementVNode("div", _hoisted_15$2, [
+                                vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", _hoisted_16$1, [
+                                  _cache[39] || (_cache[39] = vue.createElementVNode("span", { class: "meta-label" }, "插件ID：", -1)),
+                                  vue.createElementVNode("span", _hoisted_17$1, vue.toDisplayString(app.pluginId), 1)
                                 ])), [
                                   [_directive_copy, app.pluginId]
                                 ]),
-                                vue.createElementVNode("div", _hoisted_17$1, [
-                                  _cache[37] || (_cache[37] = vue.createElementVNode("span", { class: "meta-label" }, "版本：", -1)),
-                                  vue.createElementVNode("span", _hoisted_18$1, vue.toDisplayString(app.pluginVersion || "-"), 1),
+                                vue.createElementVNode("div", _hoisted_18$1, [
+                                  _cache[40] || (_cache[40] = vue.createElementVNode("span", { class: "meta-label" }, "版本：", -1)),
+                                  vue.createElementVNode("span", _hoisted_19$1, vue.toDisplayString(app.pluginVersion || "-"), 1),
                                   app.hasNewVersion ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTooltip), {
                                     key: 0,
                                     placement: "top"
@@ -5243,8 +5446,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                     _: 2
                                   }, 1024)) : vue.createCommentVNode("", true)
                                 ]),
-                                vue.createElementVNode("div", _hoisted_19$1, [
-                                  _cache[38] || (_cache[38] = vue.createElementVNode("span", { class: "meta-label" }, "类型：", -1)),
+                                vue.createElementVNode("div", _hoisted_20$1, [
+                                  _cache[41] || (_cache[41] = vue.createElementVNode("span", { class: "meta-label" }, "类型：", -1)),
                                   vue.createVNode(vue.unref(naiveUi.NTag), {
                                     size: "small",
                                     type: getApplicationTypeColor(app.applicationType)
@@ -5255,8 +5458,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                     _: 2
                                   }, 1032, ["type"])
                                 ]),
-                                app.pluginType ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_20$1, [
-                                  _cache[39] || (_cache[39] = vue.createElementVNode("span", { class: "meta-label" }, "插件类型：", -1)),
+                                app.pluginType ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_21$1, [
+                                  _cache[42] || (_cache[42] = vue.createElementVNode("span", { class: "meta-label" }, "插件类型：", -1)),
                                   vue.createVNode(vue.unref(naiveUi.NSpace), { size: 4 }, {
                                     default: vue.withCtx(() => [
                                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(getPluginTypes(app.pluginType), (type) => {
@@ -5276,10 +5479,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   }, 1024)
                                 ])) : vue.createCommentVNode("", true)
                               ]),
-                              app.description ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_21$1, vue.toDisplayString(app.description), 1)) : vue.createCommentVNode("", true)
+                              app.description ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_22$1, vue.toDisplayString(app.description), 1)) : vue.createCommentVNode("", true)
                             ]),
-                            vue.createElementVNode("div", _hoisted_22$1, [
-                              vue.createElementVNode("div", _hoisted_23$1, [
+                            vue.createElementVNode("div", _hoisted_23$1, [
+                              vue.createElementVNode("div", _hoisted_24$1, [
                                 vue.createVNode(vue.unref(naiveUi.NIcon), { size: "14" }, {
                                   default: vue.withCtx(() => [
                                     (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(TimeOutline))))
@@ -5288,14 +5491,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                 }),
                                 vue.createTextVNode(" 安装：" + vue.toDisplayString(formatDateTime(app.installTime)), 1)
                               ]),
-                              vue.createElementVNode("div", _hoisted_24$1, [
+                              vue.createElementVNode("div", _hoisted_25$1, [
                                 vue.createVNode(vue.unref(naiveUi.NButton), {
                                   text: "",
                                   type: "primary",
                                   size: "small",
                                   onClick: vue.withModifiers(($event) => handleShowConfig(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[40] || (_cache[40] = [
+                                  default: vue.withCtx(() => [..._cache[43] || (_cache[43] = [
                                     vue.createTextVNode(" 配置 ", -1)
                                   ])]),
                                   _: 1
@@ -5305,10 +5508,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   text: "",
                                   type: "warning",
                                   size: "small",
-                                  disabled: app.applicationType === "integrated",
+                                  disabled: app.applicationType === "integrated" || app.aggregateApp,
                                   onClick: vue.withModifiers(($event) => handleUpgrade(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[41] || (_cache[41] = [
+                                  default: vue.withCtx(() => [..._cache[44] || (_cache[44] = [
                                     vue.createTextVNode(" 升级 ", -1)
                                   ])]),
                                   _: 1
@@ -5320,7 +5523,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   disabled: app.status !== 1,
                                   onClick: vue.withModifiers(($event) => handleRestart(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[42] || (_cache[42] = [
+                                  default: vue.withCtx(() => [..._cache[45] || (_cache[45] = [
                                     vue.createTextVNode(" 重启 ", -1)
                                   ])]),
                                   _: 1
@@ -5357,7 +5560,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         }, 1032, ["onClick"]);
                       }), 128))
                     ])),
-                    pagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_25$1, [
+                    pagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_26$1, [
                       vue.createVNode(vue.unref(naiveUi.NPagination), {
                         page: pagination.page,
                         "onUpdate:page": [
@@ -5391,10 +5594,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                       onSearch: handleRemoteSearch,
                       onReset: handleRemoteReset
                     }, null, 8, ["filters", "show-advanced"]),
-                    remoteLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_26$1, [
+                    remoteLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_27$1, [
                       vue.createVNode(vue.unref(naiveUi.NSpin), { size: "large" })
-                    ])) : remoteTableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_27$1, [
-                      vue.createElementVNode("div", _hoisted_28$1, [
+                    ])) : remoteTableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_28$1, [
+                      vue.createElementVNode("div", _hoisted_29$1, [
                         vue.createVNode(vue.unref(naiveUi.NIcon), { size: "48" }, {
                           default: vue.withCtx(() => [
                             (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(AppsOutline))))
@@ -5402,8 +5605,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           _: 1
                         })
                       ]),
-                      vue.createElementVNode("div", _hoisted_29$1, vue.toDisplayString(remoteFilters.value.keyword ? "未找到匹配的应用" : "暂无远程应用"), 1)
-                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_30$1, [
+                      vue.createElementVNode("div", _hoisted_30$1, vue.toDisplayString(remoteFilters.value.keyword ? "未找到匹配的应用" : "暂无远程应用"), 1)
+                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_31$1, [
                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(remoteTableData.value, (app) => {
                         return vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NCard), {
                           key: app.id,
@@ -5412,8 +5615,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           onClick: ($event) => handleViewRemoteDetail(app)
                         }, {
                           default: vue.withCtx(() => [
-                            vue.createElementVNode("div", _hoisted_31$1, [
-                              vue.createElementVNode("div", _hoisted_32$1, [
+                            vue.createElementVNode("div", _hoisted_32$1, [
+                              vue.createElementVNode("div", _hoisted_33$1, [
                                 vue.createVNode(vue.unref(naiveUi.NIcon), { size: "24" }, {
                                   default: vue.withCtx(() => [
                                     (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(ExtensionPuzzleOutline))))
@@ -5421,17 +5624,17 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   _: 1
                                 })
                               ]),
-                              vue.createElementVNode("div", _hoisted_33$1, [
-                                vue.createElementVNode("div", _hoisted_34$1, vue.toDisplayString(app.applicationName), 1),
-                                vue.createElementVNode("div", _hoisted_35$1, vue.toDisplayString(app.applicationCode), 1)
+                              vue.createElementVNode("div", _hoisted_34$1, [
+                                vue.createElementVNode("div", _hoisted_35$1, vue.toDisplayString(app.applicationName), 1),
+                                vue.createElementVNode("div", _hoisted_36$1, vue.toDisplayString(app.applicationCode), 1)
                               ]),
-                              vue.createElementVNode("div", _hoisted_36$1, [
+                              vue.createElementVNode("div", _hoisted_37$1, [
                                 app.installStatus === "INSTALLED" ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTag), {
                                   key: 0,
                                   type: "success",
                                   size: "small"
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[43] || (_cache[43] = [
+                                  default: vue.withCtx(() => [..._cache[46] || (_cache[46] = [
                                     vue.createTextVNode(" 已安装 ", -1)
                                   ])]),
                                   _: 1
@@ -5440,7 +5643,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   type: "warning",
                                   size: "small"
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[44] || (_cache[44] = [
+                                  default: vue.withCtx(() => [..._cache[47] || (_cache[47] = [
                                     vue.createTextVNode(" 可升级 ", -1)
                                   ])]),
                                   _: 1
@@ -5449,36 +5652,36 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   type: "info",
                                   size: "small"
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[45] || (_cache[45] = [
+                                  default: vue.withCtx(() => [..._cache[48] || (_cache[48] = [
                                     vue.createTextVNode(" 未安装 ", -1)
                                   ])]),
                                   _: 1
                                 }))
                               ])
                             ]),
-                            vue.createElementVNode("div", _hoisted_37$1, [
-                              vue.createElementVNode("div", _hoisted_38, [
-                                vue.createElementVNode("div", _hoisted_39, [
-                                  _cache[46] || (_cache[46] = vue.createElementVNode("span", { class: "meta-label" }, "插件ID：", -1)),
-                                  vue.createElementVNode("span", _hoisted_40, vue.toDisplayString(app.pluginId), 1)
+                            vue.createElementVNode("div", _hoisted_38, [
+                              vue.createElementVNode("div", _hoisted_39, [
+                                vue.createElementVNode("div", _hoisted_40, [
+                                  _cache[49] || (_cache[49] = vue.createElementVNode("span", { class: "meta-label" }, "插件ID：", -1)),
+                                  vue.createElementVNode("span", _hoisted_41, vue.toDisplayString(app.pluginId), 1)
                                 ]),
-                                vue.createElementVNode("div", _hoisted_41, [
-                                  _cache[47] || (_cache[47] = vue.createElementVNode("span", { class: "meta-label" }, "远程版本：", -1)),
-                                  vue.createElementVNode("span", _hoisted_42, vue.toDisplayString(app.pluginVersion || "-"), 1)
+                                vue.createElementVNode("div", _hoisted_42, [
+                                  _cache[50] || (_cache[50] = vue.createElementVNode("span", { class: "meta-label" }, "远程版本：", -1)),
+                                  vue.createElementVNode("span", _hoisted_43, vue.toDisplayString(app.pluginVersion || "-"), 1)
                                 ]),
-                                app.localVersion ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_43, [
-                                  _cache[48] || (_cache[48] = vue.createElementVNode("span", { class: "meta-label" }, "本地版本：", -1)),
-                                  vue.createElementVNode("span", _hoisted_44, vue.toDisplayString(app.localVersion), 1)
+                                app.localVersion ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_44, [
+                                  _cache[51] || (_cache[51] = vue.createElementVNode("span", { class: "meta-label" }, "本地版本：", -1)),
+                                  vue.createElementVNode("span", _hoisted_45, vue.toDisplayString(app.localVersion), 1)
                                 ])) : vue.createCommentVNode("", true),
-                                app.author ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_45, [
-                                  _cache[49] || (_cache[49] = vue.createElementVNode("span", { class: "meta-label" }, "作者：", -1)),
-                                  vue.createElementVNode("span", _hoisted_46, vue.toDisplayString(app.author), 1)
+                                app.author ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_46, [
+                                  _cache[52] || (_cache[52] = vue.createElementVNode("span", { class: "meta-label" }, "作者：", -1)),
+                                  vue.createElementVNode("span", _hoisted_47, vue.toDisplayString(app.author), 1)
                                 ])) : vue.createCommentVNode("", true)
                               ]),
-                              app.description ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_47, vue.toDisplayString(app.description), 1)) : vue.createCommentVNode("", true)
+                              app.description ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_48, vue.toDisplayString(app.description), 1)) : vue.createCommentVNode("", true)
                             ]),
-                            vue.createElementVNode("div", _hoisted_48, [
-                              vue.createElementVNode("div", _hoisted_49, [
+                            vue.createElementVNode("div", _hoisted_49, [
+                              vue.createElementVNode("div", _hoisted_50, [
                                 vue.createVNode(vue.unref(naiveUi.NIcon), { size: "14" }, {
                                   default: vue.withCtx(() => [
                                     (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(TimeOutline))))
@@ -5487,14 +5690,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                 }),
                                 vue.createTextVNode(" 更新：" + vue.toDisplayString(formatDateTime(app.updateTime)), 1)
                               ]),
-                              vue.createElementVNode("div", _hoisted_50, [
+                              vue.createElementVNode("div", _hoisted_51, [
                                 vue.createVNode(vue.unref(naiveUi.NButton), {
                                   text: "",
                                   type: "info",
                                   size: "small",
                                   onClick: vue.withModifiers(($event) => handleViewRemoteDetail(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[50] || (_cache[50] = [
+                                  default: vue.withCtx(() => [..._cache[53] || (_cache[53] = [
                                     vue.createTextVNode(" 详情 ", -1)
                                   ])]),
                                   _: 1
@@ -5507,7 +5710,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   loading: installRemoteLoading.value[app.pluginId],
                                   onClick: vue.withModifiers(($event) => handleInstallRemote(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[51] || (_cache[51] = [
+                                  default: vue.withCtx(() => [..._cache[54] || (_cache[54] = [
                                     vue.createTextVNode(" 安装 ", -1)
                                   ])]),
                                   _: 1
@@ -5519,7 +5722,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   loading: upgradeRemoteLoading.value[app.pluginId],
                                   onClick: vue.withModifiers(($event) => handleUpgradeRemote(app), ["stop"])
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[52] || (_cache[52] = [
+                                  default: vue.withCtx(() => [..._cache[55] || (_cache[55] = [
                                     vue.createTextVNode(" 升级 ", -1)
                                   ])]),
                                   _: 1
@@ -5530,7 +5733,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   size: "small",
                                   disabled: ""
                                 }, {
-                                  default: vue.withCtx(() => [..._cache[53] || (_cache[53] = [
+                                  default: vue.withCtx(() => [..._cache[56] || (_cache[56] = [
                                     vue.createTextVNode(" 已安装 ", -1)
                                   ])]),
                                   _: 1
@@ -5542,7 +5745,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         }, 1032, ["onClick"]);
                       }), 128))
                     ])),
-                    remotePagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_51, [
+                    remotePagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_52, [
                       vue.createVNode(vue.unref(naiveUi.NPagination), {
                         page: remotePagination.page,
                         "onUpdate:page": [
@@ -5583,7 +5786,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                       vue.createVNode(vue.unref(naiveUi.NButton), {
                         onClick: _cache[13] || (_cache[13] = ($event) => showDetailDrawer.value = false)
                       }, {
-                        default: vue.withCtx(() => [..._cache[61] || (_cache[61] = [
+                        default: vue.withCtx(() => [..._cache[64] || (_cache[64] = [
                           vue.createTextVNode("关闭", -1)
                         ])]),
                         _: 1
@@ -5605,7 +5808,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         tab: "基本信息"
                       }, {
                         default: vue.withCtx(() => [
-                          vue.createElementVNode("div", _hoisted_52, [
+                          vue.createElementVNode("div", _hoisted_53, [
                             vue.createVNode(vue.unref(naiveUi.NCard), {
                               title: "基本信息",
                               bordered: false,
@@ -5708,11 +5911,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                           type: "warning",
                                           size: "small"
                                         }, {
-                                          default: vue.withCtx(() => [..._cache[54] || (_cache[54] = [
+                                          default: vue.withCtx(() => [..._cache[57] || (_cache[57] = [
                                             vue.createTextVNode("是", -1)
                                           ])]),
                                           _: 1
-                                        })) : (vue.openBlock(), vue.createElementBlock("span", _hoisted_53, "否"))
+                                        })) : (vue.openBlock(), vue.createElementBlock("span", _hoisted_54, "否"))
                                       ]),
                                       _: 1
                                     }),
@@ -5779,7 +5982,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                           href: currentApplication.value.homepage,
                                           target: "_blank",
                                           rel: "noopener noreferrer"
-                                        }, vue.toDisplayString(currentApplication.value.homepage), 9, _hoisted_54)
+                                        }, vue.toDisplayString(currentApplication.value.homepage), 9, _hoisted_55)
                                       ]),
                                       _: 1
                                     })) : vue.createCommentVNode("", true)
@@ -5845,11 +6048,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         tab: "操作日志"
                       }, {
                         default: vue.withCtx(() => [
-                          operationLogsLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_55, [
+                          operationLogsLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_56, [
                             vue.createVNode(vue.unref(naiveUi.NSpin), { size: "large" })
-                          ])) : operationLogs.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_56, [..._cache[55] || (_cache[55] = [
+                          ])) : operationLogs.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_57, [..._cache[58] || (_cache[58] = [
                             vue.createElementVNode("div", { class: "empty-state__text" }, "暂无操作日志", -1)
-                          ])])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_57, [
+                          ])])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_58, [
                             vue.createVNode(vue.unref(naiveUi.NTimeline), null, {
                               default: vue.withCtx(() => [
                                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(operationLogs.value, (log2) => {
@@ -5859,7 +6062,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                     time: formatDateTime(log2.createTime)
                                   }, {
                                     header: vue.withCtx(() => [
-                                      vue.createElementVNode("div", _hoisted_58, [
+                                      vue.createElementVNode("div", _hoisted_59, [
                                         vue.createVNode(vue.unref(naiveUi.NTag), {
                                           size: "small",
                                           type: getOperationTypeColor(log2.operationType)
@@ -5879,24 +6082,24 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                           ]),
                                           _: 2
                                         }, 1032, ["type"]),
-                                        vue.createElementVNode("span", _hoisted_59, vue.toDisplayString(log2.operationDesc), 1)
+                                        vue.createElementVNode("span", _hoisted_60, vue.toDisplayString(log2.operationDesc), 1)
                                       ])
                                     ]),
                                     default: vue.withCtx(() => [
-                                      vue.createElementVNode("div", _hoisted_60, [
-                                        log2.operatorName ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_61, [
-                                          _cache[56] || (_cache[56] = vue.createElementVNode("span", { class: "log-label" }, "操作人：", -1)),
-                                          vue.createElementVNode("span", _hoisted_62, vue.toDisplayString(log2.operatorName), 1)
+                                      vue.createElementVNode("div", _hoisted_61, [
+                                        log2.operatorName ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_62, [
+                                          _cache[59] || (_cache[59] = vue.createElementVNode("span", { class: "log-label" }, "操作人：", -1)),
+                                          vue.createElementVNode("span", _hoisted_63, vue.toDisplayString(log2.operatorName), 1)
                                         ])) : vue.createCommentVNode("", true),
-                                        log2.duration ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_63, [
-                                          _cache[57] || (_cache[57] = vue.createElementVNode("span", { class: "log-label" }, "耗时：", -1)),
-                                          vue.createElementVNode("span", _hoisted_64, vue.toDisplayString(log2.duration) + "ms", 1)
+                                        log2.duration ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_64, [
+                                          _cache[60] || (_cache[60] = vue.createElementVNode("span", { class: "log-label" }, "耗时：", -1)),
+                                          vue.createElementVNode("span", _hoisted_65, vue.toDisplayString(log2.duration) + "ms", 1)
                                         ])) : vue.createCommentVNode("", true),
-                                        log2.message ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_65, [
-                                          _cache[58] || (_cache[58] = vue.createElementVNode("span", { class: "log-label" }, "说明：", -1)),
-                                          vue.createElementVNode("span", _hoisted_66, vue.toDisplayString(log2.message), 1)
+                                        log2.message ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_66, [
+                                          _cache[61] || (_cache[61] = vue.createElementVNode("span", { class: "log-label" }, "说明：", -1)),
+                                          vue.createElementVNode("span", _hoisted_67, vue.toDisplayString(log2.message), 1)
                                         ])) : vue.createCommentVNode("", true),
-                                        log2.operationType === "CONFIG_UPDATE" && (log2.beforeData || log2.afterData) ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_67, [
+                                        log2.operationType === "CONFIG_UPDATE" && (log2.beforeData || log2.afterData) ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_68, [
                                           vue.createVNode(vue.unref(naiveUi.NCollapse), null, {
                                             default: vue.withCtx(() => [
                                               vue.createVNode(vue.unref(naiveUi.NCollapseItem), {
@@ -5904,14 +6107,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                                 name: "config"
                                               }, {
                                                 default: vue.withCtx(() => [
-                                                  vue.createElementVNode("div", _hoisted_68, [
-                                                    vue.createElementVNode("div", _hoisted_69, [
-                                                      _cache[59] || (_cache[59] = vue.createElementVNode("div", { class: "config-title" }, "原配置", -1)),
-                                                      vue.createElementVNode("pre", _hoisted_70, vue.toDisplayString(formatJson(log2.beforeData)), 1)
+                                                  vue.createElementVNode("div", _hoisted_69, [
+                                                    vue.createElementVNode("div", _hoisted_70, [
+                                                      _cache[62] || (_cache[62] = vue.createElementVNode("div", { class: "config-title" }, "原配置", -1)),
+                                                      vue.createElementVNode("pre", _hoisted_71, vue.toDisplayString(formatJson(log2.beforeData)), 1)
                                                     ]),
-                                                    vue.createElementVNode("div", _hoisted_71, [
-                                                      _cache[60] || (_cache[60] = vue.createElementVNode("div", { class: "config-title" }, "新配置", -1)),
-                                                      vue.createElementVNode("pre", _hoisted_72, vue.toDisplayString(formatJson(log2.afterData)), 1)
+                                                    vue.createElementVNode("div", _hoisted_72, [
+                                                      _cache[63] || (_cache[63] = vue.createElementVNode("div", { class: "config-title" }, "新配置", -1)),
+                                                      vue.createElementVNode("pre", _hoisted_73, vue.toDisplayString(formatJson(log2.afterData)), 1)
                                                     ])
                                                   ])
                                                 ]),
@@ -5929,7 +6132,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                               ]),
                               _: 1
                             }),
-                            operationLogsPagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_73, [
+                            operationLogsPagination.itemCount > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_74, [
                               vue.createVNode(vue.unref(naiveUi.NPagination), {
                                 page: operationLogsPagination.page,
                                 "onUpdate:page": [
@@ -6051,7 +6254,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     "show-icon": false,
                     style: { "margin-top": "16px" }
                   }, {
-                    default: vue.withCtx(() => [..._cache[62] || (_cache[62] = [
+                    default: vue.withCtx(() => [..._cache[65] || (_cache[65] = [
                       vue.createTextVNode(" 升级后将使用新版本的插件包 ", -1)
                     ])]),
                     _: 1
@@ -6102,7 +6305,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     "show-icon": false,
                     style: { "margin-top": "16px" }
                   }, {
-                    default: vue.withCtx(() => [..._cache[63] || (_cache[63] = [
+                    default: vue.withCtx(() => [..._cache[66] || (_cache[66] = [
                       vue.createTextVNode(" 卸载后应用数据将被删除，此操作不可恢复！ ", -1)
                     ])]),
                     _: 1
@@ -6124,14 +6327,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             onPositiveClick: handleUpgradeFromInfo
           }, {
             default: vue.withCtx(() => [
-              upgradeInfoApp.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_74, [
+              upgradeInfoApp.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_75, [
                 vue.createVNode(vue.unref(naiveUi.NAlert), {
                   type: "info",
                   "show-icon": false,
                   style: { "margin-bottom": "16px" }
                 }, {
                   header: vue.withCtx(() => [
-                    vue.createElementVNode("div", _hoisted_75, [
+                    vue.createElementVNode("div", _hoisted_76, [
                       vue.createVNode(vue.unref(naiveUi.NIcon), {
                         size: "20",
                         color: "#f59e0b"
@@ -6141,7 +6344,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         ]),
                         _: 1
                       }),
-                      vue.createElementVNode("span", _hoisted_76, vue.toDisplayString(upgradeInfoApp.value.applicationName) + " 有新版本可用", 1)
+                      vue.createElementVNode("span", _hoisted_77, vue.toDisplayString(upgradeInfoApp.value.applicationName) + " 有新版本可用", 1)
                     ])
                   ]),
                   _: 1
@@ -6200,7 +6403,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                   "show-icon": false,
                   style: { "margin-top": "16px" }
                 }, {
-                  default: vue.withCtx(() => [..._cache[64] || (_cache[64] = [
+                  default: vue.withCtx(() => [..._cache[67] || (_cache[67] = [
                     vue.createTextVNode(" 升级前请确保已备份重要数据，升级过程中应用将暂时不可用 ", -1)
                   ])]),
                   _: 1
@@ -6218,12 +6421,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             "negative-text": "关闭"
           }, {
             default: vue.withCtx(() => [
-              upgradeLogsLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_77, [
+              upgradeLogsLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_78, [
                 vue.createVNode(vue.unref(naiveUi.NSpin), { size: "large" })
-              ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_78, [
-                upgradeLogs.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_79, [..._cache[65] || (_cache[65] = [
+              ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_79, [
+                upgradeLogs.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_80, [..._cache[68] || (_cache[68] = [
                   vue.createElementVNode("div", { class: "empty-state__text" }, "暂未查询到升级日志", -1)
-                ])])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_80, [
+                ])])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_81, [
                   vue.createVNode(vue.unref(naiveUi.NTimeline), null, {
                     default: vue.withCtx(() => [
                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(upgradeLogs.value, (log2) => {
@@ -6248,22 +6451,22 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                             ])
                           ]),
                           default: vue.withCtx(() => [
-                            vue.createElementVNode("div", _hoisted_81, [
-                              vue.createElementVNode("div", _hoisted_82, [
-                                _cache[66] || (_cache[66] = vue.createElementVNode("span", { class: "meta-label" }, "目标版本：", -1)),
-                                vue.createElementVNode("span", _hoisted_83, vue.toDisplayString(log2.targetVersion || "-"), 1)
+                            vue.createElementVNode("div", _hoisted_82, [
+                              vue.createElementVNode("div", _hoisted_83, [
+                                _cache[69] || (_cache[69] = vue.createElementVNode("span", { class: "meta-label" }, "目标版本：", -1)),
+                                vue.createElementVNode("span", _hoisted_84, vue.toDisplayString(log2.targetVersion || "-"), 1)
                               ]),
-                              log2.pluginType ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_84, [
-                                _cache[67] || (_cache[67] = vue.createElementVNode("span", { class: "meta-label" }, "插件类型：", -1)),
-                                vue.createElementVNode("span", _hoisted_85, vue.toDisplayString(log2.pluginType), 1)
+                              log2.pluginType ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_85, [
+                                _cache[70] || (_cache[70] = vue.createElementVNode("span", { class: "meta-label" }, "插件类型：", -1)),
+                                vue.createElementVNode("span", _hoisted_86, vue.toDisplayString(log2.pluginType), 1)
                               ])) : vue.createCommentVNode("", true),
-                              log2.operatorName ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_86, [
-                                _cache[68] || (_cache[68] = vue.createElementVNode("span", { class: "meta-label" }, "操作人：", -1)),
-                                vue.createElementVNode("span", _hoisted_87, vue.toDisplayString(log2.operatorName), 1)
+                              log2.operatorName ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_87, [
+                                _cache[71] || (_cache[71] = vue.createElementVNode("span", { class: "meta-label" }, "操作人：", -1)),
+                                vue.createElementVNode("span", _hoisted_88, vue.toDisplayString(log2.operatorName), 1)
                               ])) : vue.createCommentVNode("", true),
-                              log2.message ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_88, [
-                                _cache[69] || (_cache[69] = vue.createElementVNode("span", { class: "meta-label" }, "说明：", -1)),
-                                vue.createElementVNode("span", _hoisted_89, vue.toDisplayString(log2.message), 1)
+                              log2.message ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_89, [
+                                _cache[72] || (_cache[72] = vue.createElementVNode("span", { class: "meta-label" }, "说明：", -1)),
+                                vue.createElementVNode("span", _hoisted_90, vue.toDisplayString(log2.message), 1)
                               ])) : vue.createCommentVNode("", true)
                             ])
                           ]),
@@ -6375,11 +6578,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     "show-icon": false,
                     style: { "margin-top": "16px" }
                   }, {
-                    header: vue.withCtx(() => [..._cache[70] || (_cache[70] = [
+                    header: vue.withCtx(() => [..._cache[73] || (_cache[73] = [
                       vue.createElementVNode("div", { style: { "font-weight": "600" } }, "注意事项", -1)
                     ])]),
                     default: vue.withCtx(() => [
-                      _cache[71] || (_cache[71] = vue.createElementVNode("ul", { style: { "margin": "8px 0 0 0", "padding-left": "20px" } }, [
+                      _cache[74] || (_cache[74] = vue.createElementVNode("ul", { style: { "margin": "8px 0 0 0", "padding-left": "20px" } }, [
                         vue.createElementVNode("li", null, "降级操作会将应用回滚到指定版本"),
                         vue.createElementVNode("li", null, "降级过程中应用将暂时不可用"),
                         vue.createElementVNode("li", null, "请确保已备份重要数据")
@@ -6395,7 +6598,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           }, 8, ["show", "positive-button-props", "loading"]),
           vue.createVNode(vue.unref(naiveUi.NModal), {
             show: showConfigModal.value,
-            "onUpdate:show": _cache[31] || (_cache[31] = ($event) => showConfigModal.value = $event),
+            "onUpdate:show": _cache[32] || (_cache[32] = ($event) => showConfigModal.value = $event),
             preset: "dialog",
             title: "应用配置",
             "positive-text": "保存",
@@ -6410,7 +6613,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                 default: vue.withCtx(() => [
                   vue.createVNode(vue.unref(naiveUi.NSpin), { show: configMetadataLoading.value }, {
                     default: vue.withCtx(() => [
-                      vue.createElementVNode("div", _hoisted_90, [
+                      vue.createElementVNode("div", _hoisted_91, [
                         vue.createVNode(vue.unref(naiveUi.NCard), {
                           size: "small",
                           bordered: false,
@@ -6419,13 +6622,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           default: vue.withCtx(() => {
                             var _a2;
                             return [
-                              vue.createElementVNode("div", _hoisted_91, [
-                                vue.createElementVNode("div", _hoisted_92, [
-                                  _cache[72] || (_cache[72] = vue.createElementVNode("span", { class: "info-label" }, "应用名称：", -1)),
-                                  vue.createElementVNode("span", _hoisted_93, vue.toDisplayString((_a2 = configTargetApp.value) == null ? void 0 : _a2.applicationName), 1)
+                              vue.createElementVNode("div", _hoisted_92, [
+                                vue.createElementVNode("div", _hoisted_93, [
+                                  _cache[75] || (_cache[75] = vue.createElementVNode("span", { class: "info-label" }, "应用名称：", -1)),
+                                  vue.createElementVNode("span", _hoisted_94, vue.toDisplayString((_a2 = configTargetApp.value) == null ? void 0 : _a2.applicationName), 1)
                                 ]),
-                                vue.createElementVNode("div", _hoisted_94, [
-                                  _cache[73] || (_cache[73] = vue.createElementVNode("span", { class: "info-label" }, "应用代码：", -1)),
+                                vue.createElementVNode("div", _hoisted_95, [
+                                  _cache[76] || (_cache[76] = vue.createElementVNode("span", { class: "info-label" }, "应用代码：", -1)),
                                   vue.createVNode(vue.unref(naiveUi.NText), {
                                     type: "info",
                                     class: "info-value"
@@ -6479,7 +6682,29 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                   size: "small"
                                 }, {
                                   default: vue.withCtx(() => [
-                                    vue.createElementVNode("div", _hoisted_95, [
+                                    vue.createElementVNode("div", _hoisted_96, [
+                                      vue.createVNode(vue.unref(naiveUi.NFormItem), {
+                                        label: "前端页面",
+                                        path: "hasFrontend"
+                                      }, {
+                                        default: vue.withCtx(() => [
+                                          vue.createVNode(vue.unref(naiveUi.NSwitch), {
+                                            value: configForm.hasFrontend,
+                                            "onUpdate:value": _cache[26] || (_cache[26] = ($event) => configForm.hasFrontend = $event),
+                                            disabled: configLoading.value,
+                                            size: "small"
+                                          }, {
+                                            checked: vue.withCtx(() => [..._cache[77] || (_cache[77] = [
+                                              vue.createTextVNode("有", -1)
+                                            ])]),
+                                            unchecked: vue.withCtx(() => [..._cache[78] || (_cache[78] = [
+                                              vue.createTextVNode("无", -1)
+                                            ])]),
+                                            _: 1
+                                          }, 8, ["value", "disabled"])
+                                        ]),
+                                        _: 1
+                                      }),
                                       vue.createVNode(vue.unref(naiveUi.NFormItem), {
                                         label: "自动加载",
                                         path: "autoLoad"
@@ -6487,14 +6712,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                         default: vue.withCtx(() => [
                                           vue.createVNode(vue.unref(naiveUi.NSwitch), {
                                             value: configForm.autoLoad,
-                                            "onUpdate:value": _cache[26] || (_cache[26] = ($event) => configForm.autoLoad = $event),
+                                            "onUpdate:value": _cache[27] || (_cache[27] = ($event) => configForm.autoLoad = $event),
                                             disabled: configLoading.value,
                                             size: "small"
                                           }, {
-                                            checked: vue.withCtx(() => [..._cache[74] || (_cache[74] = [
+                                            checked: vue.withCtx(() => [..._cache[79] || (_cache[79] = [
                                               vue.createTextVNode("开启", -1)
                                             ])]),
-                                            unchecked: vue.withCtx(() => [..._cache[75] || (_cache[75] = [
+                                            unchecked: vue.withCtx(() => [..._cache[80] || (_cache[80] = [
                                               vue.createTextVNode("关闭", -1)
                                             ])]),
                                             _: 1
@@ -6509,14 +6734,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                         default: vue.withCtx(() => [
                                           vue.createVNode(vue.unref(naiveUi.NSwitch), {
                                             value: configForm.loadOnStartup,
-                                            "onUpdate:value": _cache[27] || (_cache[27] = ($event) => configForm.loadOnStartup = $event),
+                                            "onUpdate:value": _cache[28] || (_cache[28] = ($event) => configForm.loadOnStartup = $event),
                                             disabled: configLoading.value || !configForm.autoLoad,
                                             size: "small"
                                           }, {
-                                            checked: vue.withCtx(() => [..._cache[76] || (_cache[76] = [
+                                            checked: vue.withCtx(() => [..._cache[81] || (_cache[81] = [
                                               vue.createTextVNode("开启", -1)
                                             ])]),
-                                            unchecked: vue.withCtx(() => [..._cache[77] || (_cache[77] = [
+                                            unchecked: vue.withCtx(() => [..._cache[82] || (_cache[82] = [
                                               vue.createTextVNode("关闭", -1)
                                             ])]),
                                             _: 1
@@ -6531,7 +6756,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                         default: vue.withCtx(() => [
                                           vue.createVNode(vue.unref(naiveUi.NInputNumber), {
                                             value: configForm.startPriority,
-                                            "onUpdate:value": _cache[28] || (_cache[28] = ($event) => configForm.startPriority = $event),
+                                            "onUpdate:value": _cache[29] || (_cache[29] = ($event) => configForm.startPriority = $event),
                                             min: 0,
                                             max: 100,
                                             disabled: configLoading.value || !configForm.autoLoad,
@@ -6548,7 +6773,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                         default: vue.withCtx(() => [
                                           vue.createVNode(vue.unref(naiveUi.NInputNumber), {
                                             value: configForm.startDelay,
-                                            "onUpdate:value": _cache[29] || (_cache[29] = ($event) => configForm.startDelay = $event),
+                                            "onUpdate:value": _cache[30] || (_cache[30] = ($event) => configForm.startDelay = $event),
                                             min: 0,
                                             max: 6e4,
                                             step: 1e3,
@@ -6567,7 +6792,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                       default: vue.withCtx(() => [
                                         vue.createVNode(vue.unref(naiveUi.NInput), {
                                           value: configForm.description,
-                                          "onUpdate:value": _cache[30] || (_cache[30] = ($event) => configForm.description = $event),
+                                          "onUpdate:value": _cache[31] || (_cache[31] = ($event) => configForm.description = $event),
                                           type: "textarea",
                                           placeholder: "可选，描述此配置的用途",
                                           rows: 2,
@@ -6583,8 +6808,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                       size: "small",
                                       style: { "margin-top": "12px" }
                                     }, {
-                                      default: vue.withCtx(() => [..._cache[78] || (_cache[78] = [
+                                      default: vue.withCtx(() => [..._cache[83] || (_cache[83] = [
                                         vue.createElementVNode("ul", { style: { "margin": "0", "padding-left": "20px", "font-size": "12px", "line-height": "1.6" } }, [
+                                          vue.createElementVNode("li", null, "前端页面：该插件是否包含菜单/路由等前端页面能力"),
                                           vue.createElementVNode("li", null, "自动加载：系统启动时是否自动加载该插件"),
                                           vue.createElementVNode("li", null, "启动时加载：插件加载后是否立即启动"),
                                           vue.createElementVNode("li", null, "启动优先级：数值越大越先启动（0-100）"),
@@ -6614,7 +6840,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           }, 8, ["show", "positive-button-props", "loading"]),
           vue.createVNode(vue.unref(naiveUi.NModal), {
             show: showUploadModal.value,
-            "onUpdate:show": _cache[32] || (_cache[32] = ($event) => showUploadModal.value = $event),
+            "onUpdate:show": _cache[33] || (_cache[33] = ($event) => showUploadModal.value = $event),
             preset: "dialog",
             title: "上传应用包",
             "positive-text": "确认安装",
@@ -6644,7 +6870,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                         default: vue.withCtx(() => [
                           vue.createVNode(vue.unref(naiveUi.NUploadDragger), null, {
                             default: vue.withCtx(() => [
-                              vue.createElementVNode("div", _hoisted_96, [
+                              vue.createElementVNode("div", _hoisted_97, [
                                 vue.createVNode(vue.unref(naiveUi.NIcon), {
                                   size: "48",
                                   depth: 3
@@ -6656,7 +6882,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                 })
                               ]),
                               vue.createVNode(vue.unref(naiveUi.NText), { style: { "font-size": "16px" } }, {
-                                default: vue.withCtx(() => [..._cache[79] || (_cache[79] = [
+                                default: vue.withCtx(() => [..._cache[84] || (_cache[84] = [
                                   vue.createTextVNode(" 点击或拖拽文件到此区域上传 ", -1)
                                 ])]),
                                 _: 1
@@ -6665,7 +6891,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                 depth: "3",
                                 style: { "margin": "8px 0 0 0" }
                               }, {
-                                default: vue.withCtx(() => [..._cache[80] || (_cache[80] = [
+                                default: vue.withCtx(() => [..._cache[85] || (_cache[85] = [
                                   vue.createTextVNode(" 仅支持 .jar 格式的应用包文件 ", -1)
                                 ])]),
                                 _: 1
@@ -6685,19 +6911,19 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     "show-icon": false,
                     style: { "margin-top": "16px" }
                   }, {
-                    header: vue.withCtx(() => [..._cache[81] || (_cache[81] = [
+                    header: vue.withCtx(() => [..._cache[86] || (_cache[86] = [
                       vue.createElementVNode("div", { style: { "font-weight": "600" } }, "已选择文件", -1)
                     ])]),
                     default: vue.withCtx(() => {
                       var _a2;
                       return [
-                        vue.createElementVNode("div", _hoisted_97, [
+                        vue.createElementVNode("div", _hoisted_98, [
                           vue.createElementVNode("div", null, [
-                            _cache[82] || (_cache[82] = vue.createElementVNode("strong", null, "文件名：", -1)),
+                            _cache[87] || (_cache[87] = vue.createElementVNode("strong", null, "文件名：", -1)),
                             vue.createTextVNode(vue.toDisplayString(uploadFile.value.name), 1)
                           ]),
                           vue.createElementVNode("div", null, [
-                            _cache[83] || (_cache[83] = vue.createElementVNode("strong", null, "大小：", -1)),
+                            _cache[88] || (_cache[88] = vue.createElementVNode("strong", null, "大小：", -1)),
                             vue.createTextVNode(vue.toDisplayString(formatFileSize(((_a2 = uploadFile.value.file) == null ? void 0 : _a2.size) || 0)), 1)
                           ])
                         ])
@@ -6710,11 +6936,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     "show-icon": false,
                     style: { "margin-top": "16px" }
                   }, {
-                    header: vue.withCtx(() => [..._cache[84] || (_cache[84] = [
+                    header: vue.withCtx(() => [..._cache[89] || (_cache[89] = [
                       vue.createElementVNode("div", { style: { "font-weight": "600" } }, "注意事项", -1)
                     ])]),
                     default: vue.withCtx(() => [
-                      _cache[85] || (_cache[85] = vue.createElementVNode("ul", { style: { "margin": "8px 0 0 0", "padding-left": "20px" } }, [
+                      _cache[90] || (_cache[90] = vue.createElementVNode("ul", { style: { "margin": "8px 0 0 0", "padding-left": "20px" } }, [
                         vue.createElementVNode("li", null, "请确保上传的是有效的应用包文件"),
                         vue.createElementVNode("li", null, "安装过程中请勿关闭页面"),
                         vue.createElementVNode("li", null, "安装完成后应用将自动启用")
@@ -6739,17 +6965,460 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     return target;
   };
-  const ApplicationManagement = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-6096b87c"]]);
-  const _hoisted_1$5 = { class: "operation-log-page" };
-  const _hoisted_2$5 = { class: "page-header-wrapper" };
-  const _hoisted_3$5 = { class: "page-content" };
-  const _hoisted_4$3 = { class: "table-container" };
-  const _hoisted_5$2 = { class: "pagination-container" };
-  const _hoisted_6$2 = {
+  const ApplicationManagement = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["__scopeId", "data-v-c8ddb4c1"]]);
+  const _hoisted_1$8 = { class: "aggregate-application-page" };
+  const _hoisted_2$7 = { class: "page-header-wrapper" };
+  const _hoisted_3$7 = { class: "page-content" };
+  const _hoisted_4$5 = {
+    key: 0,
+    class: "empty-hint"
+  };
+  const _hoisted_5$4 = {
+    key: 1,
+    class: "aggregate-grid"
+  };
+  const _hoisted_6$4 = { class: "aggregate-row" };
+  const _hoisted_7$3 = { class: "aggregate-row__main" };
+  const _hoisted_8$2 = {
+    key: 0,
+    class: "aggregate-card-icon-wrap"
+  };
+  const _hoisted_9$2 = ["src"];
+  const _hoisted_10$2 = {
+    key: 1,
+    class: "aggregate-card-icon-wrap aggregate-card-icon-wrap--default"
+  };
+  const _hoisted_11$2 = { class: "aggregate-row__text" };
+  const _hoisted_12$1 = { class: "aggregate-row__title" };
+  const _hoisted_13$1 = {
+    key: 0,
+    class: "aggregate-row__order"
+  };
+  const _hoisted_14$1 = { class: "aggregate-row__plugins" };
+  const _hoisted_15$1 = { class: "aggregate-actions" };
+  const _sfc_main$8 = /* @__PURE__ */ vue.defineComponent({
+    __name: "AggregateApplicationManagement",
+    setup(__props) {
+      const message = useMessage();
+      const dialog = naiveUi.useDialog();
+      const RefreshOutline = useIcon("RefreshOutline");
+      useIcon("CubeOutline");
+      const AddOutline = useIcon("AddOutline");
+      const LayersOutline = useIcon("LayersOutline");
+      const aggregateLoading = vue.ref(false);
+      const aggregateSaving = vue.ref(false);
+      const aggregateList = vue.ref([]);
+      const aggregatablePlugins = vue.ref([]);
+      const aggregateModalVisible = vue.ref(false);
+      const aggregateForm = vue.reactive({
+        id: void 0,
+        applicationCode: "",
+        applicationName: "",
+        description: "",
+        icon: "",
+        aggregateListOrder: 1e3,
+        pluginIds: [],
+        autoLoad: false
+      });
+      const aggregatablePluginOptions = vue.computed(
+        () => aggregatablePlugins.value.map((p) => ({
+          label: `${p.applicationName} (${p.pluginId})`,
+          value: p.pluginId
+        }))
+      );
+      const sortedAggregateList = vue.computed(
+        () => [...aggregateList.value].sort(
+          (a, b) => (a.aggregateListOrder ?? 1e3) - (b.aggregateListOrder ?? 1e3)
+        )
+      );
+      function aggregateCardIconUrl(item) {
+        var _a2;
+        const u = (_a2 = item.icon) == null ? void 0 : _a2.trim();
+        return u || null;
+      }
+      function resetAggregateForm() {
+        aggregateForm.id = void 0;
+        aggregateForm.applicationCode = "";
+        aggregateForm.applicationName = "";
+        aggregateForm.description = "";
+        aggregateForm.icon = "";
+        aggregateForm.aggregateListOrder = 1e3;
+        aggregateForm.pluginIds = [];
+        aggregateForm.autoLoad = false;
+      }
+      function handleCancelAggregateModal() {
+        aggregateModalVisible.value = false;
+        resetAggregateForm();
+      }
+      async function loadAggregateData() {
+        aggregateLoading.value = true;
+        try {
+          const [aggregates, plugins] = await Promise.all([
+            applicationApi.listAggregates(),
+            applicationApi.listAggregatablePlugins()
+          ]);
+          aggregateList.value = aggregates || [];
+          aggregatablePlugins.value = (plugins || []).filter((p) => !p.aggregateApp);
+        } finally {
+          aggregateLoading.value = false;
+        }
+      }
+      function handleNew() {
+        resetAggregateForm();
+        aggregateModalVisible.value = true;
+        message.info("已清空表单，可填写后保存创建新聚合应用");
+      }
+      function editAggregate(app) {
+        aggregateForm.id = app.id;
+        aggregateForm.applicationCode = app.applicationCode || "";
+        aggregateForm.applicationName = app.applicationName || "";
+        aggregateForm.description = app.description || "";
+        aggregateForm.icon = app.icon || "";
+        aggregateForm.aggregateListOrder = app.aggregateListOrder ?? 1e3;
+        aggregateForm.pluginIds = Array.isArray(app.aggregatedPluginIds) ? [...app.aggregatedPluginIds] : [];
+        aggregateForm.autoLoad = Boolean(app.autoLoad);
+        aggregateModalVisible.value = true;
+      }
+      async function saveAggregateApp() {
+        var _a2, _b2, _c2;
+        if (!((_a2 = aggregateForm.applicationCode) == null ? void 0 : _a2.trim())) {
+          message.warning("请输入应用编码");
+          return;
+        }
+        if (!((_b2 = aggregateForm.applicationName) == null ? void 0 : _b2.trim())) {
+          message.warning("请输入应用名称");
+          return;
+        }
+        if (!aggregateForm.pluginIds || aggregateForm.pluginIds.length === 0) {
+          message.warning("请选择至少一个插件");
+          return;
+        }
+        aggregateSaving.value = true;
+        try {
+          const payload = {
+            applicationCode: aggregateForm.applicationCode.trim(),
+            applicationName: aggregateForm.applicationName.trim(),
+            description: aggregateForm.description || "",
+            icon: ((_c2 = aggregateForm.icon) == null ? void 0 : _c2.trim()) || void 0,
+            aggregateListOrder: aggregateForm.aggregateListOrder ?? 1e3,
+            pluginIds: [...aggregateForm.pluginIds],
+            autoLoad: Boolean(aggregateForm.autoLoad)
+          };
+          if (aggregateForm.id) {
+            await applicationApi.updateAggregate(aggregateForm.id, payload);
+            message.success("聚合应用已更新");
+          } else {
+            await applicationApi.createAggregate(payload);
+            message.success("聚合应用已创建");
+          }
+          await loadAggregateData();
+          aggregateModalVisible.value = false;
+          resetAggregateForm();
+        } catch (e2) {
+          console.error("保存聚合应用失败", e2);
+        } finally {
+          aggregateSaving.value = false;
+        }
+      }
+      function removeAggregate(app) {
+        dialog.warning({
+          title: "删除聚合应用",
+          content: `确定删除聚合应用 "${app.applicationName}" 吗？`,
+          positiveText: "删除",
+          negativeText: "取消",
+          onPositiveClick: async () => {
+            await applicationApi.deleteAggregate(app.id);
+            message.success("聚合应用已删除");
+            if (aggregateForm.id === app.id) {
+              resetAggregateForm();
+              aggregateModalVisible.value = false;
+            }
+            await loadAggregateData();
+          }
+        });
+      }
+      vue.onMounted(() => {
+        loadAggregateData();
+      });
+      return (_ctx, _cache) => {
+        const _component_PageHeader = vue.resolveComponent("PageHeader");
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$8, [
+          vue.createElementVNode("div", _hoisted_2$7, [
+            vue.createVNode(_component_PageHeader, {
+              title: "聚合应用管理",
+              subtitle: "将多个含前端的插件合并为一个应用，统一菜单与路由"
+            }, {
+              actions: vue.withCtx(() => [
+                vue.createVNode(vue.unref(naiveUi.NButton), {
+                  type: "primary",
+                  onClick: handleNew
+                }, {
+                  icon: vue.withCtx(() => [
+                    vue.createVNode(vue.unref(naiveUi.NIcon), null, {
+                      default: vue.withCtx(() => [
+                        (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(AddOutline))))
+                      ]),
+                      _: 1
+                    })
+                  ]),
+                  default: vue.withCtx(() => [
+                    _cache[8] || (_cache[8] = vue.createTextVNode(" 创建 ", -1))
+                  ]),
+                  _: 1
+                }),
+                vue.createVNode(vue.unref(naiveUi.NButton), {
+                  loading: aggregateLoading.value,
+                  onClick: loadAggregateData
+                }, {
+                  icon: vue.withCtx(() => [
+                    vue.createVNode(vue.unref(naiveUi.NIcon), null, {
+                      default: vue.withCtx(() => [
+                        (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(RefreshOutline))))
+                      ]),
+                      _: 1
+                    })
+                  ]),
+                  default: vue.withCtx(() => [
+                    _cache[9] || (_cache[9] = vue.createTextVNode(" 刷新 ", -1))
+                  ]),
+                  _: 1
+                }, 8, ["loading"])
+              ]),
+              _: 1
+            })
+          ]),
+          vue.createElementVNode("div", _hoisted_3$7, [
+            vue.createVNode(vue.unref(naiveUi.NSpin), { show: aggregateLoading.value }, {
+              default: vue.withCtx(() => [
+                vue.createVNode(vue.unref(naiveUi.NCard), {
+                  title: "已创建聚合应用",
+                  size: "small",
+                  class: "list-card"
+                }, {
+                  default: vue.withCtx(() => [
+                    vue.createVNode(vue.unref(naiveUi.NAlert), {
+                      type: "info",
+                      "show-icon": false,
+                      class: "hint-alert",
+                      style: { "margin-bottom": "12px" }
+                    }, {
+                      default: vue.withCtx(() => [..._cache[10] || (_cache[10] = [
+                        vue.createTextVNode(" 可选项仅包含已标记「含前端」的插件（hasFrontend=true）。已被聚合的插件将不再出现在主应用列表中；聚合应用的菜单与路由会自动汇总子插件结果。 ", -1)
+                      ])]),
+                      _: 1
+                    }),
+                    sortedAggregateList.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_4$5, "暂无聚合应用")) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_5$4, [
+                      (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(sortedAggregateList.value, (item) => {
+                        return vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NCard), {
+                          key: item.id,
+                          size: "small",
+                          class: "aggregate-item-card"
+                        }, {
+                          default: vue.withCtx(() => {
+                            var _a2;
+                            return [
+                              vue.createElementVNode("div", _hoisted_6$4, [
+                                vue.createElementVNode("div", _hoisted_7$3, [
+                                  aggregateCardIconUrl(item) ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_8$2, [
+                                    vue.createElementVNode("img", {
+                                      src: aggregateCardIconUrl(item),
+                                      alt: "",
+                                      class: "aggregate-card-icon-img"
+                                    }, null, 8, _hoisted_9$2)
+                                  ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_10$2, [
+                                    vue.createVNode(vue.unref(naiveUi.NIcon), { size: "20" }, {
+                                      default: vue.withCtx(() => [
+                                        (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(LayersOutline))))
+                                      ]),
+                                      _: 1
+                                    })
+                                  ])),
+                                  vue.createElementVNode("div", _hoisted_11$2, [
+                                    vue.createElementVNode("div", _hoisted_12$1, [
+                                      vue.createTextVNode(vue.toDisplayString(item.applicationName) + "（" + vue.toDisplayString(item.applicationCode) + "） ", 1),
+                                      item.aggregateListOrder != null ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_13$1, " 排序 " + vue.toDisplayString(item.aggregateListOrder), 1)) : vue.createCommentVNode("", true)
+                                    ]),
+                                    vue.createElementVNode("div", _hoisted_14$1, vue.toDisplayString(((_a2 = item.aggregatedPluginIds) == null ? void 0 : _a2.join(", ")) || "-"), 1)
+                                  ])
+                                ])
+                              ]),
+                              vue.createElementVNode("div", _hoisted_15$1, [
+                                vue.createVNode(vue.unref(naiveUi.NSpace), null, {
+                                  default: vue.withCtx(() => [
+                                    vue.createVNode(vue.unref(naiveUi.NButton), {
+                                      size: "tiny",
+                                      onClick: ($event) => editAggregate(item)
+                                    }, {
+                                      default: vue.withCtx(() => [..._cache[11] || (_cache[11] = [
+                                        vue.createTextVNode("编辑", -1)
+                                      ])]),
+                                      _: 1
+                                    }, 8, ["onClick"]),
+                                    vue.createVNode(vue.unref(naiveUi.NButton), {
+                                      size: "tiny",
+                                      type: "error",
+                                      onClick: ($event) => removeAggregate(item)
+                                    }, {
+                                      default: vue.withCtx(() => [..._cache[12] || (_cache[12] = [
+                                        vue.createTextVNode("删除", -1)
+                                      ])]),
+                                      _: 1
+                                    }, 8, ["onClick"])
+                                  ]),
+                                  _: 2
+                                }, 1024)
+                              ])
+                            ];
+                          }),
+                          _: 2
+                        }, 1024);
+                      }), 128))
+                    ]))
+                  ]),
+                  _: 1
+                })
+              ]),
+              _: 1
+            }, 8, ["show"])
+          ]),
+          vue.createVNode(vue.unref(naiveUi.NModal), {
+            show: aggregateModalVisible.value,
+            "onUpdate:show": _cache[7] || (_cache[7] = ($event) => aggregateModalVisible.value = $event),
+            preset: "card",
+            "mask-closable": false,
+            title: aggregateForm.id ? "编辑聚合应用" : "创建聚合应用",
+            style: { "width": "760px" }
+          }, {
+            footer: vue.withCtx(() => [
+              vue.createVNode(vue.unref(naiveUi.NSpace), { justify: "end" }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(vue.unref(naiveUi.NButton), { onClick: handleCancelAggregateModal }, {
+                    default: vue.withCtx(() => [..._cache[13] || (_cache[13] = [
+                      vue.createTextVNode("取消", -1)
+                    ])]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NButton), {
+                    type: "primary",
+                    loading: aggregateSaving.value,
+                    onClick: saveAggregateApp
+                  }, {
+                    default: vue.withCtx(() => [..._cache[14] || (_cache[14] = [
+                      vue.createTextVNode(" 保存 ", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["loading"])
+                ]),
+                _: 1
+              })
+            ]),
+            default: vue.withCtx(() => [
+              vue.createVNode(vue.unref(naiveUi.NForm), {
+                model: aggregateForm,
+                "label-placement": "left",
+                "label-width": "110",
+                size: "small"
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "应用编码" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NInput), {
+                        value: aggregateForm.applicationCode,
+                        "onUpdate:value": _cache[0] || (_cache[0] = ($event) => aggregateForm.applicationCode = $event),
+                        placeholder: "例如：ops-center",
+                        disabled: Boolean(aggregateForm.id)
+                      }, null, 8, ["value", "disabled"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "应用名称" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NInput), {
+                        value: aggregateForm.applicationName,
+                        "onUpdate:value": _cache[1] || (_cache[1] = ($event) => aggregateForm.applicationName = $event),
+                        placeholder: "例如：运营中台"
+                      }, null, 8, ["value"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "描述" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NInput), {
+                        value: aggregateForm.description,
+                        "onUpdate:value": _cache[2] || (_cache[2] = ($event) => aggregateForm.description = $event),
+                        type: "textarea",
+                        rows: 2
+                      }, null, 8, ["value"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "展示图标" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NInput), {
+                        value: aggregateForm.icon,
+                        "onUpdate:value": _cache[3] || (_cache[3] = ($event) => aggregateForm.icon = $event),
+                        placeholder: "可选：图标图片 URL；留空则使用默认聚合图标"
+                      }, null, 8, ["value"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "列表排序" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NInputNumber), {
+                        value: aggregateForm.aggregateListOrder,
+                        "onUpdate:value": _cache[4] || (_cache[4] = ($event) => aggregateForm.aggregateListOrder = $event),
+                        min: 0,
+                        max: 999999,
+                        placeholder: "越小越靠前，默认 1000",
+                        style: { "width": "100%" }
+                      }, null, 8, ["value"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "自动加载" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NSwitch), {
+                        value: aggregateForm.autoLoad,
+                        "onUpdate:value": _cache[5] || (_cache[5] = ($event) => aggregateForm.autoLoad = $event),
+                        size: "small"
+                      }, null, 8, ["value"])
+                    ]),
+                    _: 1
+                  }),
+                  vue.createVNode(vue.unref(naiveUi.NFormItem), { label: "聚合插件" }, {
+                    default: vue.withCtx(() => [
+                      vue.createVNode(vue.unref(naiveUi.NSelect), {
+                        value: aggregateForm.pluginIds,
+                        "onUpdate:value": _cache[6] || (_cache[6] = ($event) => aggregateForm.pluginIds = $event),
+                        options: aggregatablePluginOptions.value,
+                        multiple: "",
+                        filterable: "",
+                        placeholder: "请选择要聚合的插件（仅 hasFrontend=true）"
+                      }, null, 8, ["value", "options"])
+                    ]),
+                    _: 1
+                  })
+                ]),
+                _: 1
+              }, 8, ["model"])
+            ]),
+            _: 1
+          }, 8, ["show", "title"])
+        ]);
+      };
+    }
+  });
+  const AggregateApplicationManagement = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-c1075c77"]]);
+  const _hoisted_1$7 = { class: "operation-log-page" };
+  const _hoisted_2$6 = { class: "page-header-wrapper" };
+  const _hoisted_3$6 = { class: "page-content" };
+  const _hoisted_4$4 = { class: "table-container" };
+  const _hoisted_5$3 = { class: "pagination-container" };
+  const _hoisted_6$3 = {
     key: 0,
     class: "log-detail"
   };
-  const _hoisted_7$1 = { class: "config-diff" };
+  const _hoisted_7$2 = { class: "config-diff" };
   const _hoisted_8$1 = { class: "config-column" };
   const _hoisted_9$1 = {
     key: 1,
@@ -6760,7 +7429,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     key: 1,
     class: "empty-config"
   };
-  const _sfc_main$5 = /* @__PURE__ */ vue.defineComponent({
+  const _sfc_main$7 = /* @__PURE__ */ vue.defineComponent({
     __name: "OperationLog",
     setup(__props) {
       const Refresh = useIcon("RefreshOutline");
@@ -7016,8 +7685,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return (_ctx, _cache) => {
         const _component_PageHeader = vue.resolveComponent("PageHeader");
         const _component_FilterPanel = vue.resolveComponent("FilterPanel");
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$5, [
-          vue.createElementVNode("div", _hoisted_2$5, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$7, [
+          vue.createElementVNode("div", _hoisted_2$6, [
             vue.createVNode(_component_PageHeader, {
               title: "操作日志",
               subtitle: "查看所有应用操作记录，追踪应用变更"
@@ -7044,7 +7713,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
               _: 1
             })
           ]),
-          vue.createElementVNode("div", _hoisted_3$5, [
+          vue.createElementVNode("div", _hoisted_3$6, [
             vue.createVNode(_component_FilterPanel, {
               filters: filters.value,
               "onUpdate:filters": _cache[0] || (_cache[0] = ($event) => filters.value = $event),
@@ -7055,7 +7724,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
               onSearch: handleSearch,
               onReset: handleReset
             }, null, 8, ["filters", "show-advanced"]),
-            vue.createElementVNode("div", _hoisted_4$3, [
+            vue.createElementVNode("div", _hoisted_4$4, [
               vue.createVNode(vue.unref(naiveUi.NDataTable), {
                 columns,
                 data: tableData.value,
@@ -7064,7 +7733,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                 "row-key": (row) => row.id,
                 striped: ""
               }, null, 8, ["data", "loading", "row-key"]),
-              vue.createElementVNode("div", _hoisted_5$2, [
+              vue.createElementVNode("div", _hoisted_5$3, [
                 vue.createVNode(vue.unref(naiveUi.NPagination), {
                   page: pagination.page,
                   "onUpdate:page": [
@@ -7116,7 +7785,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                   })
                 ]),
                 default: vue.withCtx(() => [
-                  currentLog.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_6$2, [
+                  currentLog.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_6$3, [
                     vue.createVNode(vue.unref(naiveUi.NCard), {
                       title: "基本信息",
                       bordered: false,
@@ -7274,7 +7943,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                       class: "detail-section"
                     }, {
                       default: vue.withCtx(() => [
-                        vue.createElementVNode("div", _hoisted_7$1, [
+                        vue.createElementVNode("div", _hoisted_7$2, [
                           vue.createElementVNode("div", _hoisted_8$1, [
                             _cache[7] || (_cache[7] = vue.createElementVNode("div", { class: "config-header" }, "变更前", -1)),
                             currentLog.value.beforeData ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NCode), {
@@ -7308,7 +7977,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const OperationLog = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__scopeId", "data-v-1f12c0f3"]]);
+  const OperationLog = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["__scopeId", "data-v-1f12c0f3"]]);
   const API_BASE$2 = "/plugins/appstore";
   const middlewareApi = {
     list() {
@@ -7350,25 +8019,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     },
     /**
      * 上传并安装中间件插件包
-     * 注意：使用原生 fetch API，因为 GressBridge 不支持 FormData
      */
     async uploadAndInstall(formData) {
-      const response = await fetch(`/api/${API_BASE$2}/middlewares/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-      });
-      const result = await response.json().catch(() => ({
-        success: false,
-        errorMessage: "解析响应失败"
-      }));
-      if (result.success === false) {
-        throw new Error(result.errorMessage || "上传失败");
-      }
-      if (!response.ok) {
-        throw new Error(result.errorMessage || `HTTP ${response.status}`);
-      }
-      return result.data;
+      const result = await http.post(`${API_BASE$2}/middlewares/upload`, formData);
+      return result;
     },
     /**
      * 获取中间件连接信息
@@ -7437,19 +8091,19 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return http.post(`${API_BASE$1}/nodes/${nodeId}/test`);
     }
   };
-  const _hoisted_1$4 = { class: "middleware-management-page" };
-  const _hoisted_2$4 = { class: "page-content" };
-  const _hoisted_3$4 = {
+  const _hoisted_1$6 = { class: "middleware-management-page" };
+  const _hoisted_2$5 = { class: "page-content" };
+  const _hoisted_3$5 = {
     key: 0,
     class: "loading-state"
   };
-  const _hoisted_4$2 = {
+  const _hoisted_4$3 = {
     key: 1,
     class: "empty-state"
   };
-  const _hoisted_5$1 = { class: "empty-state__icon" };
-  const _hoisted_6$1 = { class: "empty-state__text" };
-  const _hoisted_7 = {
+  const _hoisted_5$2 = { class: "empty-state__icon" };
+  const _hoisted_6$2 = { class: "empty-state__text" };
+  const _hoisted_7$1 = {
     key: 2,
     class: "middleware-list"
   };
@@ -7498,7 +8152,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     key: 0,
     style: { "text-align": "center", "color": "#999", "padding": "20px" }
   };
-  const _sfc_main$4 = /* @__PURE__ */ vue.defineComponent({
+  const _sfc_main$6 = /* @__PURE__ */ vue.defineComponent({
     __name: "MiddlewareManagement",
     setup(__props) {
       const message = naiveUi.useMessage();
@@ -8237,7 +8891,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const _component_n_drawer_content = vue.resolveComponent("n-drawer-content");
         const _component_n_drawer = vue.resolveComponent("n-drawer");
         const _component_DynamicFormRenderer = vue.resolveComponent("DynamicFormRenderer");
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$4, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$6, [
           vue.createVNode(_component_PageHeader, {
             title: "中间件管理",
             subtitle: "安装与管理基础设施中间件插件（如 Milvus/Redis 等）"
@@ -8282,7 +8936,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             ]),
             _: 1
           }),
-          vue.createElementVNode("div", _hoisted_2$4, [
+          vue.createElementVNode("div", _hoisted_2$5, [
             vue.createVNode(vue.unref(naiveUi.NTabs), {
               value: activeTab.value,
               "onUpdate:value": [
@@ -8361,10 +9015,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                       ]),
                       _: 1
                     }),
-                    remoteLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$4, [
+                    remoteLoading.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$5, [
                       vue.createVNode(vue.unref(naiveUi.NSpin), { size: "large" })
-                    ])) : remoteTableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_4$2, [
-                      vue.createElementVNode("div", _hoisted_5$1, [
+                    ])) : remoteTableData.value.length === 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_4$3, [
+                      vue.createElementVNode("div", _hoisted_5$2, [
                         vue.createVNode(vue.unref(naiveUi.NIcon), { size: "48" }, {
                           default: vue.withCtx(() => [
                             (vue.openBlock(), vue.createBlock(vue.resolveDynamicComponent(vue.unref(ServerOutline))))
@@ -8372,8 +9026,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                           _: 1
                         })
                       ]),
-                      vue.createElementVNode("div", _hoisted_6$1, vue.toDisplayString(remoteFilters.value.keyword ? "未找到匹配的中间件" : "暂无远程中间件"), 1)
-                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_7, [
+                      vue.createElementVNode("div", _hoisted_6$2, vue.toDisplayString(remoteFilters.value.keyword ? "未找到匹配的中间件" : "暂无远程中间件"), 1)
+                    ])) : (vue.openBlock(), vue.createElementBlock("div", _hoisted_7$1, [
                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(remoteTableData.value, (middleware) => {
                         return vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NCard), {
                           key: middleware.pluginId,
@@ -8952,11 +9606,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const MiddlewareManagement = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-de190af1"]]);
-  const _hoisted_1$3 = { class: "node-management-page" };
-  const _hoisted_2$3 = { class: "page-content" };
-  const _hoisted_3$3 = { style: { "display": "flex", "justify-content": "flex-end", "gap": "8px" } };
-  const _sfc_main$3 = /* @__PURE__ */ vue.defineComponent({
+  const MiddlewareManagement = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-de190af1"]]);
+  const _hoisted_1$5 = { class: "node-management-page" };
+  const _hoisted_2$4 = { class: "page-content" };
+  const _hoisted_3$4 = { style: { "display": "flex", "justify-content": "flex-end", "gap": "8px" } };
+  const _sfc_main$5 = /* @__PURE__ */ vue.defineComponent({
     __name: "NodeManagement",
     setup(__props) {
       const message = naiveUi.useMessage();
@@ -9103,7 +9757,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const _component_n_input_number = vue.resolveComponent("n-input-number");
         const _component_n_form = vue.resolveComponent("n-form");
         const _component_n_modal = vue.resolveComponent("n-modal");
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$5, [
           vue.createVNode(_component_PageHeader, {
             title: "节点管理",
             subtitle: "管理用于远程部署的节点（local/ssh/docker-api）"
@@ -9130,7 +9784,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             ]),
             _: 1
           }),
-          vue.createElementVNode("div", _hoisted_2$3, [
+          vue.createElementVNode("div", _hoisted_2$4, [
             vue.createVNode(_component_n_card, null, {
               default: vue.withCtx(() => [
                 vue.createVNode(_component_n_data_table, {
@@ -9153,7 +9807,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             style: { "width": "720px" }
           }, {
             footer: vue.withCtx(() => [
-              vue.createElementVNode("div", _hoisted_3$3, [
+              vue.createElementVNode("div", _hoisted_3$4, [
                 vue.createVNode(vue.unref(naiveUi.NButton), {
                   onClick: _cache[16] || (_cache[16] = ($event) => showModal.value = false)
                 }, {
@@ -9413,7 +10067,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const NodeManagement = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-f5a8cbe7"]]);
+  const NodeManagement = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__scopeId", "data-v-f5a8cbe7"]]);
   const API_BASE = "/plugins/appstore/monitor";
   const pluginMonitorApi = {
     /**
@@ -50002,13 +50656,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
   });
   var src_default = ECharts_default;
-  const _hoisted_1$2 = { class: "plugin-monitor-history" };
-  const _hoisted_2$2 = { class: "time-range-selector" };
-  const _hoisted_3$2 = {
+  const _hoisted_1$4 = { class: "plugin-monitor-history" };
+  const _hoisted_2$3 = { class: "time-range-selector" };
+  const _hoisted_3$3 = {
     key: 0,
     class: "charts-container"
   };
-  const _sfc_main$2 = /* @__PURE__ */ vue.defineComponent({
+  const _sfc_main$4 = /* @__PURE__ */ vue.defineComponent({
     __name: "PluginMonitorHistory",
     props: {
       pluginId: {}
@@ -50262,8 +50916,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         loadHistory();
       }, { immediate: true });
       return (_ctx, _cache) => {
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$2, [
-          vue.createElementVNode("div", _hoisted_2$2, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$4, [
+          vue.createElementVNode("div", _hoisted_2$3, [
             vue.createVNode(vue.unref(naiveUi.NRadioGroup), {
               value: selectedTimeRange.value,
               "onUpdate:value": [
@@ -50315,7 +50969,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           ]),
           vue.createVNode(vue.unref(naiveUi.NSpin), { show: loading.value }, {
             default: vue.withCtx(() => [
-              historyData.value.length > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$2, [
+              historyData.value.length > 0 ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_3$3, [
                 vue.createVNode(vue.unref(naiveUi.NCard), {
                   title: "内存使用趋势",
                   class: "chart-card",
@@ -50356,14 +51010,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const PluginMonitorHistory = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__scopeId", "data-v-2d9dee19"]]);
-  const _hoisted_1$1 = { class: "plugin-monitor-detail" };
-  const _hoisted_2$1 = { key: 0 };
-  const _hoisted_3$1 = ["href"];
-  const _hoisted_4$1 = { key: 1 };
-  const _hoisted_5 = { key: 0 };
-  const _hoisted_6 = { key: 0 };
-  const _sfc_main$1 = /* @__PURE__ */ vue.defineComponent({
+  const PluginMonitorHistory = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-2d9dee19"]]);
+  const _hoisted_1$3 = { class: "plugin-monitor-detail" };
+  const _hoisted_2$2 = { key: 0 };
+  const _hoisted_3$2 = ["href"];
+  const _hoisted_4$2 = { key: 1 };
+  const _hoisted_5$1 = { key: 0 };
+  const _hoisted_6$1 = { key: 0 };
+  const _sfc_main$3 = /* @__PURE__ */ vue.defineComponent({
     __name: "PluginMonitorDetail",
     props: {
       pluginId: {}
@@ -50481,12 +51135,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         loadDetail();
       }, { immediate: true });
       return (_ctx, _cache) => {
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$1, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
           vue.createVNode(vue.unref(naiveUi.NSpin), { show: loading.value }, {
             default: vue.withCtx(() => {
               var _a2, _b2;
               return [
-                detail.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2$1, [
+                detail.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2$2, [
                   ((_a2 = detail.value.status) == null ? void 0 : _a2.hasError) && ((_b2 = detail.value.status) == null ? void 0 : _b2.errorMessage) ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NAlert), {
                     key: 0,
                     type: "error",
@@ -50739,7 +51393,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                                           href: detail.value.metadata.homepage,
                                           target: "_blank",
                                           rel: "noopener noreferrer"
-                                        }, vue.toDisplayString(detail.value.metadata.homepage), 9, _hoisted_3$1)) : (vue.openBlock(), vue.createElementBlock("span", _hoisted_4$1, "无"))
+                                        }, vue.toDisplayString(detail.value.metadata.homepage), 9, _hoisted_3$2)) : (vue.openBlock(), vue.createElementBlock("span", _hoisted_4$2, "无"))
                                       ];
                                     }),
                                     _: 1
@@ -50756,7 +51410,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                             bordered: false
                           }, {
                             default: vue.withCtx(() => [
-                              hasDependencies.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_5, [
+                              hasDependencies.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_5$1, [
                                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(getDependencies2(), (dep, index2) => {
                                   return vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NTag), {
                                     key: index2,
@@ -50784,7 +51438,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                             bordered: false
                           }, {
                             default: vue.withCtx(() => [
-                              hasConfiguration.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_6, [
+                              hasConfiguration.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_6$1, [
                                 vue.createVNode(vue.unref(naiveUi.NCode), {
                                   code: formatConfiguration(),
                                   language: "json",
@@ -50861,15 +51515,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const PluginMonitorDetail = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-5b2f9972"]]);
-  const _hoisted_1 = { class: "plugin-monitor-dashboard" };
-  const _hoisted_2 = {
+  const PluginMonitorDetail = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-5b2f9972"]]);
+  const _hoisted_1$2 = { class: "plugin-monitor-dashboard" };
+  const _hoisted_2$1 = {
     key: 0,
     class: "refresh-interval-text"
   };
-  const _hoisted_3 = { class: "page-content" };
-  const _hoisted_4 = { class: "overview-cards" };
-  const _sfc_main = /* @__PURE__ */ vue.defineComponent({
+  const _hoisted_3$1 = { class: "page-content" };
+  const _hoisted_4$1 = { class: "overview-cards" };
+  const _sfc_main$2 = /* @__PURE__ */ vue.defineComponent({
     __name: "PluginMonitorDashboard",
     setup(__props) {
       const CheckmarkCircleOutline = useIcon("CheckmarkCircleOutline");
@@ -51092,7 +51746,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         const _component_n_data_table = vue.resolveComponent("n-data-table");
         const _component_n_drawer_content = vue.resolveComponent("n-drawer-content");
         const _component_n_drawer = vue.resolveComponent("n-drawer");
-        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1, [
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$2, [
           vue.createVNode(_component_PageHeader, {
             title: "插件监控",
             subtitle: "实时监控插件运行状态、内存使用和性能指标"
@@ -51115,7 +51769,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                     ])]),
                     _: 1
                   }, 8, ["value"]),
-                  autoRefresh.value ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_2, " 每 " + vue.toDisplayString(refreshInterval.value / 1e3) + "s ", 1)) : vue.createCommentVNode("", true),
+                  autoRefresh.value ? (vue.openBlock(), vue.createElementBlock("span", _hoisted_2$1, " 每 " + vue.toDisplayString(refreshInterval.value / 1e3) + "s ", 1)) : vue.createCommentVNode("", true),
                   vue.createVNode(vue.unref(naiveUi.NButton), {
                     loading: loading.value,
                     onClick: refreshData
@@ -51131,8 +51785,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             ]),
             _: 1
           }),
-          vue.createElementVNode("div", _hoisted_3, [
-            vue.createElementVNode("div", _hoisted_4, [
+          vue.createElementVNode("div", _hoisted_3$1, [
+            vue.createElementVNode("div", _hoisted_4$1, [
               vue.createVNode(_component_n_card, { class: "overview-card" }, {
                 default: vue.withCtx(() => [
                   vue.createVNode(_component_n_statistic, {
@@ -51271,7 +51925,117 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       };
     }
   });
-  const PluginMonitorDashboard = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-9372efef"]]);
+  const PluginMonitorDashboard = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__scopeId", "data-v-9372efef"]]);
+  const _hoisted_1$1 = { class: "plugin-stats-widget" };
+  const _hoisted_2 = { class: "stats-grid" };
+  const _hoisted_3 = { class: "stat-item" };
+  const _hoisted_4 = { class: "stat-value" };
+  const _hoisted_5 = { class: "stat-item running" };
+  const _hoisted_6 = { class: "stat-value" };
+  const _hoisted_7 = { class: "stat-value" };
+  const _sfc_main$1 = /* @__PURE__ */ vue.defineComponent({
+    __name: "PluginStatsWidget",
+    setup(__props) {
+      const loading = vue.ref(false);
+      const overview = vue.ref({
+        totalPlugins: 0,
+        runningPlugins: 0,
+        stoppedPlugins: 0,
+        errorPlugins: 0,
+        totalMemoryUsage: 0
+      });
+      let timer = null;
+      async function fetchOverview() {
+        try {
+          loading.value = true;
+          overview.value = await pluginMonitorApi.getOverview();
+        } catch (e2) {
+          console.error("[PluginStatsWidget] Failed to fetch overview", e2);
+        } finally {
+          loading.value = false;
+        }
+      }
+      vue.onMounted(() => {
+        fetchOverview();
+        timer = window.setInterval(fetchOverview, 3e4);
+      });
+      vue.onUnmounted(() => {
+        if (timer) clearInterval(timer);
+      });
+      return (_ctx, _cache) => {
+        const _component_n_spin = vue.resolveComponent("n-spin");
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$1, [
+          vue.createVNode(_component_n_spin, { show: loading.value }, {
+            default: vue.withCtx(() => [
+              vue.createElementVNode("div", _hoisted_2, [
+                vue.createElementVNode("div", _hoisted_3, [
+                  vue.createElementVNode("div", _hoisted_4, vue.toDisplayString(overview.value.totalPlugins), 1),
+                  _cache[0] || (_cache[0] = vue.createElementVNode("div", { class: "stat-label" }, "已安装", -1))
+                ]),
+                vue.createElementVNode("div", _hoisted_5, [
+                  vue.createElementVNode("div", _hoisted_6, vue.toDisplayString(overview.value.runningPlugins), 1),
+                  _cache[1] || (_cache[1] = vue.createElementVNode("div", { class: "stat-label" }, "运行中", -1))
+                ]),
+                vue.createElementVNode("div", {
+                  class: vue.normalizeClass(["stat-item error", { "has-error": overview.value.errorPlugins > 0 }])
+                }, [
+                  vue.createElementVNode("div", _hoisted_7, vue.toDisplayString(overview.value.errorPlugins), 1),
+                  _cache[2] || (_cache[2] = vue.createElementVNode("div", { class: "stat-label" }, "异常", -1))
+                ], 2)
+              ])
+            ]),
+            _: 1
+          }, 8, ["show"])
+        ]);
+      };
+    }
+  });
+  const PluginStatsWidget = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-5097c4cb"]]);
+  const _hoisted_1 = { class: "appstore-test-shared-field" };
+  const _sfc_main = /* @__PURE__ */ vue.defineComponent({
+    __name: "AppstoreTestSharedField",
+    props: {
+      modelValue: {},
+      disabled: { type: Boolean },
+      placeholder: {},
+      options: {}
+    },
+    emits: ["update:modelValue"],
+    setup(__props, { emit: __emit }) {
+      const props = __props;
+      const emit = __emit;
+      const placeholder = vue.computed(() => props.placeholder ?? "请选择/输入");
+      const disabled = vue.computed(() => props.disabled ?? false);
+      const displayValue = vue.computed(() => {
+        if (props.modelValue === null || props.modelValue === void 0) return "";
+        return String(props.modelValue);
+      });
+      function onUpdate(val) {
+        emit("update:modelValue", val);
+      }
+      return (_ctx, _cache) => {
+        return vue.openBlock(), vue.createElementBlock("div", _hoisted_1, [
+          __props.options && __props.options.length > 0 ? (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NSelect), {
+            key: 0,
+            disabled: disabled.value,
+            value: __props.modelValue,
+            options: __props.options,
+            filterable: "",
+            clearable: "",
+            placeholder: placeholder.value,
+            "onUpdate:value": onUpdate
+          }, null, 8, ["disabled", "value", "options", "placeholder"])) : (vue.openBlock(), vue.createBlock(vue.unref(naiveUi.NInput), {
+            key: 1,
+            disabled: disabled.value,
+            value: displayValue.value,
+            placeholder: placeholder.value,
+            "onUpdate:value": onUpdate
+          }, null, 8, ["disabled", "value", "placeholder"]))
+        ]);
+      };
+    }
+  });
+  const AppstoreTestSharedField = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-cd59a00a"]]);
   const defaultConfig = {
     enabled: true
   };
@@ -51315,17 +52079,37 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
        */
       components: {
         ApplicationManagement,
+        AggregateApplicationManagement,
         OperationLog,
         MiddlewareManagement,
         NodeManagement,
         PluginMonitorDashboard
       },
       extensions: {
-        // 这里不再重复定义 routes，交由后端 yml 管理，避免前后端路由信息重复维护
         routes: [],
-        // 组件扩展（可选，保留以兼容旧逻辑）
-        components: [],
-        menus: []
+        components: [
+          {
+            global: true,
+            category: "schema-form.field",
+            name: "AppstoreTestSharedField",
+            component: AppstoreTestSharedField
+          }
+        ],
+        menus: [],
+        widgets: [
+          {
+            id: "plugin-stats",
+            title: "插件统计",
+            description: "显示已安装、运行中、异常插件数量",
+            icon: "grid-outline",
+            component: PluginStatsWidget,
+            category: "stats",
+            defaultSize: "small",
+            supportedSizes: ["small", "medium"],
+            refreshInterval: 3e4,
+            order: 10
+          }
+        ]
       },
       lifecycle: {
         async install(context) {

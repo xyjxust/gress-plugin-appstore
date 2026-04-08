@@ -37,13 +37,13 @@ public class PluginMemoryCollector {
      * @return 插件内存信息，如果插件未加载则返回 null
      */
     public PluginMemoryInfo collectMemoryInfo(String pluginId) {
-        log.debug("收集插件内存信息: pluginId={}", pluginId);
+
         
         try {
             // 获取插件包运行时信息
             Result<PluginPackageRuntimeInfo> result = pluginLifecycle.getPluginPackageRuntimeInfo(pluginId);
             if (!result.isSuccess() || result.getData() == null) {
-                log.warn("插件未加载，无法收集内存信息: pluginId={}", pluginId);
+
                 return MonitorErrorHandler.handleMemoryUnavailable(pluginId);
             }
             
@@ -61,8 +61,7 @@ public class PluginMemoryCollector {
                     .maxJvmMemory(runtime.maxMemory())
                     .build();
             
-            log.debug("插件内存信息收集完成: pluginId={}, usedMemory={}", 
-                    pluginId, memInfo.getFormattedMemory());
+
             
             return memInfo;
         } catch (Exception e) {

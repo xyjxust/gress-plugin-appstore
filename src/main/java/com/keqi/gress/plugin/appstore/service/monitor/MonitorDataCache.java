@@ -199,7 +199,7 @@ public class MonitorDataCache {
                 long currentTime = System.currentTimeMillis();
                 int rows = cacheDao.deleteExpiredCache(currentTime);
                 if (rows > 0) {
-                    log.debug("清理过期缓存完成: rows={}", rows);
+
                 }
             } catch (Exception e) {
                 log.warn("清理过期缓存失败", e);

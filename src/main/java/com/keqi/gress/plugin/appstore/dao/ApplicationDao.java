@@ -47,6 +47,9 @@ public class ApplicationDao {
         // 应用类型过滤
         if (applicationType != null && !applicationType.trim().isEmpty()) {
             query.eq(SysApplication::getApplicationType, applicationType);
+        } else {
+            // 默认列表接口不返回聚合应用，聚合应用由 /applications/aggregates 独立管理
+            query.ne(SysApplication::getApplicationType, "aggregated");
         }
         
         // 插件ID过滤
@@ -153,5 +156,35 @@ public class ApplicationDao {
     public java.util.List<SysApplication> findAll() {
         return dataSource.lambdaQuery(SysApplication.class)
                          .list();
+    }
+
+    /**
+     * 按应用类型查询
+     */
+    public java.util.List<SysApplication> findByApplicationType(String applicationType) {
+        return dataSource.lambdaQuery(SysApplication.class)
+                .eq(SysApplication::getApplicationType, applicationType)
+                .list();
+    }
+
+    /**
+     * 更新聚合应用基础信息
+     */
+    public int updateAggregateApplication(Long id,
+                                          String applicationCode,
+                                          String applicationName,
+                                          String description,
+                                          String icon,
+                                          String extensionConfig,
+                                          String updateBy) {
+        return dataSource.lambdaUpdate(SysApplication.class)
+                .set(SysApplication::getApplicationCode, applicationCode)
+                .set(SysApplication::getApplicationName, applicationName)
+                .set(SysApplication::getDescription, description)
+                .set(SysApplication::getIcon, icon)
+                .set(SysApplication::getExtensionConfig, extensionConfig)
+                .set(SysApplication::getUpdateBy, updateBy)
+                .eq(SysApplication::getId, id)
+                .update();
     }
 }

@@ -3,6 +3,12 @@
     <!-- 页面头部 -->
     <PageHeader title="应用管理" subtitle="管理已安装的应用插件">
       <template #actions>
+        <n-button v-if="activeTab === 'local'" @click="goToAggregateManagement">
+          <template #icon>
+            <n-icon><component :is="AppsOutline" /></n-icon>
+          </template>
+          聚合应用管理
+        </n-button>
         <n-button v-if="activeTab === 'local'" type="primary" @click="handleUploadClick">
           <template #icon>
             <n-icon><component :is="CloudUploadOutline" /></n-icon>
@@ -56,14 +62,23 @@
               @click="handleViewDetail(app)"
             >
               <div class="app-header">
-                <div class="app-icon" :class="`app-icon--${app.applicationType}`">
-                  <n-icon size="24">
-                    <component :is="app.applicationType === 'integrated' ? CubeOutline : ExtensionPuzzleOutline" />
+                <div class="app-icon" :class="localAppIconModifierClass(app)">
+                  <img
+                    v-if="useAggregateIconImg(app)"
+                    :src="app.icon!.trim()"
+                    alt=""
+                    class="app-icon__img"
+                  />
+                  <n-icon v-else size="24">
+                    <component :is="localAppIconComponent(app)" />
                   </n-icon>
                 </div>
                 <div class="app-info">
                   <div class="app-name">
                     {{ app.applicationName }}
+                    <n-tag v-if="app.aggregateApp" type="info" size="small" style="margin-left: 8px">
+                      聚合
+                    </n-tag>
                     <n-tag v-if="app.isDefault === 1" type="warning" size="small" style="margin-left: 8px">
                       默认
                     </n-tag>
@@ -148,7 +163,7 @@
                     text
                     type="warning"
                     size="small"
-                    :disabled="app.applicationType === 'integrated'"
+                    :disabled="app.applicationType === 'integrated' || app.aggregateApp"
                     @click.stop="handleUpgrade(app)"
                   >
                     升级
@@ -825,6 +840,13 @@
               <n-collapse-item title="高级配置" name="advanced">
                 <n-form ref="configFormRef" :model="configForm" label-placement="left" label-width="100" size="small">
                   <div class="advanced-config-grid">
+                    <n-form-item label="前端页面" path="hasFrontend">
+                      <n-switch v-model:value="configForm.hasFrontend" :disabled="configLoading" size="small">
+                        <template #checked>有</template>
+                        <template #unchecked>无</template>
+                      </n-switch>
+                    </n-form-item>
+
                     <n-form-item label="自动加载" path="autoLoad">
                       <n-switch v-model:value="configForm.autoLoad" :disabled="configLoading" size="small">
                         <template #checked>开启</template>
@@ -880,6 +902,7 @@
 
                   <n-alert type="info" :show-icon="false" size="small" style="margin-top: 12px;">
                     <ul style="margin: 0; padding-left: 20px; font-size: 12px; line-height: 1.6;">
+                      <li>前端页面：该插件是否包含菜单/路由等前端页面能力</li>
                       <li>自动加载：系统启动时是否自动加载该插件</li>
                       <li>启动时加载：插件加载后是否立即启动</li>
                       <li>启动优先级：数值越大越先启动（0-100）</li>
@@ -957,7 +980,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed, getCurrentInstance } from 'vue'
 import { useMessage } from '@keqi.gress/plugin-bridge'
 import {
   NSpace,
@@ -1017,6 +1040,7 @@ const ExtensionPuzzleOutline = useIcon('ExtensionPuzzleOutline')
 const TimeOutline = useIcon('TimeOutline')
 const RocketOutline = useIcon('RocketOutline')
 const EllipsisHorizontalOutline = useIcon('EllipsisHorizontalOutline')
+const LayersOutline = useIcon('LayersOutline')
 
 // FilterFieldConfig 类型定义
 export type FilterFieldType = 'input' | 'select' | 'date' | 'date-range'
@@ -1143,6 +1167,35 @@ const uploadForm = reactive({})
 const uploadFile = ref<UploadFileInfo | null>(null)
 const uploading = ref(false)
 
+const AGGREGATE_PAGE = '/plugins/appstore/aggregate-applications'
+
+function goToAggregateManagement() {
+  const router = getCurrentInstance()?.appContext.config.globalProperties.$router as
+    | { push?: (p: string) => void }
+    | undefined
+  if (router?.push) {
+    router.push(AGGREGATE_PAGE)
+  } else {
+    window.location.assign(AGGREGATE_PAGE)
+  }
+}
+
+/** 聚合应用在配置了 icon 时用图片展示（支持绝对 URL 与站点内相对路径） */
+function useAggregateIconImg(app: Application): boolean {
+  return Boolean(app.aggregateApp && app.icon?.trim())
+}
+
+function localAppIconModifierClass(app: Application): string {
+  if (app.aggregateApp) return 'app-icon--aggregated'
+  return `app-icon--${app.applicationType}`
+}
+
+function localAppIconComponent(app: Application) {
+  if (app.aggregateApp) return LayersOutline
+  if (app.applicationType === 'integrated') return CubeOutline
+  return ExtensionPuzzleOutline
+}
+
 // 升级日志
 const showUpgradeLogModal = ref(false)
 const upgradeLogsLoading = ref(false)
@@ -1166,6 +1219,7 @@ const configLoading = ref(false)
 const configFormRef = ref<FormInst | null>(null)
 const configTargetApp = ref<Application | null>(null)
 const configForm = reactive({
+  hasFrontend: false,
   autoLoad: false,
   loadOnStartup: false,
   startPriority: 50,
@@ -1203,7 +1257,8 @@ const basicFields: FilterFieldConfig[] = [
     options: [
       { label: '全部', value: null },
       { label: '集成应用', value: 'integrated' },
-      { label: '插件应用', value: 'plugin' }
+      { label: '插件应用', value: 'plugin' },
+      { label: '聚合应用', value: 'aggregated' }
     ]
   }
 ]
@@ -1806,6 +1861,7 @@ const handleShowConfig = async (app: Application) => {
   configLoading.value = true
   try {
     const config = await applicationApi.getConfig(app.id)
+    configForm.hasFrontend = config.extensionConfig?.hasFrontend || false
     configForm.autoLoad = config.autoLoad || false
     configForm.loadOnStartup = config.loadOnStartup || false
     configForm.startPriority = config.startPriority || 50
@@ -1822,6 +1878,7 @@ const handleShowConfig = async (app: Application) => {
   } catch (error: any) {
     console.error('加载应用配置失败:', error)
     // 使用默认值
+    configForm.hasFrontend = false
     configForm.autoLoad = false
     configForm.loadOnStartup = false
     configForm.startPriority = 50
@@ -1842,6 +1899,7 @@ const confirmConfig = async () => {
   try {
     // 获取最新的 extensionConfig 值
     const extensionConfigToSave = { ...configForm.extensionConfig }
+    extensionConfigToSave.hasFrontend = configForm.hasFrontend
     
     console.log('[ApplicationManagement] 保存配置:', {
       appId: configTargetApp.value.id,
@@ -1873,7 +1931,7 @@ const confirmConfig = async () => {
 
 // Helper Functions
 const getMoreActions = (app: Application) => {
-  const actions = []
+  const actions: Array<{ label: string; key: string; disabled?: boolean }> = []
   
   // 升级日志
   actions.push({
@@ -1885,7 +1943,7 @@ const getMoreActions = (app: Application) => {
   actions.push({
     label: '降级',
     key: 'rollback',
-    disabled: app.applicationType === 'integrated'
+    disabled: app.applicationType === 'integrated' || app.aggregateApp
   })
   
   // 详情
@@ -1911,7 +1969,7 @@ const getMoreActions = (app: Application) => {
   actions.push({
     label: '卸载',
     key: 'uninstall',
-    disabled: app.isDefault === 1 || app.applicationType === 'integrated'
+    disabled: app.isDefault === 1 || app.applicationType === 'integrated' || app.aggregateApp
   })
   
   return actions
@@ -1945,6 +2003,8 @@ const getApplicationTypeColor = (type: ApplicationType): 'default' | 'success' |
     return 'info'
   } else if (type === 'plugin') {
     return 'success'
+  } else if (type === 'aggregated') {
+    return 'warning'
   }
   return 'default'
 }
@@ -2131,6 +2191,19 @@ onMounted(() => {
 .app-icon--plugin {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
+}
+
+.app-icon--aggregated {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.app-icon__img {
+  width: fit-content;
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .app-info {

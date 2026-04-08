@@ -73,6 +73,9 @@ public class ApplicationDTO {
     
     /** 插件类型（TRIGGER, TASK, APPLICATION） */
     private String pluginType;
+
+    /** 应用图标 */
+    private String icon;
     
     /** 本地安装状态（用于远程应用列表）：NOT_INSTALLED-未安装, INSTALLED-已安装, UPGRADABLE-可升级 */
     private String installStatus;
@@ -85,6 +88,24 @@ public class ApplicationDTO {
     
     /** 是否有新版本可升级（用于本地应用列表） */
     private Boolean hasNewVersion;
+
+    /** 是否为聚合应用 */
+    private Boolean aggregateApp;
+
+    /** 聚合应用包含的插件ID列表 */
+    private List<String> aggregatedPluginIds;
+
+    /** 扩展配置中的 hasFrontend（用于可聚合列表等） */
+    private Boolean hasFrontend;
+
+    /** 聚合应用在列表中的排序权重（越小越靠前） */
+    private Integer aggregateListOrder;
+
+    /** 扩展配置中的 autoLoad */
+    private Boolean autoLoad;
+
+    /** Marketplace 提供的 SHA-256（用于安装前后完整性校验） */
+    private String sha256;
     
     /** 依赖信息列表 */
     private List<DependencyInfo> dependencies;

@@ -2,7 +2,8 @@ package com.keqi.gress.plugin.appstore.domain.entity;
 
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
-import  com.keqi.gress.common.entity.BaseEntity;
+
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -57,6 +58,9 @@ public class Application extends BaseEntity {
     
     @Schema(description = "是否默认应用（0:否 1:是）")
     private Integer isDefault;
+
+    @Schema(description = "应用图标")
+    private String icon;
     
     /**
      * 检查应用是否启用

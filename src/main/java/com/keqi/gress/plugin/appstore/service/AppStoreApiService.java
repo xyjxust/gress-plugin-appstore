@@ -408,6 +408,50 @@ public class AppStoreApiService {
     }
 
     /**
+     * Fetch trusted signing roots from appstore-admin.
+     *
+     * <p>Stage B: enables smooth rotation by trusting multiple roots (old+new window).</p>
+     */
+    public java.util.List<TrustedRootDTO> getTrustedRoots() {
+        // 复用 API 配置校验逻辑
+        if (config == null || config.getApi() == null) {
+            log.error("应用商店配置未加载，请检查 plugin.yml 中的 appstore.api 配置");
+            return java.util.Collections.emptyList();
+        }
+        if (!Boolean.TRUE.equals(config.getApi().getEnabled())) {
+            return java.util.Collections.emptyList();
+        }
+
+        try {
+            // GET {baseUrl}/signing/trusted-roots
+            String url = String.format("%s/signing/trusted-roots", config.getApi().getBaseUrl());
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<TrustedRootsResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                TrustedRootsResponse.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                TrustedRootsResponse body = response.getBody();
+                if (body != null && body.data != null) {
+                    return body.data;
+                }
+            }
+
+            log.warn("获取可信签名根失败: HTTP {}", response.getStatusCode());
+            return java.util.Collections.emptyList();
+        } catch (Exception e) {
+            log.error("获取可信签名根失败", e);
+            return java.util.Collections.emptyList();
+        }
+    }
+
+    /**
      * 根据插件ID和版本下载应用
      *
      * @param pluginId 插件ID
@@ -553,6 +597,7 @@ public class AppStoreApiService {
         dto.setPluginVersion(info.getVersion());
         dto.setDescription(info.getDescription());
         dto.setAuthor(info.getDeveloperName());
+        dto.setSha256(info.getSha256());
         dto.setApplicationType("plugin");
         dto.setApplicationTypeText("插件应用"); // 设置应用类型文本
         dto.setPluginType(info.getPluginType()); // 设置插件类型
@@ -628,6 +673,27 @@ public class AppStoreApiService {
         private boolean success;
         private String errorMessage;
         private PageData data;
+    }
+
+    @Data
+    private static class TrustedRootsResponse {
+        private boolean success;
+        private String errorMessage;
+        private java.util.List<TrustedRootDTO> data;
+    }
+
+    /**
+     * Trusted root material returned by appstore-admin.
+     */
+    @Data
+    public static class TrustedRootDTO {
+        private String keyId;
+        private String alias;
+        /**
+         * PEM string: CERTIFICATE or PUBLIC KEY.
+         */
+        private String publicKeyPem;
+        private String fingerprintSha256;
     }
     
     /**

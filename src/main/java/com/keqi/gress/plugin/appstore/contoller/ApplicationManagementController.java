@@ -1,10 +1,9 @@
 package com.keqi.gress.plugin.appstore.contoller;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.annotion.Inject;
 import  com.keqi.gress.common.plugin.annotion.Service;
+import com.keqi.gress.plugin.api.cache.annotation.PluginCacheable;
 import com.keqi.gress.plugin.appstore.config.AppStoreConfig;
 import com.keqi.gress.plugin.appstore.dto.*;
 import com.keqi.gress.plugin.appstore.service.ApplicationManagementService;
@@ -74,6 +73,46 @@ public class ApplicationManagementController {
         }
         
         return result;
+    }
+
+    /**
+     * 查询聚合应用列表
+     */
+    @GetMapping("/aggregates")
+    public Result<java.util.List<ApplicationDTO>> listAggregates() {
+        return applicationManagementService.listAggregateApplications();
+    }
+
+    /**
+     * 查询可聚合插件列表
+     */
+    @GetMapping("/aggregates/available-plugins")
+    public Result<java.util.List<ApplicationDTO>> listAggregatablePlugins() {
+        return applicationManagementService.listAggregatablePlugins();
+    }
+
+    /**
+     * 创建聚合应用
+     */
+    @PostMapping("/aggregates")
+    public Result<Void> createAggregate(@RequestBody AggregateApplicationRequest request) {
+        return applicationManagementService.createAggregateApplication(request, "admin");
+    }
+
+    /**
+     * 更新聚合应用
+     */
+    @PutMapping("/aggregates/{id}")
+    public Result<Void> updateAggregate(@PathVariable Long id, @RequestBody AggregateApplicationRequest request) {
+        return applicationManagementService.updateAggregateApplication(id, request, "admin");
+    }
+
+    /**
+     * 删除聚合应用
+     */
+    @DeleteMapping("/aggregates/{id}")
+    public Result<Void> deleteAggregate(@PathVariable Long id) {
+        return applicationManagementService.deleteAggregateApplication(id, "admin");
     }
     
     /**
@@ -157,12 +196,22 @@ public class ApplicationManagementController {
     
     /**
      * 卸载应用
+     * <p>请求体可选：部分客户端对 DELETE 不带 body；未传时操作人默认为 admin。</p>
      */
     @DeleteMapping("/{id}")
-    public Result<Void> uninstallApplication(@PathVariable Long id, @RequestBody ApplicationUninstallRequest request) {
-        log.info("卸载应用: id={}, operator={}, reason={}", 
-                id, request.getOperatorName(), request.getReason());
-        return applicationManagementService.uninstallApplication(id, request);
+    public Result<Void> uninstallApplication(
+            @PathVariable Long id,
+            @RequestBody(required = false) ApplicationUninstallRequest request) {
+        ApplicationUninstallRequest body = request != null ? request : new ApplicationUninstallRequest();
+        if (body.getOperatorId() == null || body.getOperatorId().isEmpty()) {
+            body.setOperatorId("admin");
+        }
+        if (body.getOperatorName() == null || body.getOperatorName().isEmpty()) {
+            body.setOperatorName("admin");
+        }
+        log.info("卸载应用: id={}, operator={}, reason={}",
+                id, body.getOperatorName(), body.getReason());
+        return applicationManagementService.uninstallApplication(id, body);
     }
     
     /**

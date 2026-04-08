@@ -7,10 +7,13 @@
 import type { PluginManifest } from '@keqi.gress/plugin-bridge'
 import { PluginPermission } from '@keqi.gress/plugin-bridge'
 import ApplicationManagement from './views/ApplicationManagement.vue'
+import AggregateApplicationManagement from './views/AggregateApplicationManagement.vue'
 import OperationLog from './views/OperationLog.vue'
 import MiddlewareManagement from './views/MiddlewareManagement.vue'
 import NodeManagement from './views/NodeManagement.vue'
 import PluginMonitorDashboard from './views/PluginMonitorDashboard.vue'
+import PluginStatsWidget from './widgets/PluginStatsWidget.vue'
+import AppstoreTestSharedField from './components/shared/AppstoreTestSharedField.vue'
 
 // 不再需要全局类型声明，使用统一的 __GRESS_PLUGIN__ 全局变量
 
@@ -87,6 +90,7 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
      */
     components: {
       ApplicationManagement,
+      AggregateApplicationManagement,
       OperationLog,
       MiddlewareManagement,
       NodeManagement,
@@ -94,12 +98,29 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
     },
 
     extensions: {
-      // 这里不再重复定义 routes，交由后端 yml 管理，避免前后端路由信息重复维护
       routes: [],
-      // 组件扩展（可选，保留以兼容旧逻辑）
-      components: [],
-      menus: [
-        
+      components: [
+        {
+          global: true,
+          category: 'schema-form.field',
+          name: 'AppstoreTestSharedField',
+          component: AppstoreTestSharedField,
+        }
+      ],
+      menus: [],
+      widgets: [
+        {
+          id: 'plugin-stats',
+          title: '插件统计',
+          description: '显示已安装、运行中、异常插件数量',
+          icon: 'grid-outline',
+          component: PluginStatsWidget,
+          category: 'stats',
+          defaultSize: 'small',
+          supportedSizes: ['small', 'medium'],
+          refreshInterval: 30000,
+          order: 10
+        }
       ]
     },
 

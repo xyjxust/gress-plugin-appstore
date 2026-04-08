@@ -40,7 +40,7 @@ public class MonitorSnapshotScheduler {
     @Scheduled(cron = "0 * * * * ?")
     public void saveMonitorSnapshots() {
         try {
-            log.debug("开始保存监控快照");
+
             
             // 收集所有插件状态
             List<PluginMonitorStatus> statusList = statusCollector.collectAllStatus();

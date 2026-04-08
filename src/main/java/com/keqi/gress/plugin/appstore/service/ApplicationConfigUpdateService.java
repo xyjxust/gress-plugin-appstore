@@ -8,6 +8,7 @@ import com.keqi.gress.plugin.appstore.dao.ApplicationDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,6 +52,8 @@ public class ApplicationConfigUpdateService {
             
             // 将拍平的配置转换为嵌套结构
             Map<String, Object> nestedConfig = ConfigUtils.flatToNested(pluginYmlConfig);
+            // 安装时也强制写入扩展点标记/页面标记，避免被覆盖导致缺失
+            applyExtensionFlags(nestedConfig, nestedConfig);
             
             // 安装时直接覆盖配置
             String newConfigJson = JSON.toJSONString(nestedConfig);
@@ -111,7 +114,10 @@ public class ApplicationConfigUpdateService {
             
             // 增量合并配置（只添加新 key，不覆盖已存在的 key）
             Map<String, Object> mergedConfig = ConfigUtils.incrementalMerge(existingConfig, newNestedConfig);
-            
+
+            // 前端扩展点标记以新版本为准（强制覆盖），升级后可能新增/移除了 widget/panel
+            applyExtensionFlags(mergedConfig, newNestedConfig);
+
             // 更新配置
             String newConfigJson = JSON.toJSONString(mergedConfig);
             int updated = applicationDao.updateApplicationExtensionConfig(
@@ -177,9 +183,9 @@ public class ApplicationConfigUpdateService {
             String key = entry.getKey();
             Object newValue = entry.getValue();
             String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
-            
+
             Object existingValue = existing != null ? existing.get(key) : null;
-            
+
             if (existingValue == null) {
                 // 新key
                 if (result.length() > 0) {
@@ -188,9 +194,78 @@ public class ApplicationConfigUpdateService {
                 result.append(fullKey);
             } else if (existingValue instanceof Map && newValue instanceof Map) {
                 // 递归处理嵌套Map
-                collectNewKeys(fullKey, (Map<String, Object>) existingValue, 
+                collectNewKeys(fullKey, (Map<String, Object>) existingValue,
                               (Map<String, Object>) newValue, result);
             }
         }
+    }
+
+    /**
+     * 从新配置中提取 hasWidget / hasPanel 标记，强制覆盖到合并后的配置中。
+     * 升级时这些标记必须以新版本 plugin-ui.yml 为准，不能保留旧值。
+     * 同时根据标记自动计算 autoLoad。
+     *
+     * @param mergedConfig 增量合并后的配置（会被就地修改）
+     * @param newConfig    新版本的嵌套配置
+     */
+    @SuppressWarnings("unchecked")
+    private void applyExtensionFlags(Map<String, Object> mergedConfig, Map<String, Object> newConfig) {
+        // 从新配置的 plugin 节点提取标记
+        boolean hasWidget = false;
+        Boolean yamlHasPanel = null;
+        Boolean pluginAutoLoad = null;
+        boolean hasPanel;
+        boolean hasFrontend = false;
+
+        Object pluginNode = newConfig.get("plugin");
+        if (pluginNode instanceof Map) {
+            Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
+            hasWidget = Boolean.TRUE.equals(pluginMap.get("hasWidget"));
+            if (pluginMap.containsKey("hasPanel")) {
+                yamlHasPanel = pluginMap.get("hasPanel") instanceof Boolean
+                        ? (Boolean) pluginMap.get("hasPanel")
+                        : Boolean.parseBoolean(String.valueOf(pluginMap.get("hasPanel")));
+            }
+            if (pluginMap.containsKey("autoLoad")) {
+                pluginAutoLoad = pluginMap.get("autoLoad") instanceof Boolean
+                        ? (Boolean) pluginMap.get("autoLoad")
+                        : Boolean.parseBoolean(String.valueOf(pluginMap.get("autoLoad")));
+            }
+        }
+
+        // menus/routes 任一非空，则认为存在前端页面
+        Object menusObj = newConfig.get("menus");
+        if (menusObj instanceof List && !((List<?>) menusObj).isEmpty()) {
+            hasFrontend = true;
+        } else {
+            Object routesObj = newConfig.get("routes");
+            if (routesObj instanceof List && !((List<?>) routesObj).isEmpty()) {
+                hasFrontend = true;
+            }
+        }
+
+        if (pluginAutoLoad != null) {
+            // 有显式 autoLoad：优先使用它
+            boolean autoLoad = pluginAutoLoad;
+            if (yamlHasPanel != null) {
+                hasPanel = yamlHasPanel;
+            } else {
+                // 没有 hasPanel 时推断：panel-only 更合理
+                hasPanel = autoLoad && !hasWidget;
+            }
+            mergedConfig.put("autoLoad", autoLoad);
+        } else {
+            // 兼容旧版：autoLoad = hasWidget || hasPanel
+            hasPanel = yamlHasPanel != null ? yamlHasPanel : false;
+            mergedConfig.put("autoLoad", hasWidget || hasPanel);
+        }
+
+        // 强制覆盖
+        mergedConfig.put("hasWidget", hasWidget);
+        mergedConfig.put("hasPanel", hasPanel);
+        mergedConfig.put("hasFrontend", hasFrontend);
+
+        log.info("升级时强制更新扩展点标记: hasWidget={}, hasPanel={}, autoLoad={}",
+                hasWidget, hasPanel, mergedConfig.get("autoLoad"));
     }
 }

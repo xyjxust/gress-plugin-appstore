@@ -79,29 +79,10 @@ export const middlewareApi = {
 
   /**
    * 上传并安装中间件插件包
-   * 注意：使用原生 fetch API，因为 GressBridge 不支持 FormData
    */
   async uploadAndInstall(formData: FormData): Promise<MiddlewareInstallResult> {
-    const response = await fetch(`/api/${API_BASE}/middlewares/upload`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    })
-
-    const result = await response.json().catch(() => ({
-      success: false,
-      errorMessage: '解析响应失败'
-    }))
-
-    if (result.success === false) {
-      throw new Error(result.errorMessage || '上传失败')
-    }
-
-    if (!response.ok) {
-      throw new Error(result.errorMessage || `HTTP ${response.status}`)
-    }
-
-    return result.data as MiddlewareInstallResult
+    const result = await http.post<MiddlewareInstallResult>(`${API_BASE}/middlewares/upload`, formData)
+    return result as unknown as MiddlewareInstallResult
   },
 
   /**

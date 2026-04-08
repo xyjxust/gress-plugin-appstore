@@ -1,7 +1,5 @@
 package com.keqi.gress.plugin.appstore.service;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import  com.keqi.gress.common.model.Result;
@@ -26,9 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +53,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ApplicationManagementService {
+    private static final String APP_TYPE_AGGREGATED = "aggregated";
 
   //  private static final Log log = LogFactory.get(ApplicationManagementService.class);
     
@@ -138,6 +141,81 @@ public class ApplicationManagementService {
         } catch (Exception e) {
             log.error("获取应用详情失败: id={}", id, e);
             return Result.error("获取应用详情失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 查询聚合应用列表
+     */
+    public Result<List<ApplicationDTO>> listAggregateApplications() {
+        try {
+            List<ApplicationDTO> list = applicationDao.findByApplicationType(APP_TYPE_AGGREGATED).stream()
+                    .map(this::mapToApplicationDTO)
+                    .collect(Collectors.toList());
+            return Result.success(list);
+        } catch (Exception e) {
+            log.error("查询聚合应用列表失败", e);
+            return Result.error("查询聚合应用列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 查询可被聚合的插件应用（过滤掉聚合应用本身）
+     */
+    public Result<List<ApplicationDTO>> listAggregatablePlugins() {
+        try {
+            List<ApplicationDTO> list = applicationDao.findAll().stream()
+                    .filter(app -> !"aggregated".equalsIgnoreCase(app.getApplicationType()))
+                    .filter(this::hasFrontendFlagFromEntity)
+                    .map(this::mapToApplicationDTO)
+                    .collect(Collectors.toList());
+            return Result.success(list);
+        } catch (Exception e) {
+            log.error("查询可聚合插件失败", e);
+            return Result.error("查询可聚合插件失败: " + e.getMessage());
+        }
+    }
+
+    /** 仅允许将带前端（菜单/路由）的插件纳入聚合 */
+    private boolean hasFrontendFlagFromEntity(SysApplication app) {
+        Map<String, Object> ext = parseExtConfig(app.getExtensionConfig());
+        return Boolean.TRUE.equals(ext.get("hasFrontend"));
+    }
+
+    /**
+     * 创建聚合应用
+     */
+    public Result<Void> createAggregateApplication(AggregateApplicationRequest request, String operatorName) {
+        return saveAggregateApplication(null, request, operatorName);
+    }
+
+    /**
+     * 更新聚合应用
+     */
+    public Result<Void> updateAggregateApplication(Long id, AggregateApplicationRequest request, String operatorName) {
+        return saveAggregateApplication(id, request, operatorName);
+    }
+
+    /**
+     * 删除聚合应用
+     */
+    public Result<Void> deleteAggregateApplication(Long id, String operatorName) {
+        try {
+            SysApplication existing = persistenceService.findById(id);
+            if (existing == null) {
+                return Result.error("聚合应用不存在");
+            }
+            if (!APP_TYPE_AGGREGATED.equalsIgnoreCase(existing.getApplicationType())) {
+                return Result.error("仅支持删除聚合应用");
+            }
+            int rows = applicationDao.deleteApplication(id);
+            if (rows <= 0) {
+                return Result.error("删除聚合应用失败");
+            }
+            return Result.success();
+        } catch (Exception e) {
+            log.error("删除聚合应用失败: id={}", id, e);
+            return Result.error("删除聚合应用失败: " + e.getMessage());
         }
     }
     
@@ -646,6 +724,7 @@ public class ApplicationManagementService {
         dto.setPluginType(application.getPluginType());
         dto.setDescription(application.getDescription());
         dto.setAuthor(application.getAuthor());
+        dto.setIcon(application.getIcon());
         dto.setHomepage(application.getHomepage());
         dto.setApplicationType(application.getApplicationType());
         dto.setStatus(application.getStatus());
@@ -655,12 +734,24 @@ public class ApplicationManagementService {
         dto.setCreateBy(application.getCreateBy());
         dto.setUpdateBy(application.getUpdateBy());
         dto.setNamespaceCode(application.getNamespaceCode());
+
+        // 聚合应用扩展信息
+        Map<String, Object> extConfig = parseExtConfig(application.getExtensionConfig());
+        boolean aggregateApp = "aggregated".equalsIgnoreCase(application.getApplicationType())
+                || Boolean.TRUE.equals(extConfig.get("aggregateApp"));
+        dto.setAggregateApp(aggregateApp);
+        dto.setAggregatedPluginIds(parseStringList(extConfig.get("aggregatedPluginIds")));
+        dto.setHasFrontend(Boolean.TRUE.equals(extConfig.get("hasFrontend")));
+        dto.setAggregateListOrder(parseIntObject(extConfig.get("aggregateListOrder")));
+        dto.setAutoLoad(Boolean.TRUE.equals(extConfig.get("autoLoad")));
         
         // 设置计算字段：应用类型文本
         if ("integrated".equals(application.getApplicationType())) {
             dto.setApplicationTypeText("集成应用");
         } else if ("plugin".equals(application.getApplicationType())) {
             dto.setApplicationTypeText("插件应用");
+        } else if ("aggregated".equalsIgnoreCase(application.getApplicationType())) {
+            dto.setApplicationTypeText("聚合应用");
         } else {
             dto.setApplicationTypeText(application.getApplicationType());
         }
@@ -671,6 +762,147 @@ public class ApplicationManagementService {
         }
         
         return dto;
+    }
+
+    private Result<Void> saveAggregateApplication(Long id,
+                                                  AggregateApplicationRequest request,
+                                                  String operatorName) {
+        try {
+            if (request == null) {
+                return Result.error("请求参数不能为空");
+            }
+            if (request.getApplicationCode() == null || request.getApplicationCode().trim().isEmpty()) {
+                return Result.error("应用编码不能为空");
+            }
+            if (request.getApplicationName() == null || request.getApplicationName().trim().isEmpty()) {
+                return Result.error("应用名称不能为空");
+            }
+            if (request.getPluginIds() == null || request.getPluginIds().isEmpty()) {
+                return Result.error("请选择至少一个插件");
+            }
+
+            List<String> pluginIds = request.getPluginIds().stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (pluginIds.isEmpty()) {
+                return Result.error("请选择至少一个有效插件");
+            }
+
+            // 禁止将聚合应用再次聚合
+            Set<String> aggregatePluginIds = applicationDao.findByApplicationType(APP_TYPE_AGGREGATED).stream()
+                    .map(SysApplication::getPluginId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            for (String pid : pluginIds) {
+                if (aggregatePluginIds.contains(pid)) {
+                    return Result.error("聚合应用不能被再次聚合: " + pid);
+                }
+            }
+
+            Map<String, Object> extConfig = new HashMap<>();
+            extConfig.put("aggregateApp", true);
+            extConfig.put("hasFrontend", true);
+            extConfig.put("autoLoad", Boolean.TRUE.equals(request.getAutoLoad()));
+            extConfig.put("aggregatedPluginIds", pluginIds);
+            int listOrder = request.getAggregateListOrder() != null ? request.getAggregateListOrder() : 1000;
+            extConfig.put("aggregateListOrder", listOrder);
+            String extJson = new ObjectMapper().writeValueAsString(extConfig);
+
+            String iconVal = request.getIcon() != null ? request.getIcon().trim() : "";
+            String iconToStore = iconVal.isEmpty() ? null : iconVal;
+
+            if (id == null) {
+                SysApplication existingByCode = applicationDao.getApplicationByCode(request.getApplicationCode().trim());
+                if (existingByCode != null) {
+                    return Result.error("应用编码已存在: " + request.getApplicationCode());
+                }
+                SysApplication app = new SysApplication();
+                app.setApplicationCode(request.getApplicationCode().trim());
+                app.setApplicationName(request.getApplicationName().trim());
+                app.setPluginId(request.getApplicationCode().trim());
+                app.setPluginVersion("1.0.0");
+                app.setDescription(request.getDescription());
+                app.setAuthor("system");
+                app.setApplicationType(APP_TYPE_AGGREGATED);
+                app.setPluginType("APPLICATION");
+                app.setStatus(1);
+                app.setIsDefault(0);
+                app.setInstallTime(LocalDateTime.now());
+                app.setUpdateTime(LocalDateTime.now());
+                app.setCreateBy(operatorName != null ? operatorName : "admin");
+                app.setUpdateBy(operatorName != null ? operatorName : "admin");
+                app.setExtensionConfig(extJson);
+                app.setIcon(iconToStore);
+                int rows = applicationDao.insertApplication(app);
+                if (rows <= 0) {
+                    return Result.error("创建聚合应用失败");
+                }
+                return Result.success();
+            }
+
+            SysApplication existing = persistenceService.findById(id);
+            if (existing == null) {
+                return Result.error("聚合应用不存在");
+            }
+            if (!APP_TYPE_AGGREGATED.equalsIgnoreCase(existing.getApplicationType())) {
+                return Result.error("仅支持更新聚合应用");
+            }
+            int rows = applicationDao.updateAggregateApplication(
+                    id,
+                    request.getApplicationCode().trim(),
+                    request.getApplicationName().trim(),
+                    request.getDescription(),
+                    iconToStore,
+                    extJson,
+                    operatorName != null ? operatorName : "admin"
+            );
+            if (rows <= 0) {
+                return Result.error("更新聚合应用失败");
+            }
+            return Result.success();
+        } catch (Exception e) {
+            log.error("保存聚合应用失败: id={}", id, e);
+            return Result.error("保存聚合应用失败: " + e.getMessage());
+        }
+    }
+
+    private Map<String, Object> parseExtConfig(String extJson) {
+        if (extJson == null || extJson.trim().isEmpty()) {
+            return new HashMap<>();
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(extJson, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+
+    private List<String> parseStringList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return new ArrayList<>();
+        }
+        return list.stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    private Integer parseIntObject(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number n) {
+            return n.intValue();
+        }
+        try {
+            return Integer.parseInt(value.toString().trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
     
     /**

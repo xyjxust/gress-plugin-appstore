@@ -131,11 +131,11 @@ public class PluginStatusCollector {
      * @return 类加载器信息，如果插件未加载则返回 null
      */
     public ClassLoaderInfo getClassLoaderInfo(String pluginId) {
-        log.debug("获取类加载器信息: pluginId={}", pluginId);
+
         
         Result<PluginPackageRuntimeInfo> result = pluginLifecycle.getPluginPackageRuntimeInfo(pluginId);
         if (!result.isSuccess() || result.getData() == null) {
-            log.warn("插件未加载，无法获取类加载器信息: pluginId={}", pluginId);
+
             return null;
         }
         
@@ -144,7 +144,7 @@ public class PluginStatusCollector {
             PluginPackageRuntimeInfo.ClassLoaderInfo classLoaderInfo = runtimeInfo.getClassLoader();
             
             if (classLoaderInfo == null) {
-                log.warn("插件运行时信息中没有类加载器信息: pluginId={}", pluginId);
+
                 return null;
             }
             
@@ -154,7 +154,7 @@ public class PluginStatusCollector {
             
             return info;
         } catch (Exception e) {
-            log.error("获取类加载器信息失败: pluginId={}", pluginId, e);
+
             return null;
         }
     }

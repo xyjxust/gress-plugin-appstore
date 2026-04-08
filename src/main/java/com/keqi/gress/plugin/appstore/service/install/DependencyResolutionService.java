@@ -574,7 +574,7 @@ public class DependencyResolutionService {
             
             // 5. 安装应用
             Result<PluginPackageInstallResult> installResult = 
-                    applicationInstallService.installApplication(fileUrl);
+                    applicationInstallService.installApplication(fileUrl, appDetail.getSha256());
             
             if (!installResult.isSuccess()) {
                 log.error("安装应用失败: {}", installResult.getErrorMessage());

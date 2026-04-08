@@ -1,22 +1,22 @@
 # 应用商店插件配置
 appstore:
   # 应用商店基本信息
-  store-name: Gress 应用商店（开发环境）
-  store-url: http://localhost:8081/
+  storeName: Gress 应用商店（开发环境）
+  storeUrl: http://localhost:8081/
   
   # 应用商店 API 配置
   api:
     # API 基础地址（指向 gress-plugin-appstore-admin 提供的 API）
-    base-url: http://localhost:8081/gress/plugins/appstore-admin/api/appstore
+    baseUrl: http://localhost:8081/gress/plugins/appstore-admin/api/appstore
     
     # API 认证密钥（开发环境暂不需要）
-    secret-key: 
+    secretKey: 
     
     # API 超时时间（毫秒）
     timeout: 30000
     
     # 重试次数
-    max-retries: 3
+    maxRetries: 3
     
     # 是否启用 API 调用
     enabled: true
@@ -30,13 +30,13 @@ appstore:
     timeout: 300000
     
     # 最大并发下载数
-    max-concurrent: 3
+    maxConcurrent: 3
     
     # 下载完成后是否自动安装（开发环境建议手动安装）
-    auto-install: false
+    autoInstall: false
     
     # 下载失败后是否自动重试
-    auto-retry: true
+    autoRetry: true
   
   # 应用信息同步配置
   sync:
@@ -50,7 +50,7 @@ appstore:
     cron: 0 0 2 * * ?
     
     # 同步失败后重试次数
-    max-retries: 3
+    maxRetries: 3
   
   # 缓存配置
   cache:
@@ -58,30 +58,30 @@ appstore:
     enabled: false
     
     # 缓存过期时间（秒）
-    expire-seconds: 3600
+    expireSeconds: 3600
     
     # 最大缓存条目数
-    max-size: 1000
+    maxSize: 1000
   
   # 安全配置
   security:
     # 是否验证应用签名（开发环境可以禁用）
-    verify-signature: false
+    verifySignature: false
     
     # 是否检查应用来源（开发环境可以禁用）
-    check-source: false
+    checkSource: false
     
     # 允许的应用来源列表
-    allowed-sources:
+    allowedSources:
       - http://localhost:8080
       - https://store.gress.io
       - https://plugins.gress.io
     
     # 是否启用应用沙箱
-    enable-sandbox: false
+    enableSandbox: false
   
   # 应用类型配置
-  application-types:
+  applicationTypes:
     # 允许的应用类型
     allowed:
       - WORKFLOW
@@ -90,7 +90,7 @@ appstore:
       - TASK
     
     # 默认应用类型
-    default: APPLICATION
+    defaultType: APPLICATION
   
   # 通知配置
   notification:
@@ -109,7 +109,7 @@ appstore:
       - application.failed
   
   # 自定义属性
-  custom-properties:
+  customProperties:
     # 功能开关
     feature.new-ui: enabled
     feature.beta-test: enabled

@@ -29,20 +29,18 @@ public class MonitorDataCleanupScheduler {
     @Scheduled(cron = "0 0 3 * * ?")
     public void cleanupExpiredData() {
         try {
-            log.info("开始清理过期监控数据");
+
             
             // 计算过期时间戳（7 天前）
             long expireTime = System.currentTimeMillis() - (RETENTION_DAYS * 24L * 60 * 60 * 1000);
             
             // 清理过期的监控快照
             int deletedSnapshots = historyDao.deleteExpiredData(expireTime);
-            log.info("清理过期监控快照: 删除数量={}", deletedSnapshots);
+
             
             // 清理过期的状态变更日志
             int deletedLogs = historyDao.deleteExpiredStateLogs(expireTime);
-            log.info("清理过期状态变更日志: 删除数量={}", deletedLogs);
-            
-            log.info("清理过期监控数据完成: 快照={}, 日志={}", deletedSnapshots, deletedLogs);
+
             
         } catch (Exception e) {
             log.error("清理过期监控数据失败", e);

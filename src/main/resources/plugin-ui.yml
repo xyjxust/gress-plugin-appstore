@@ -5,11 +5,41 @@ plugin:
   id: appstore
   name: 应用商店
   version: 1.0.0
+  # 前端扩展点声明（安装时自动写入 extension_config）
+  hasWidget: true
+  hasPanel: false
 
 # ============================================================
 # 菜单配置（一站式配置：菜单+路由+权限+按钮）
 # ============================================================
 menus:
+  # 聚合应用管理（独立菜单）
+  - id: aggregate-applications
+    title: 聚合应用管理
+    icon: Layers
+    path: /plugins/appstore/aggregate-applications
+    component: AggregateApplicationManagement
+    order: 49
+    apiPrefix: /api/v2/plugins/appstore/applications/aggregates
+
+    operations:
+      - VIEW
+      - MANAGE
+
+    buttons:
+      - id: refresh
+        label: 刷新列表
+        path: GET:/api/v2/plugins/appstore/applications/aggregates
+      - id: save
+        label: 保存聚合应用
+        path: POST:/api/v2/plugins/appstore/applications/aggregates
+      - id: update
+        label: 更新聚合应用
+        path: PUT:/api/v2/plugins/appstore/applications/aggregates/{id}
+      - id: delete
+        label: 删除聚合应用
+        path: DELETE:/api/v2/plugins/appstore/applications/aggregates/{id}
+
   # 应用管理菜单
   - id: applications
     title: 应用管理
@@ -183,6 +213,7 @@ roles:
     name: 应用查看者
     description: 只能查看应用列表和详情，不能进行任何操作
     permissions:
+      - aggregate-applications:VIEW
       - applications:VIEW
       - operation-logs:VIEW
       - plugin-monitor:VIEW
@@ -191,6 +222,7 @@ roles:
     name: 应用普通用户
     description: 可以查看应用、启用/禁用应用
     permissions:
+      - aggregate-applications:VIEW
       - applications:VIEW
       - applications.enable
       - applications.disable
@@ -202,6 +234,8 @@ roles:
     name: 应用管理员
     description: 拥有应用管理的完整权限
     permissions:
+      - aggregate-applications:VIEW,MANAGE
+      - aggregate-applications.*
       - applications:VIEW,MANAGE
       - applications.*  # 所有按钮权限
       - operation-logs:VIEW

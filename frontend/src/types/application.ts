@@ -5,7 +5,7 @@
 /**
  * 应用类型
  */
-export type ApplicationType = 'integrated' | 'plugin'
+export type ApplicationType = 'integrated' | 'plugin' | 'aggregated'
 
 /**
  * 安装状态
@@ -41,6 +41,23 @@ export interface Application {
   // 本地应用字段
   remoteVersion?: string
   hasNewVersion?: boolean
+  aggregateApp?: boolean
+  aggregatedPluginIds?: string[]
+  icon?: string
+  hasFrontend?: boolean
+  /** 聚合应用列表排序权重（越小越靠前） */
+  aggregateListOrder?: number
+  autoLoad?: boolean
+}
+
+export interface AggregateApplicationRequest {
+  applicationCode: string
+  applicationName: string
+  description?: string
+  icon?: string
+  aggregateListOrder?: number
+  pluginIds: string[]
+  autoLoad?: boolean
 }
 
 /**

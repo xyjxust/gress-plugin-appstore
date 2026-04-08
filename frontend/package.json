@@ -17,7 +17,7 @@
   "dependencies": {
     "@keqi.gress/plugin-bridge": "^1.0.0",
     "@keqi.gress/plugin-ui": "^1.0.1",
-    "@keqi.gress/shared-utils": "^1.0.2",
+    "@keqi.gress/shared-utils": "^1.0.3",
     "echarts": "^6.0.0",
     "naive-ui": "^2.38.0",
     "vue": "^3.3.0",

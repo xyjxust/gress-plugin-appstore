@@ -1,6 +1,7 @@
 package com.keqi.gress.plugin.appstore.config;
 
-import  com.keqi.gress.common.plugin.annotion.ConfigurationProperties;
+
+import com.keqi.gress.common.plugin.annotion.ConfigurationProperties;
 import  com.keqi.gress.common.plugin.annotion.FormField;
 import  com.keqi.gress.common.plugin.dto.Input;
 import lombok.Data;
@@ -69,31 +70,73 @@ public class AppStoreConfig implements Input {
     /**
      * 同步配置
      */
+    @FormField(
+        label = "同步配置",
+        description = "应用商店数据同步相关配置",
+        type = FormField.FieldType.OBJECT,
+        order = 30,
+        group = "sync"
+    )
     private SyncConfig sync;
     
     /**
      * 缓存配置
      */
+    @FormField(
+        label = "缓存配置",
+        description = "应用商店缓存相关配置",
+        type = FormField.FieldType.OBJECT,
+        order = 40,
+        group = "cache"
+    )
     private CacheConfig cache;
     
     /**
      * 安全配置
      */
+    @FormField(
+        label = "安全配置",
+        description = "来源白名单、签名校验等安全策略",
+        type = FormField.FieldType.OBJECT,
+        order = 50,
+        group = "security"
+    )
     private SecurityConfig security;
     
     /**
      * 应用类型配置
      */
+    @FormField(
+        label = "应用类型配置",
+        description = "允许的应用类型与默认类型配置",
+        type = FormField.FieldType.OBJECT,
+        order = 60,
+        group = "applicationTypes"
+    )
     private ApplicationTypesConfig applicationTypes;
     
     /**
      * 通知配置
      */
+    @FormField(
+        label = "通知配置",
+        description = "通知相关配置",
+        type = FormField.FieldType.OBJECT,
+        order = 70,
+        group = "notification"
+    )
     private NotificationConfig notification;
     
     /**
      * 自定义属性
      */
+    @FormField(
+        label = "自定义属性",
+        description = "自定义键值对（高级配置）",
+        type = FormField.FieldType.OBJECT,
+        order = 80,
+        group = "customProperties"
+    )
     private Map<String, String> customProperties;
     
     /**
@@ -242,21 +285,54 @@ public class AppStoreConfig implements Input {
         /**
          * 是否启用自动同步
          */
+        @FormField(
+            label = "启用同步",
+            description = "是否启用自动同步",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "false",
+            component = FormField.ComponentType.SWITCH,
+            order = 1,
+            group = "sync"
+        )
         private Boolean enabled;
         
         /**
          * 同步间隔（秒）
          */
+        @FormField(
+            label = "同步间隔（秒）",
+            description = "定期同步的间隔（秒），与 cron 二选一",
+            type = FormField.FieldType.INTEGER,
+            defaultValue = "3600",
+            order = 2,
+            group = "sync"
+        )
         private Integer interval;
         
         /**
          * 同步时间（Cron 表达式）
          */
+        @FormField(
+            label = "同步 Cron",
+            description = "定时同步 Cron 表达式（优先于 interval）",
+            type = FormField.FieldType.STRING,
+            required = false,
+            order = 3,
+            group = "sync"
+        )
         private String cron;
         
         /**
          * 同步失败后重试次数
          */
+        @FormField(
+            label = "同步重试次数",
+            description = "同步失败后最大重试次数",
+            type = FormField.FieldType.INTEGER,
+            defaultValue = "3",
+            order = 4,
+            group = "sync"
+        )
         private Integer maxRetries;
     }
     
@@ -268,16 +344,41 @@ public class AppStoreConfig implements Input {
         /**
          * 是否启用缓存
          */
+        @FormField(
+            label = "启用缓存",
+            description = "是否启用应用商店缓存",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "true",
+            component = FormField.ComponentType.SWITCH,
+            order = 1,
+            group = "cache"
+        )
         private Boolean enabled;
         
         /**
          * 缓存过期时间（秒）
          */
+        @FormField(
+            label = "缓存过期（秒）",
+            description = "缓存默认过期时间（秒）",
+            type = FormField.FieldType.INTEGER,
+            defaultValue = "300",
+            order = 2,
+            group = "cache"
+        )
         private Integer expireSeconds;
         
         /**
          * 最大缓存条目数
          */
+        @FormField(
+            label = "最大缓存条目数",
+            description = "缓存最大条目数（0 或空表示不限制）",
+            type = FormField.FieldType.INTEGER,
+            required = false,
+            order = 3,
+            group = "cache"
+        )
         private Integer maxSize;
     }
     
@@ -289,21 +390,68 @@ public class AppStoreConfig implements Input {
         /**
          * 是否验证应用签名
          */
+        @FormField(
+            label = "是否验证应用签名",
+            description = "安装应用前校验 JAR 内置签名（META-INF/*.SF/*.RSA）。验签失败禁止安装。",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "false",
+            component = FormField.ComponentType.SWITCH,
+            order = 1
+        )
         private Boolean verifySignature;
         
         /**
          * 是否检查应用来源
          */
+        @FormField(
+            label = "校验来源白名单",
+            description = "仅允许从可信来源下载/安装（白名单域名/仓库）。建议开启。",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "true",
+            component = FormField.ComponentType.SWITCH,
+            order = 2
+        )
         private Boolean checkSource;
         
         /**
-         * 允许的应用来源列表
+         * 允许的应用来源列表（逗号分隔）
          */
-        private List<String> allowedSources;
+        @FormField(
+            label = "允许的来源列表",
+            description = "白名单来源（例如域名或仓库前缀），使用逗号分隔。仅在开启“校验来源白名单”时生效。",
+            type = FormField.FieldType.STRING,
+            required = false,
+            placeholder = "例如：appstore.company.com,github.com/org/repo",
+            component = FormField.ComponentType.TEXTAREA,
+            order = 3
+        )
+        private String allowedSources;
+
+        /**
+         * 解析允许来源列表（以逗号分隔）
+         */
+        public java.util.List<String> allowedSourcesList() {
+            if (allowedSources == null || allowedSources.trim().isEmpty()) {
+                return java.util.Collections.emptyList();
+            }
+            return java.util.Arrays.stream(allowedSources.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList();
+        }
         
         /**
          * 是否启用应用沙箱
          */
+        @FormField(
+            label = "启用沙箱",
+            description = "是否启用应用沙箱隔离（预留开关）",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "false",
+            component = FormField.ComponentType.SWITCH,
+            order = 4
+        )
         private Boolean enableSandbox;
         
         /**
@@ -328,11 +476,27 @@ public class AppStoreConfig implements Input {
         /**
          * 允许的应用类型
          */
+        @FormField(
+            label = "允许的应用类型",
+            description = "允许的应用类型列表（例如 plugin、integrated 等）",
+            type = FormField.FieldType.ARRAY,
+            required = false,
+            order = 1,
+            group = "applicationTypes"
+        )
         private List<String> allowed;
         
         /**
          * 默认应用类型
          */
+        @FormField(
+            label = "默认应用类型",
+            description = "当未指定时使用的默认应用类型",
+            type = FormField.FieldType.STRING,
+            required = false,
+            order = 2,
+            group = "applicationTypes"
+        )
         private String defaultType;
     }
     
@@ -344,16 +508,41 @@ public class AppStoreConfig implements Input {
         /**
          * 是否启用通知
          */
+        @FormField(
+            label = "启用通知",
+            description = "是否启用通知功能",
+            type = FormField.FieldType.BOOLEAN,
+            defaultValue = "false",
+            component = FormField.ComponentType.SWITCH,
+            order = 1,
+            group = "notification"
+        )
         private Boolean enabled;
         
         /**
          * 通知方式
          */
+        @FormField(
+            label = "通知方式",
+            description = "通知方式列表（预留字段）",
+            type = FormField.FieldType.ARRAY,
+            required = false,
+            order = 2,
+            group = "notification"
+        )
         private List<String> methods;
         
         /**
          * 通知事件
          */
+        @FormField(
+            label = "通知事件",
+            description = "需要通知的事件列表（预留字段）",
+            type = FormField.FieldType.ARRAY,
+            required = false,
+            order = 3,
+            group = "notification"
+        )
         private List<String> events;
     }
 }

@@ -1,7 +1,5 @@
 package com.keqi.gress.plugin.appstore.service.persistence;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import  com.keqi.gress.common.plugin.PluginPackageInstallResult;
@@ -113,6 +111,7 @@ public class ApplicationPersistenceService {
             application.setPluginVersion(installInfo.getVersion());
             application.setDescription(installInfo.getDescription());
             application.setAuthor(installInfo.getProvider());
+            application.setIcon(installInfo.getIcon());
             application.setApplicationType("plugin");
             application.setStatus(1);
             application.setIsDefault(0);
@@ -130,7 +129,95 @@ public class ApplicationPersistenceService {
                 application.setPluginType("APPLICATION");
                 log.warn("未检测到插件类型，使用默认值 APPLICATION: pluginId={}", packageId);
             }
-            
+
+            // 构建 extension_config：根据 hasWidget / hasPanel / autoLoad 标记
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, Object> extConfig = new java.util.HashMap<>();
+                boolean hasWidget = installInfo.isHasWidget();
+                boolean hasPanel = installInfo.isHasPanel();
+
+                // 尽量从 plugin-ui.yml 的 plugin 节点读取 autoLoad（旧版只有 hasPanel 时仍能兼容）
+                Boolean pluginAutoLoad = null;
+                Boolean yamlHasPanel = null;
+                Map<String, Object> pluginYmlConfig = installInfo.getPluginYmlConfig();
+                Object pluginNode = pluginYmlConfig != null ? pluginYmlConfig.get("plugin") : null;
+                if (pluginNode instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
+                    pluginAutoLoad = pluginMap.containsKey("autoLoad") ? parseBoolean(pluginMap.get("autoLoad")) : null;
+                    yamlHasPanel = pluginMap.containsKey("hasPanel") ? parseBoolean(pluginMap.get("hasPanel")) : null;
+                }
+
+                // 有菜单/路由的插件才认为“有前端页面”
+                boolean hasFrontend = false;
+                if (pluginYmlConfig != null) {
+                    Object menusObj = pluginYmlConfig.get("menus");
+                    if (menusObj instanceof List && !((List<?>) menusObj).isEmpty()) {
+                        hasFrontend = true;
+                    }
+                    if (!hasFrontend) {
+                        Object routesObj = pluginYmlConfig.get("routes");
+                        if (routesObj instanceof List && !((List<?>) routesObj).isEmpty()) {
+                            hasFrontend = true;
+                        }
+                    }
+                }
+
+                boolean autoLoad;
+                if (pluginAutoLoad != null) {
+                    autoLoad = pluginAutoLoad;
+                    if (yamlHasPanel != null) {
+                        hasPanel = yamlHasPanel;
+                    } else {
+                        // 如果只给了 autoLoad 而没有 hasPanel，则推断：panel-only 更合理
+                        hasPanel = autoLoad && !hasWidget;
+                    }
+                } else {
+                    // 兼容旧版：autoLoad 由 hasPanel/hasWidget 计算
+                    if (yamlHasPanel != null) {
+                        hasPanel = yamlHasPanel;
+                    }
+                    autoLoad = hasPanel || hasWidget;
+                }
+
+                // 有面板或小组件的插件需要自动加载前端 JS
+                extConfig.put("autoLoad", autoLoad);
+                extConfig.put("hasPanel", hasPanel);
+                extConfig.put("hasWidget", hasWidget);
+                extConfig.put("hasFrontend", hasFrontend);
+
+                // 完整性校验信息（Marketplace SHA-256 + 安装前后校验）
+                try {
+                    Map<String, String> meta = installInfo.getMetadata();
+                    if (meta != null) {
+                        String sha256Expected = meta.get("sha256Expected");
+                        String sha256Before = meta.get("sha256Before");
+                        String sha256After = meta.get("sha256After");
+                        if (sha256Expected != null && !sha256Expected.isBlank()) {
+                            extConfig.put("sha256Expected", sha256Expected);
+                        }
+                        if (sha256Before != null && !sha256Before.isBlank()) {
+                            extConfig.put("sha256Before", sha256Before);
+                        }
+                        if (sha256After != null && !sha256After.isBlank()) {
+                            extConfig.put("sha256After", sha256After);
+                        }
+                        if (sha256Expected != null && !sha256Expected.isBlank()
+                                && sha256After != null && !sha256After.isBlank()) {
+                            extConfig.put("sha256Verified", sha256Expected.equalsIgnoreCase(sha256After));
+                        }
+                    }
+                } catch (Exception ignore) {
+                }
+
+                application.setExtensionConfig(objectMapper.writeValueAsString(extConfig));
+                log.info("设置扩展配置: pluginId={}, autoLoad={}, hasPanel={}, hasWidget={}",
+                        packageId, autoLoad, hasPanel, hasWidget);
+            } catch (Exception e) {
+                log.warn("构建 extension_config 失败: pluginId={}, error={}", packageId, e.getMessage());
+            }
+
             // 保存到数据库
             int rows = dataSource.insert(application);
             
@@ -285,6 +372,19 @@ public class ApplicationPersistenceService {
     public boolean updateExtensionConfig(Long id, String configJson, String operatorName) {
         int updated = applicationDao.updateApplicationExtensionConfig(id, configJson, operatorName);
         return updated > 0;
+    }
+
+    /**
+     * 兼容 plugin-ui.yml 中布尔字段解析（SnakeYAML/JSON 可能返回 Boolean 或字符串）。
+     */
+    private Boolean parseBoolean(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return Boolean.parseBoolean(String.valueOf(value));
     }
 }
 

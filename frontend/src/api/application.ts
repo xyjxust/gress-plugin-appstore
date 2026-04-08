@@ -9,7 +9,8 @@ import type {
   ApplicationQueryRequest,
   ApplicationUpgradeRequest,
   ApplicationUninstallRequest,
-  ApplicationUpgradeLog
+  ApplicationUpgradeLog,
+  AggregateApplicationRequest
 } from '../types/application'
 
 const API_BASE = '/plugins/appstore'
@@ -25,80 +26,58 @@ export const applicationApi = {
    * 查询应用列表
    */
   getList(params?: ApplicationQueryRequest): Promise<PageResult<Application>> {
-    return http.get<PageResult<Application>>(`${API_BASE}/applications`, params)
+    return http.get<PageResult<Application>>(`${API_BASE}/applications`, params) as any
   },
 
   /**
    * 获取应用详情
    */
   getDetail(id: number): Promise<Application> {
-    return http.get<Application>(`${API_BASE}/applications/${id}`)
+    return http.get<Application>(`${API_BASE}/applications/${id}`) as any
   },
 
   /**
    * 升级应用
    */
   upgrade(id: number, data: ApplicationUpgradeRequest): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/upgrade`, data)
+    return http.post(`${API_BASE}/applications/${id}/upgrade`, data) as any
   },
 
   /**
    * 卸载应用
    */
   uninstall(id: number, data: ApplicationUninstallRequest): Promise<void> {
-    return http.delete(`${API_BASE}/applications/${id}`, data)
+    return http.delete(`${API_BASE}/applications/${id}`, { data }) as any
   },
 
   /**
    * 启用应用
    */
   enable(id: number, operatorName: string): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/enable`, { operatorName })
+    return http.post(`${API_BASE}/applications/${id}/enable`, { operatorName }) as any
   },
 
   /**
    * 禁用应用
    */
   disable(id: number, operatorName: string): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/disable`, { operatorName })
+    return http.post(`${API_BASE}/applications/${id}/disable`, { operatorName }) as any
   },
 
   /**
    * 查询远程应用商店应用列表
    */
   getRemoteList(params?: ApplicationQueryRequest): Promise<PageResult<Application>> {
-    return http.get<PageResult<Application>>(`${API_BASE}/applications/remote`, params)
+    return http.get<PageResult<Application>>(`${API_BASE}/applications/remote`, params) as any
   },
 
   /**
    * 上传并安装应用包
-   * 注意：使用原生 fetch API，因为 GressBridge 不支持 FormData
    */
   async uploadAndInstall(formData: FormData): Promise<void> {
-    // 使用原生 fetch API 上传文件
-    const response = await fetch(`/api/${API_BASE}/applications/upload`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include' // 包含 cookies
-    })
-    
-    // 先解析 JSON 响应
-    const result = await response.json().catch(() => ({
-      success: false,
-      errorMessage: '解析响应失败'
-    }))
-    
-    // 检查业务逻辑是否成功（不依赖 HTTP 状态码）
-    if (result.success === false) {
-      throw new Error(result.errorMessage || '上传失败')
-    }
-    
-    // 检查 HTTP 状态码
-    if (!response.ok) {
-      throw new Error(result.errorMessage || `HTTP ${response.status}`)
-    }
-    
-    return result.data
+    await http.post(`${API_BASE}/applications/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } as any)
   },
 
   /**
@@ -112,53 +91,82 @@ export const applicationApi = {
     }
     // 构建查询字符串
     const queryString = new URLSearchParams(params).toString()
-    return http.post(`${API_BASE}/applications/remote/install?${queryString}`)
+    return http.post(`${API_BASE}/applications/remote/install?${queryString}`) as any
   },
 
   /**
    * 查询应用升级日志
    */
   getUpgradeLogs(id: number): Promise<ApplicationUpgradeLog[]> {
-    return http.get<ApplicationUpgradeLog[]>(`${API_BASE}/applications/${id}/upgrade-logs`)
+    return http.get<ApplicationUpgradeLog[]>(`${API_BASE}/applications/${id}/upgrade-logs`) as any
   },
 
   /**
    * 降级应用（按指定版本回滚）
    */
   rollback(id: number, data: ApplicationUpgradeRequest): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/rollback`, data)
+    return http.post(`${API_BASE}/applications/${id}/rollback`, data) as any
   },
 
   /**
    * 重启应用
    */
   restart(id: number, operatorName: string = 'admin'): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/restart`, { operatorName })
+    return http.post(`${API_BASE}/applications/${id}/restart`, { operatorName }) as any
   },
 
   /**
    * 获取应用配置元数据（用于动态表单渲染）
    */
   getConfigMetadata(id: number): Promise<any[]> {
-    return http.get(`${API_BASE}/applications/${id}/config/metadata`)
+    return http.get(`${API_BASE}/applications/${id}/config/metadata`) as any
   },
 
   /**
    * 获取应用配置
    */
   getConfig(id: number): Promise<{
+    autoLoad?: boolean
+    loadOnStartup?: boolean
+    startPriority?: number
+    startDelay?: number
+    description?: string
     extensionConfig?: Record<string, any>
   }> {
-    return http.get(`${API_BASE}/applications/${id}/config`)
+    return http.get(`${API_BASE}/applications/${id}/config`) as any
   },
 
   /**
    * 更新应用配置
    */
   updateConfig(id: number, data: {
+    autoLoad?: boolean
+    loadOnStartup?: boolean
+    startPriority?: number
+    startDelay?: number
+    description?: string
     extensionConfig?: Record<string, any>
   }): Promise<void> {
-    return http.put(`${API_BASE}/applications/${id}/config`, data)
+    return http.put(`${API_BASE}/applications/${id}/config`, data) as any
+  },
+
+  /**
+   * 聚合应用管理
+   */
+  listAggregates(): Promise<Application[]> {
+    return http.get<Application[]>(`${API_BASE}/applications/aggregates`) as any
+  },
+  listAggregatablePlugins(): Promise<Application[]> {
+    return http.get<Application[]>(`${API_BASE}/applications/aggregates/available-plugins`) as any
+  },
+  createAggregate(data: AggregateApplicationRequest): Promise<void> {
+    return http.post(`${API_BASE}/applications/aggregates`, data) as any
+  },
+  updateAggregate(id: number, data: AggregateApplicationRequest): Promise<void> {
+    return http.put(`${API_BASE}/applications/aggregates/${id}`, data) as any
+  },
+  deleteAggregate(id: number): Promise<void> {
+    return http.delete(`${API_BASE}/applications/aggregates/${id}`) as any
   },
 
   /**
@@ -169,7 +177,7 @@ export const applicationApi = {
     if (operationType) {
       params.operationType = operationType
     }
-    return http.get<PageResult<any>>(`${API_BASE}/applications/${id}/operation-logs`, params)
+    return http.get<PageResult<any>>(`${API_BASE}/applications/${id}/operation-logs`, params) as any
   },
 
   /**
@@ -183,6 +191,6 @@ export const applicationApi = {
     applicationName?: string
     status?: string
   }): Promise<PageResult<any>> {
-    return http.get<PageResult<any>>(`${API_BASE}/applications/operation-logs`, params)
+    return http.get<PageResult<any>>(`${API_BASE}/applications/operation-logs`, params) as any
   }
 }
