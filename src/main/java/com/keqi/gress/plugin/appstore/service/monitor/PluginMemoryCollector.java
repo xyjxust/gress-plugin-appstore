@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.monitor;
 
 import com.keqi.gress.common.plugin.PluginPackageLifecycle;
 import com.keqi.gress.common.plugin.PluginPackageRuntimeInfo;
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.common.model.Result;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMemoryInfo;
 import com.keqi.gress.plugin.appstore.util.MonitorErrorHandler;
@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 public class PluginMemoryCollector {
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginPackageLifecycle pluginLifecycle;
     
     private final Runtime runtime = Runtime.getRuntime();
@@ -44,7 +44,13 @@ public class PluginMemoryCollector {
             Result<PluginPackageRuntimeInfo> result = pluginLifecycle.getPluginPackageRuntimeInfo(pluginId);
             if (!result.isSuccess() || result.getData() == null) {
 
-                return MonitorErrorHandler.handleMemoryUnavailable(pluginId);
+                return PluginMemoryInfo.builder()
+                    .usedMemory(0L)
+                    .formattedMemory("不可用")
+                    .totalJvmMemory(runtime.totalMemory())
+                    .freeJvmMemory(runtime.freeMemory())
+                    .maxJvmMemory(runtime.maxMemory())
+                    .build();
             }
             
             PluginPackageRuntimeInfo runtimeInfo = result.getData();
@@ -66,7 +72,13 @@ public class PluginMemoryCollector {
             return memInfo;
         } catch (Exception e) {
             log.error("收集插件内存信息失败: pluginId={}", pluginId, e);
-            return MonitorErrorHandler.handleMemoryUnavailable(pluginId);
+            return PluginMemoryInfo.builder()
+                .usedMemory(0L)
+                .formattedMemory("不可用")
+                .totalJvmMemory(runtime.totalMemory())
+                .freeJvmMemory(runtime.freeMemory())
+                .maxJvmMemory(runtime.maxMemory())
+                .build();
         }
     }
     

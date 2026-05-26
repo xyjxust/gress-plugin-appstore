@@ -1,10 +1,8 @@
 package com.keqi.gress.plugin.appstore.service;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.ApplicationOperationLogDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplicationOperationLog;
@@ -21,7 +19,7 @@ public class ApplicationOperationLogService {
 
    // private static final Log log = LogFactory.get(ApplicationOperationLogService.class);
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogDao operationLogDao;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,7 +49,12 @@ public class ApplicationOperationLogService {
             Object beforeData,
             Object afterData,
             Long duration) {
-        
+        if (application == null || application.getId() == null) {
+            log.warn("跳过写入操作日志：applicationId 为空, operationType={}, operationDesc={}, operatorId={}, operatorName={}, status={}, message={}",
+                    operationType, operationDesc, operatorId, operatorName, status, message);
+            return;
+        }
+
         try {
             SysApplicationOperationLog logEntry = new SysApplicationOperationLog();
             logEntry.setApplicationId(application.getId());

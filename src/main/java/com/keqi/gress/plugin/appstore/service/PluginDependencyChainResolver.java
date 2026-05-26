@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class PluginDependencyChainResolver {
     
     //private static final Log log = LogFactory.get(PluginDependencyChainResolver.class);
     
-    @Inject
+    @Autowired
     private AppStoreApiService appStoreApiService;
     
     /**

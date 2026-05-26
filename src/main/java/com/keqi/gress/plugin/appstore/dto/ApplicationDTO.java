@@ -95,14 +95,20 @@ public class ApplicationDTO {
     /** 聚合应用包含的插件ID列表 */
     private List<String> aggregatedPluginIds;
 
-    /** 扩展配置中的 hasFrontend（用于可聚合列表等） */
-    private Boolean hasFrontend;
+    /** 扩展配置：B 端管理列表 */
+    private Boolean surfaceAdmin;
+
+    /** 扩展配置：C 端表面 */
+    private Boolean surfaceConsumer;
+
+    /** 扩展配置：管理壳预加载 */
+    private Boolean autoLoadAdmin;
+
+    /** 扩展配置：C 端预加载 */
+    private Boolean autoLoadConsumer;
 
     /** 聚合应用在列表中的排序权重（越小越靠前） */
     private Integer aggregateListOrder;
-
-    /** 扩展配置中的 autoLoad */
-    private Boolean autoLoad;
 
     /** Marketplace 提供的 SHA-256（用于安装前后完整性校验） */
     private String sha256;

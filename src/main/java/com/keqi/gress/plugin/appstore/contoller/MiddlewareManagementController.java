@@ -3,15 +3,18 @@ package com.keqi.gress.plugin.appstore.contoller;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
+import com.keqi.gress.plugin.api.ui.annotation.PluginAction;
+import com.keqi.gress.plugin.api.ui.annotation.PluginMenu;
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
 import com.keqi.gress.plugin.appstore.dto.PageResult;
 import com.keqi.gress.plugin.appstore.service.AppStoreApiService;
 import com.keqi.gress.plugin.appstore.service.MiddlewareManagementService;
 import com.keqi.gress.plugin.appstore.service.middleware.ConnectionInfoFormatter;
 import com.keqi.gress.plugin.appstore.service.middleware.MiddlewareInstallSsePublisher;
+import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -38,20 +41,21 @@ import java.util.Optional;
 @RequestMapping("/middlewares")
 @Valid
 @Slf4j
+@PluginMenu(id = "middlewares", name = "中间件管理", managementEnabled = true)
 public class MiddlewareManagementController {
 
   //  private static final Log log = LogFactory.get(MiddlewareManagementController.class);
 
-    @Inject
+    @Autowired
     private MiddlewareManagementService middlewareManagementService;
     
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private AppStoreApiService appStoreApiService;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private  com.keqi.gress.common.storage.FileStorageService fileStorageService;
 
-    @Inject
+    @Autowired
     private MiddlewareInstallSsePublisher installSsePublisher;
 
     /**
@@ -71,6 +75,7 @@ public class MiddlewareManagementController {
      * 健康检查
      */
     @GetMapping("/{middlewareId}/health")
+    @PluginAction(id = "health", name = "健康检查", managementEnabled = true, actionCode = "VIEW")
     public Result<MiddlewareManagementService.HealthCheckResult> health(@PathVariable String middlewareId) {
         try {
             return Result.success(middlewareManagementService.checkHealth(middlewareId));
@@ -84,18 +89,20 @@ public class MiddlewareManagementController {
      * 上传并安装中间件插件包
      */
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    @PluginAction(id = "upload", name = "上传安装")
     public Result<MiddlewareManagementService.MiddlewareInstallResult> uploadAndInstall(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false, defaultValue = "admin") String operatorName) {
+            @RequestParam(required = false) String operatorName) {
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
 
         log.info("上传并安装中间件插件包: fileName={}, size={}, operator={}",
-                file.getOriginalFilename(), file.getSize(), operatorName);
+                file.getOriginalFilename(), file.getSize(), resolvedOperatorName);
 
         Path tmp = null;
         try {
             tmp = Files.createTempFile("middleware-", ".jar");
             Files.copy(file.getInputStream(), tmp, StandardCopyOption.REPLACE_EXISTING);
-            return middlewareManagementService.installMiddleware(tmp, operatorName);
+            return middlewareManagementService.installMiddleware(tmp, resolvedOperatorName);
         } catch (Exception e) {
             log.error("上传安装中间件失败", e);
             return Result.error("安装失败: " + e.getMessage());
@@ -115,10 +122,12 @@ public class MiddlewareManagementController {
      * 为了避免 DELETE 带 body 的兼容问题，这里用 POST。
      */
     @PostMapping("/{middlewareId}/uninstall")
+    @PluginAction(id = "uninstall", name = "卸载", managementEnabled = true, actionCode = "MANAGE")
     public Result<Void> uninstall(
             @PathVariable String middlewareId,
             @RequestBody(required = false) java.util.Map<String, String> body) {
-        String operatorName = body != null ? body.getOrDefault("operatorName", "admin") : "admin";
+        String operatorName = OperatorContextHelper.resolveOperatorName(
+                body != null ? body.get("operatorName") : null);
         log.info("卸载中间件: middlewareId={}, operator={}", middlewareId, operatorName);
         return middlewareManagementService.uninstallMiddleware(middlewareId, operatorName);
     }
@@ -250,14 +259,15 @@ public class MiddlewareManagementController {
     @PostMapping("/remote/install")
     public Result<MiddlewareManagementService.MiddlewareInstallResult> installRemoteMiddleware(
             @RequestParam String pluginId,
-            @RequestParam(required = false, defaultValue = "admin") String operatorName,
+            @RequestParam(required = false) String operatorName,
             @RequestParam(required = false) String targetNodeId,
             @RequestParam(required = false) String executionType,
             @RequestHeader(value = "X-Client-Id", required = false) String clientId,
             @RequestBody(required = false) Map<String, Object> config) {
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
         
         log.info("从远程应用商店安装中间件: pluginId={}, operator={}, targetNodeId={}, executionType={}, clientId={}, config={}",
-                pluginId, operatorName, targetNodeId, executionType, clientId, config);
+                pluginId, resolvedOperatorName, targetNodeId, executionType, clientId, config);
         
         try {
             if (clientId != null && !clientId.isEmpty()) {
@@ -304,7 +314,7 @@ public class MiddlewareManagementController {
                 
                 // 3. 调用中间件管理服务安装（传递配置数据）
                 Result<MiddlewareManagementService.MiddlewareInstallResult> installResult = 
-                    middlewareManagementService.installMiddleware(tmpFile, operatorName, targetNodeId, executionType, clientId, config);
+                    middlewareManagementService.installMiddleware(tmpFile, resolvedOperatorName, targetNodeId, executionType, clientId, config);
                 
                 if (!installResult.isSuccess()) {
                     String err = "安装中间件失败: " + installResult.getErrorMessage();
@@ -315,7 +325,7 @@ public class MiddlewareManagementController {
                     return Result.error(err);
                 }
                 
-                log.info("中间件安装成功: pluginId={}, operator={}", pluginId, operatorName);
+                log.info("中间件安装成功: pluginId={}, operator={}", pluginId, resolvedOperatorName);
                 if (clientId != null && !clientId.isEmpty()) {
                     installSsePublisher.sendSuccess(clientId, pluginId, "中间件安装成功");
                     installSsePublisher.sendComplete(clientId, pluginId);
@@ -568,4 +578,3 @@ public class MiddlewareManagementController {
     }
     
 }
-

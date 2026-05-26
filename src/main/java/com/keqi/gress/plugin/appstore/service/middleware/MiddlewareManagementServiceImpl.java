@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.PluginMetadataParser;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.common.utils.WorkspaceDirectoryUtils;
 
 import com.keqi.gress.plugin.appstore.domain.entity.MiddlewareDependencyEntity;
@@ -49,26 +49,26 @@ public class MiddlewareManagementServiceImpl implements MiddlewareManagementServ
 
    // private static final Log log = LogFactory.get(MiddlewareManagementServiceImpl.class);
 
-    @Inject
+    @Autowired
     private  MiddlewareWorkflowEngine workflowEngine;
-    @Inject
+    @Autowired
     private  WorkflowDefinitionParser workflowParser;
-    @Inject
+    @Autowired
     private  MiddlewareDependencyResolutionService dependencyResolutionService;
-    @Inject
+    @Autowired
     private  MiddlewareInfoRepository middlewareInfoRepository;
-    @Inject
+    @Autowired
     private  MiddlewareServiceRepository middlewareServiceRepository;
-    @Inject
+    @Autowired
     private  MiddlewareDependencyRepository middlewareDependencyRepository;
     
-    @Inject
+    @Autowired
     private AppStoreConfig appStoreConfig;
 
     /**
      * 节点管理服务（可选，如果未注入则使用本地执行环境）
      */
-    @Inject(required = false)
+    @Autowired(required = false)
     private NodeManagementService nodeManagementService;
 
 

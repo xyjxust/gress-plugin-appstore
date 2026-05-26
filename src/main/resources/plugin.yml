@@ -1,123 +1,149 @@
-# 应用商店插件配置
+# 应用商店插件清单（与 iam-service/plugin.yml 结构一致：plugin 元数据 + ui + config）
+plugin:
+  id: appstore
+  class: com.keqi.gress.plugin.appstore.AppStorePlugin
+  name: 应用商店
+  version: 1.1.0
+  provider: Gress Team
+  description: 应用商店插件，提供应用安装、升级与运维管理能力
+  license: MIT
+  requires: "*"
+  type: APPLICATION
+
+  ui:
+    hasWidget: true
+    hasPanel: false
+    surfaces:
+      admin: true
+      consumer: false
+    autoLoad:
+      admin: true
+      consumer: false
+    menus:
+      - id: aggregate-applications
+        title: 聚合应用管理
+        icon: Layers
+        path: /plugins/appstore/aggregate-applications
+        component: AggregateApplicationManagement
+        order: 49
+        apiPrefix: /api/v2/plugins/appstore/applications/aggregates
+        operations: [VIEW, MANAGE]
+
+      - id: applications
+        title: 应用管理
+        icon: Cube
+        path: /plugins/appstore/applications
+        component: ApplicationManagement
+        order: 50
+        apiPrefix: /api/v2/plugins/appstore/applications
+        operations: [VIEW, MANAGE]
+
+      - id: operation-logs
+        title: 操作日志
+        icon: DocumentText
+        path: /plugins/appstore/operation-logs
+        component: OperationLog
+        order: 51
+        apiPrefix: /api/v2/plugins/appstore/applications/operation-logs
+        operations: [VIEW]
+
+      - id: middlewares
+        title: 中间件管理
+        icon: Server
+        path: /plugins/appstore/middlewares
+        component: MiddlewareManagement
+        order: 52
+        apiPrefix: /api/v2/plugins/appstore/middlewares
+        operations: [VIEW, MANAGE]
+
+      - id: nodes
+        title: 节点管理
+        icon: ServerOutline
+        path: /plugins/appstore/nodes
+        component: NodeManagement
+        order: 53
+        apiPrefix: /api/v2/plugins/appstore/nodes
+        operations: [VIEW, MANAGE]
+
+      - id: stack-deploy
+        title: 多套部署
+        icon: RocketOutline
+        path: /plugins/appstore/stack-deploy
+        component: StackDeployment
+        order: 54
+        apiPrefix: /api/v2/plugins/appstore/stack-deploy
+        operations: [VIEW, MANAGE]
+
+      - id: plugin-monitor
+        title: 插件监控
+        icon: Activity
+        path: /plugins/appstore/monitor
+        component: PluginMonitorDashboard
+        order: 55
+        apiPrefix: /api/plugins/appstore/monitor
+        operations: [VIEW]
+
+  # 运行时业务配置（绑定到 AppStoreConfig，前缀 appstore；由 PluginManifestConfigExtractor 展平为 appstore.*）
 appstore:
-  # 应用商店基本信息
-  storeName: Gress 应用商店（开发环境）
-  storeUrl: http://localhost:8081/
-  
-  # 应用商店 API 配置
-  api:
-    # API 基础地址（指向 gress-plugin-appstore-admin 提供的 API）
-    baseUrl: http://localhost:8081/gress/plugins/appstore-admin/api/appstore
-    
-    # API 认证密钥（开发环境暂不需要）
-    secretKey: 
-    
-    # API 超时时间（毫秒）
-    timeout: 30000
-    
-    # 重试次数
-    maxRetries: 3
-    
-    # 是否启用 API 调用
-    enabled: true
-  
-  # 应用下载配置
-  download:
-    # 下载目录（开发环境使用相对路径）
-    directory: ./downloads/plugins
-    
-    # 下载超时时间（毫秒）
-    timeout: 300000
-    
-    # 最大并发下载数
-    maxConcurrent: 3
-    
-    # 下载完成后是否自动安装（开发环境建议手动安装）
-    autoInstall: false
-    
-    # 下载失败后是否自动重试
-    autoRetry: true
-  
-  # 应用信息同步配置
-  sync:
-    # 是否启用自动同步（开发环境可以禁用）
-    enabled: false
-    
-    # 同步间隔（秒）
-    interval: 3600
-    
-    # 同步时间（Cron 表达式，每天凌晨2点）
-    cron: 0 0 2 * * ?
-    
-    # 同步失败后重试次数
-    maxRetries: 3
-  
-  # 缓存配置
-  cache:
-    # 是否启用缓存（开发环境可以禁用以便调试）
-    enabled: false
-    
-    # 缓存过期时间（秒）
-    expireSeconds: 3600
-    
-    # 最大缓存条目数
-    maxSize: 1000
-  
-  # 安全配置
-  security:
-    # 是否验证应用签名（开发环境可以禁用）
-    verifySignature: false
-    
-    # 是否检查应用来源（开发环境可以禁用）
-    checkSource: false
-    
-    # 允许的应用来源列表
-    allowedSources:
-      - http://localhost:8080
-      - https://store.gress.io
-      - https://plugins.gress.io
-    
-    # 是否启用应用沙箱
-    enableSandbox: false
-  
-  # 应用类型配置
-  applicationTypes:
-    # 允许的应用类型
-    allowed:
-      - WORKFLOW
-      - APPLICATION
-      - TRIGGER
-      - TASK
-    
-    # 默认应用类型
-    defaultType: APPLICATION
-  
-  # 通知配置
-  notification:
-    # 是否启用通知（开发环境可以禁用）
-    enabled: false
-    
-    # 通知方式（email, webhook, system）
-    methods:
-      - system
-    
-    # 通知事件
-    events:
-      - application.installed
-      - application.upgraded
-      - application.uninstalled
-      - application.failed
-  
-  # 自定义属性
-  customProperties:
-    # 功能开关
-    feature.new-ui: enabled
-    feature.beta-test: enabled
-    
-    # 限制配置
-    max-upload-size: 100MB
-    max-applications: 100
-    
-    # 其他配置
-    default-language: zh-CN
-    support-email: support@gress.io
+      storeName: Gress 应用商店（开发环境）
+      storeUrl: http://localhost:8081/
+
+      api:
+        baseUrl: http://localhost:8081/gress/plugins/as-admin
+        secretKey: ""
+        timeout: 30000
+        maxRetries: 3
+        enabled: true
+
+      download:
+        directory: ./downloads/plugins
+        timeout: 300000
+        maxConcurrent: 3
+        autoInstall: false
+        autoRetry: true
+
+      sync:
+        enabled: false
+        interval: 3600
+        cron: "0 0 2 * * ?"
+        maxRetries: 3
+
+      cache:
+        enabled: false
+        expireSeconds: 3600
+        maxSize: 1000
+
+      security:
+        verifySignature: false
+        checkSource: false
+        allowedSources:
+          - http://localhost:8080
+          - https://store.gress.io
+          - https://plugins.gress.io
+        enableSandbox: false
+
+      applicationTypes:
+        allowed:
+          - WORKFLOW
+          - APPLICATION
+          - TRIGGER
+          - TASK
+        defaultType: APPLICATION
+
+      notification:
+        enabled: false
+        methods:
+          - system
+        events:
+          - application.installed
+          - application.upgraded
+          - application.uninstalled
+          - application.failed
+
+      customProperties:
+        feature.new-ui: enabled
+        feature.beta-test: enabled
+        max-upload-size: 100MB
+        max-applications: 100
+        default-language: zh-CN
+        support-email: support@gress.io

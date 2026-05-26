@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.middleware.workflow.executor;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import com.keqi.gress.plugin.appstore.service.MiddlewareManagementService;
 import com.keqi.gress.plugin.appstore.service.NodeManagementService;
@@ -46,13 +46,13 @@ public class DockerComposeStepExecutor implements WorkflowStepExecutor {
     /**
      * 节点管理服务（可选，如果未注入则使用本地执行环境）
      */
-    @Inject
+    @Autowired
     private NodeManagementService nodeManagementService;
 
     /**
      * SSE 日志发布器（可选，如果未注入则不推送日志）
      */
-    @Inject
+    @Autowired
     private MiddlewareInstallSsePublisher installSsePublisher;
     
     @Override

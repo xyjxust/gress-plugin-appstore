@@ -1,11 +1,12 @@
 package com.keqi.gress.plugin.appstore.config;
 
 
-import com.keqi.gress.common.plugin.annotion.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import  com.keqi.gress.common.plugin.annotion.FormField;
 import  com.keqi.gress.common.plugin.dto.Input;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import java.util.Map;
  * 配置类会被 BeanDefinitionScanner 自动扫描、创建实例并绑定配置值
  */
 @Data
-@ConfigurationProperties(prefix = "appstore", order = -100)
+@ConfigurationProperties(prefix = "appstore")
 public class AppStoreConfig implements Input {
     
     /**
@@ -53,7 +54,7 @@ public class AppStoreConfig implements Input {
         order = 10,
         group = "api"
     )
-    private ApiConfig api;
+    private ApiConfig api = new ApiConfig();
     
     /**
      * 下载配置
@@ -65,7 +66,7 @@ public class AppStoreConfig implements Input {
         order = 20,
         group = "download"
     )
-    private DownloadConfig download;
+    private DownloadConfig download = new DownloadConfig();
     
     /**
      * 同步配置
@@ -77,7 +78,7 @@ public class AppStoreConfig implements Input {
         order = 30,
         group = "sync"
     )
-    private SyncConfig sync;
+    private SyncConfig sync = new SyncConfig();
     
     /**
      * 缓存配置
@@ -89,7 +90,7 @@ public class AppStoreConfig implements Input {
         order = 40,
         group = "cache"
     )
-    private CacheConfig cache;
+    private CacheConfig cache  = new CacheConfig();
     
     /**
      * 安全配置
@@ -101,7 +102,7 @@ public class AppStoreConfig implements Input {
         order = 50,
         group = "security"
     )
-    private SecurityConfig security;
+    private SecurityConfig security  = new SecurityConfig();
     
     /**
      * 应用类型配置
@@ -113,7 +114,7 @@ public class AppStoreConfig implements Input {
         order = 60,
         group = "applicationTypes"
     )
-    private ApplicationTypesConfig applicationTypes;
+    private ApplicationTypesConfig applicationTypes = new ApplicationTypesConfig();
     
     /**
      * 通知配置
@@ -125,7 +126,7 @@ public class AppStoreConfig implements Input {
         order = 70,
         group = "notification"
     )
-    private NotificationConfig notification;
+    private NotificationConfig notification = new NotificationConfig();
     
     /**
      * 自定义属性
@@ -137,7 +138,7 @@ public class AppStoreConfig implements Input {
         order = 80,
         group = "customProperties"
     )
-    private Map<String, String> customProperties;
+    private Map<String, String> customProperties = new HashMap<>();
     
     /**
      * API 配置
@@ -158,17 +159,30 @@ public class AppStoreConfig implements Input {
         private String baseUrl;
         
         /**
-         * API 认证密钥
+         * API Secret（签名密钥）
          */
         @FormField(
-            label = "API 密钥",
-            description = "用于 API 认证的密钥",
+            label = "API Secret",
+            description = "用于 API 请求签名的 Secret（与 KeyId 配对）",
             type = FormField.FieldType.STRING,
             required = true,
-            placeholder = "请输入 API 密钥",
-            order = 2
+            placeholder = "请输入 API Secret",
+            order = 3
         )
         private String secretKey;
+
+        /**
+         * API KeyId（配合签名使用）
+         */
+        @FormField(
+            label = "API KeyId",
+            description = "用于 API 认证的 KeyId（与 Secret 配对）",
+            type = FormField.FieldType.STRING,
+            required = false,
+            placeholder = "请输入 KeyId",
+            order = 2
+        )
+        private String keyId;
         
         /**
          * API 超时时间（毫秒）

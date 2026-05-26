@@ -4,8 +4,8 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.alibaba.fastjson2.JSON;
 import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import com.keqi.gress.plugin.appstore.domain.entity.NodeInfoEntity;
 import com.keqi.gress.plugin.appstore.service.NodeManagementService;
@@ -22,7 +22,7 @@ import java.util.Optional;
 /**
  * 节点管理服务（持久化实现）
  *
- * - 使用 sys_node_info 表保存节点信息
+ * - 使用 appstore_node_info 表保存节点信息
  * - config 字段以 JSON 存储，前端可自由扩展
  */
 @Service
@@ -31,7 +31,7 @@ public class NodeManagementServiceImpl implements NodeManagementService {
 
    // private static final Log log = LogFactory.get(NodeManagementServiceImpl.class);
 
-    @Inject
+    @Autowired
     private NodeInfoRepository nodeInfoRepository;
 
     @Override

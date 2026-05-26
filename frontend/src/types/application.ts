@@ -44,10 +44,12 @@ export interface Application {
   aggregateApp?: boolean
   aggregatedPluginIds?: string[]
   icon?: string
-  hasFrontend?: boolean
+  surfaceAdmin?: boolean
+  surfaceConsumer?: boolean
+  autoLoadAdmin?: boolean
+  autoLoadConsumer?: boolean
   /** 聚合应用列表排序权重（越小越靠前） */
   aggregateListOrder?: number
-  autoLoad?: boolean
 }
 
 export interface AggregateApplicationRequest {
@@ -57,6 +59,7 @@ export interface AggregateApplicationRequest {
   icon?: string
   aggregateListOrder?: number
   pluginIds: string[]
+  /** 对应后端聚合应用的 autoLoadAdmin */
   autoLoad?: boolean
 }
 
@@ -90,6 +93,10 @@ export interface ApplicationQueryRequest {
   status?: number
   applicationType?: ApplicationType
   pluginId?: string
+  clientType?: 'B' | 'C'
+  preloadEnabled?: 0 | 1
+  tag?: string
+  category?: string
 }
 
 /**
@@ -97,16 +104,16 @@ export interface ApplicationQueryRequest {
  */
 export interface ApplicationUpgradeRequest {
   targetVersion: string
-  operatorId: string
-  operatorName: string
+  operatorId?: string
+  operatorName?: string
 }
 
 /**
  * 应用卸载请求
  */
 export interface ApplicationUninstallRequest {
-  operatorId: string
-  operatorName: string
+  operatorId?: string
+  operatorName?: string
   reason: string
 }
 

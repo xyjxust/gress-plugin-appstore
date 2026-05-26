@@ -1,8 +1,7 @@
 package com.keqi.gress.plugin.appstore.service.monitor;
 
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Scheduled;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.MonitorHistoryDao;
 import com.keqi.gress.plugin.appstore.domain.entity.PluginMonitorSnapshot;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMonitorStatus;
@@ -21,23 +20,23 @@ import java.util.Map;
 @Service
 public class MonitorSnapshotScheduler {
     
-    @Inject
+    @Autowired
     private PluginStatusCollector statusCollector;
     
-    @Inject
+    @Autowired
     private PluginMemoryCollector memoryCollector;
     
-    @Inject
+    @Autowired
     private MonitorHistoryDao historyDao;
     
-    @Inject
+    @Autowired
     private PluginStateChangeListener stateChangeListener;
     
     /**
      * 定时保存监控快照
      * 每分钟执行一次
      */
-    @Scheduled(cron = "0 * * * * ?")
+    // @Scheduled(cron = "0 * * * * ?")
     public void saveMonitorSnapshots() {
         try {
 

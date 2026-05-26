@@ -14,8 +14,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class ApplicationConfigDTO {
     
-    /** 是否自动加载（系统启动时自动加载插件） */
-    private Boolean autoLoad;
+    /** 管理壳是否预加载前端 */
+    private Boolean autoLoadAdmin;
+
+    /** C 端是否预加载前端 */
+    private Boolean autoLoadConsumer;
     
     /** 是否启动时加载（插件加载后立即启动） */
     private Boolean loadOnStartup;

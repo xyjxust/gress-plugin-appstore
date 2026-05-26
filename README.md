@@ -542,11 +542,16 @@ mvn clean package -DskipTests
 ### 插件配置
 
 ```yaml
-# plugin-ui.yml
-appstore:
-  remoteUrl: https://appstore.example.com
-  autoUpdate: true
-  checkInterval: 3600
+# plugin.yml（业务配置在 plugin.config.appstore；菜单在 plugin.ui）
+plugin:
+  id: appstore
+  ui:
+    menus: []
+  config:
+    appstore:
+      storeUrl: https://appstore.example.com
+      api:
+        baseUrl: https://...
 ```
 
 ### 数据库表

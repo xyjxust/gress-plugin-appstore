@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@keqi.gress/plugin-bridge": "^1.0.0",
-    "@keqi.gress/plugin-ui": "^1.0.1",
+    "@keqi.gress/plugin-ui": "file:../../gress/gress-plugin-packages/plugin-ui",
     "@keqi.gress/shared-utils": "^1.0.3",
     "echarts": "^6.0.0",
     "naive-ui": "^2.38.0",

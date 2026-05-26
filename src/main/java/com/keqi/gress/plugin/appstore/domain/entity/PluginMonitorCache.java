@@ -1,12 +1,12 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
-import com.keqi.gress.plugin.api.database.annotation.IdType;
 import com.keqi.gress.plugin.api.database.annotation.TableField;
-import com.keqi.gress.plugin.api.database.annotation.TableId;
 import com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -17,12 +17,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @TableName("appstore_plugin_monitor_cache")
-public class PluginMonitorCache {
-    
-    /** 主键ID */
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class PluginMonitorCache extends BaseEntity {
     
     /** 插件ID */
     @TableField("plugin_id")
@@ -36,9 +33,9 @@ public class PluginMonitorCache {
     @TableField("cache_type")
     private String cacheType;
     
-    /** 创建时间（时间戳，毫秒） */
-    @TableField("create_time")
-    private Long createTime;
+    /** 缓存创建时间（时间戳，毫秒） */
+    @TableField("cache_create_time")
+    private Long cacheCreateTime;
     
     /** 过期时间（时间戳，毫秒） */
     @TableField("expire_time")

@@ -1048,7 +1048,6 @@ async function handleFileSelected() {
   try {
     const fd = new FormData()
     fd.append('file', file)
-    fd.append('operatorName', 'admin')
     const r = await middlewareApi.uploadAndInstall(fd)
     message.success(`安装成功: ${r.middlewareId}`)
     await loadLocalData()
@@ -1077,7 +1076,7 @@ function handleUninstall(row: MiddlewareInfo) {
     positiveText: '卸载',
     negativeText: '取消',
     onPositiveClick: async () => {
-        await middlewareApi.uninstall(row.id, 'admin')
+        await middlewareApi.uninstall(row.id)
         message.success('卸载成功')
         await loadLocalData()
 

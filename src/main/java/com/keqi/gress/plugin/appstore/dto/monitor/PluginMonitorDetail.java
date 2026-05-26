@@ -21,7 +21,7 @@ public class PluginMonitorDetail {
     private PluginMonitorStatus status;
     
     /** 内存信息 */
-    private PluginMemoryInfo memoryInfo;
+    private Map<String, Object> memoryInfo;
     
     /** 插件元数据（作者、描述、主页等） */
     private Map<String, Object> metadata;

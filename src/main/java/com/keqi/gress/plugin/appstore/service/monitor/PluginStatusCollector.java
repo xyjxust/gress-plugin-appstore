@@ -3,8 +3,8 @@ package com.keqi.gress.plugin.appstore.service.monitor;
 import com.keqi.gress.common.model.Result;
 import com.keqi.gress.common.plugin.PluginPackageLifecycle;
 import com.keqi.gress.common.plugin.PluginPackageRuntimeInfo;
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.ApplicationDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.dto.monitor.ClassLoaderInfo;
@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 @Service
 public class PluginStatusCollector {
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginPackageLifecycle pluginLifecycle;
     
-    @Inject
+    @Autowired
     private ApplicationDao applicationDao;
     
     /**

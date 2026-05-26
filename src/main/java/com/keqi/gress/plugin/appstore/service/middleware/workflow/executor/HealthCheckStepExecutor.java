@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.middleware.workflow.executor;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import com.keqi.gress.plugin.appstore.service.NodeManagementService;
 import com.keqi.gress.plugin.appstore.service.middleware.execution.ExecutionEnvironment;
@@ -44,7 +44,7 @@ public class HealthCheckStepExecutor implements WorkflowStepExecutor {
     /**
      * 节点管理服务（可选，如果未注入则使用本地执行环境）
      */
-    @Inject
+    @Autowired
     private NodeManagementService nodeManagementService;
     
     @Override

@@ -1,23 +1,19 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
-import  com.keqi.gress.plugin.api.database.annotation.IdType;
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
-import  com.keqi.gress.plugin.api.database.annotation.TableId;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * 应用升级日志
  * 用于记录每次升级的结果，便于后续回滚或审计
  */
 @Data
-@TableName("sys_application_upgrade_log")
-public class SysApplicationUpgradeLog {
-
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+@TableName("appstore_application_upgrade_log")
+public class SysApplicationUpgradeLog extends BaseEntity {
 
     /** 关联的应用ID */
     @TableField("application_id")
@@ -55,8 +51,5 @@ public class SysApplicationUpgradeLog {
     @TableField("message")
     private String message;
 
-    /** 创建时间 */
-    @TableField("create_time")
-    private LocalDateTime createTime = LocalDateTime.now();
 }
 

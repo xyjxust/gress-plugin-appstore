@@ -1,11 +1,9 @@
 package com.keqi.gress.plugin.appstore.service;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.PostConstruct;
-import  com.keqi.gress.common.plugin.annotion.PreDestroy;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  jakarta.annotation.PostConstruct;
+import  jakarta.annotation.PreDestroy;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.config.AppStoreConfig;
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -21,19 +19,19 @@ import java.util.concurrent.TimeUnit;
  * 定期从远程 API 同步应用信息到本地数据库
  */
 // @Slf4j
-@Service(order = 20)
+@Service
 @Slf4j
 public class AppStoreSyncService {
 
    // private final Log log = LogFactory.get(AppStoreSyncService.class);
     
-    @Inject
+    @Autowired
     private AppStoreConfig config;
     
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private AppStoreApiService apiService;
     
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private ApplicationManagementService managementService;
     
     private ScheduledExecutorService scheduler;
@@ -45,7 +43,7 @@ public class AppStoreSyncService {
         
         AppStoreConfig.SyncConfig syncConfig = config.getSync();
         
-        if (!syncConfig.getEnabled()) {
+        if (!Boolean.TRUE.equals(syncConfig.getEnabled())) {
             log.info("应用同步未启用");
             return;
         }

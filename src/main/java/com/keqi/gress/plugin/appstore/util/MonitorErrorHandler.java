@@ -4,6 +4,8 @@ import com.keqi.gress.plugin.appstore.dto.monitor.PluginMemoryInfo;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMonitorStatus;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
+
 /**
  * 监控错误处理器
  * 负责处理监控数据收集过程中的各种错误情况
@@ -62,15 +64,35 @@ public class MonitorErrorHandler {
      * @param pluginId 插件ID
      * @return 标记为不可用的内存信息对象
      */
-    public static PluginMemoryInfo handleMemoryUnavailable(String pluginId) {
+    public static Map<String, Object> handleMemoryUnavailable(String pluginId) {
         log.debug("插件内存信息不可用: pluginId={}", pluginId);
         
-        return PluginMemoryInfo.builder()
-                .usedMemory(0L)
-                .formattedMemory("不可用")
-                .totalJvmMemory(Runtime.getRuntime().totalMemory())
-                .freeJvmMemory(Runtime.getRuntime().freeMemory())
-                .maxJvmMemory(Runtime.getRuntime().maxMemory())
-                .build();
+        PluginMemoryInfo info = PluginMemoryInfo.builder()
+            .usedMemory(0L)
+            .formattedMemory("不可用")
+            .totalJvmMemory(Runtime.getRuntime().totalMemory())
+            .freeJvmMemory(Runtime.getRuntime().freeMemory())
+            .maxJvmMemory(Runtime.getRuntime().maxMemory())
+            .build();
+        return toMemoryInfoMap(info);
+    }
+
+    public static Map<String, Object> toMemoryInfoMap(PluginMemoryInfo info) {
+        if (info == null) {
+            return Map.of(
+                "usedMemory", 0L,
+                "formattedMemory", "不可用",
+                "totalJvmMemory", Runtime.getRuntime().totalMemory(),
+                "freeJvmMemory", Runtime.getRuntime().freeMemory(),
+                "maxJvmMemory", Runtime.getRuntime().maxMemory()
+            );
+        }
+        return Map.of(
+            "usedMemory", info.getUsedMemory(),
+            "formattedMemory", info.getFormattedMemory(),
+            "totalJvmMemory", info.getTotalJvmMemory(),
+            "freeJvmMemory", info.getFreeJvmMemory(),
+            "maxJvmMemory", info.getMaxJvmMemory()
+        );
     }
 }

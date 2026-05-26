@@ -4,8 +4,8 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.PluginMetadataParser;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import com.keqi.gress.plugin.appstore.service.MiddlewareManagementService;
 import com.keqi.gress.plugin.appstore.service.install.MiddlewareDependencyInstaller;
@@ -30,11 +30,11 @@ import java.util.*;
 public class MiddlewareDependencyResolutionService {
     
    // private static final Log log = LogFactory.get(MiddlewareDependencyResolutionService.class);
-    @Inject
+    @Autowired
     private MiddlewareManagementService middlewareManagementService;
     
     // 可选依赖：中间件依赖安装器（来自 appstore 插件）
-    @Inject
+    @Autowired
     private MiddlewareDependencyInstaller middlewareDependencyInstaller;  // 使用 Object 避免编译时依赖
     
 

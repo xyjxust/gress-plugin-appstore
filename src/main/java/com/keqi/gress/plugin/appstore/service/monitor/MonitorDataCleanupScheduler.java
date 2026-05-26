@@ -1,8 +1,8 @@
 package com.keqi.gress.plugin.appstore.service.monitor;
 
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Scheduled;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.MonitorHistoryDao;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class MonitorDataCleanupScheduler {
     
-    @Inject
+    @Autowired
     private MonitorHistoryDao historyDao;
     
     /**
@@ -26,7 +26,7 @@ public class MonitorDataCleanupScheduler {
      * 定时清理过期数据
      * 每天凌晨 3 点执行
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    // @Scheduled(cron = "0 0 3 * * ?")
     public void cleanupExpiredData() {
         try {
 

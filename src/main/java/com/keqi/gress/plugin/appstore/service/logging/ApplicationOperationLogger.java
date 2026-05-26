@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.logging;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.service.ApplicationOperationLogService;
 
@@ -24,7 +24,7 @@ public class ApplicationOperationLogger {
     
     private static final Log log = LogFactory.get(ApplicationOperationLogger.class);
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogService operationLogService;
     
     /**

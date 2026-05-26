@@ -20,7 +20,7 @@ import org.pf4j.Plugin;
 @Extension
 @PluginSpec(
         id = "${plugin.id}",
-        name = "应用商店",
+        name = "应用管理",
         description = "${plugin.description}",
         version = "${plugin.version}",
         author = "${plugin.provider}",

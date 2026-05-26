@@ -2,13 +2,11 @@ package com.keqi.gress.plugin.appstore.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.PluginPackageInstallResult;
-import  com.keqi.gress.common.plugin.PluginPackageLifecycle;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
-import  com.keqi.gress.common.storage.FileStorageService;
-import  com.keqi.gress.plugin.api.database.page.IPage;
+import com.keqi.gress.common.model.Result;
+import com.keqi.gress.common.plugin.PluginPackageInstallResult;
+import com.keqi.gress.common.plugin.PluginPackageLifecycle;
+import com.keqi.gress.common.storage.FileStorageService;
+import com.keqi.gress.plugin.api.database.page.IPage;
 import com.keqi.gress.plugin.appstore.dao.ApplicationDao;
 import com.keqi.gress.plugin.appstore.dao.ApplicationUpgradeLogDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
@@ -20,13 +18,17 @@ import com.keqi.gress.plugin.appstore.service.orchestrator.UpgradeOrchestrator;
 import com.keqi.gress.plugin.appstore.service.orchestrator.UninstallOrchestrator;
 import com.keqi.gress.plugin.appstore.service.persistence.ApplicationPersistenceService;
 import com.keqi.gress.plugin.appstore.service.logging.ApplicationOperationLogger;
+import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,39 +61,42 @@ public class ApplicationManagementService {
     
     // === 核心组件（编排器） ===
     
-    @Inject
+    @Autowired
     private InstallOrchestrator installOrchestrator;
     
-    @Inject
+    @Autowired
     private UpgradeOrchestrator upgradeOrchestrator;
     
-    @Inject
+    @Autowired
     private UninstallOrchestrator uninstallOrchestrator;
     
     // === 基础服务 ===
     
-    @Inject
+    @Autowired
     private ApplicationPersistenceService persistenceService;
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogger operationLogger;
     
-    @Inject
+    @Autowired
     private ApplicationDao applicationDao;
     
-    @Inject
+    @Autowired
     private ApplicationUpgradeLogDao applicationUpgradeLogDao;
     
-    @Inject
+    @Autowired
     private com.keqi.gress.plugin.appstore.dao.ApplicationOperationLogDao applicationOperationLogDao;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginPackageLifecycle pluginPackageLifecycle;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private AppStoreApiService appStoreApiService;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private  com.keqi.gress.common.plugin.PluginConfigMetadataProvider pluginConfigMetadataProvider;
     
     // ==================== 查询相关 ====================
@@ -107,7 +112,10 @@ public class ApplicationManagementService {
                 request.getKeyword(),
                 request.getStatus(),
                 request.getApplicationType(),
-                request.getPluginId()
+                request.getPluginId(),
+                request.getClientType(),
+                request.getPreloadEnabled(),
+                request.getTag()
             );
             
             List<ApplicationDTO> applications = page.getRecords().stream()
@@ -166,7 +174,7 @@ public class ApplicationManagementService {
         try {
             List<ApplicationDTO> list = applicationDao.findAll().stream()
                     .filter(app -> !"aggregated".equalsIgnoreCase(app.getApplicationType()))
-                    .filter(this::hasFrontendFlagFromEntity)
+                    .filter(this::surfaceAdminFlagFromEntity)
                     .map(this::mapToApplicationDTO)
                     .collect(Collectors.toList());
             return Result.success(list);
@@ -176,10 +184,10 @@ public class ApplicationManagementService {
         }
     }
 
-    /** 仅允许将带前端（菜单/路由）的插件纳入聚合 */
-    private boolean hasFrontendFlagFromEntity(SysApplication app) {
+    /** 仅允许将声明了 B 端表面的插件纳入聚合 */
+    private boolean surfaceAdminFlagFromEntity(SysApplication app) {
         Map<String, Object> ext = parseExtConfig(app.getExtensionConfig());
-        return Boolean.TRUE.equals(ext.get("hasFrontend"));
+        return Boolean.TRUE.equals(ext.get("surfaceAdmin"));
     }
 
     /**
@@ -225,9 +233,18 @@ public class ApplicationManagementService {
      * 上传并安装应用
      */
     public Result<Void> uploadAndInstall(MultipartFile file, String operatorId, String operatorName) {
+        return uploadAndInstall(file, operatorId, operatorName, null);
+    }
+
+    public Result<Void> uploadAndInstall(
+            MultipartFile file,
+            String operatorId,
+            String operatorName,
+            Map<String, Object> installConfig) {
         long startTime = System.currentTimeMillis();
         SysApplication tempApp = createTempApp("上传的应用", "unknown");
-        
+        String uploadedFileUrl = null;
+
         try {
             // 1. 验证文件
             if (file == null || file.isEmpty()) {
@@ -243,7 +260,7 @@ public class ApplicationManagementService {
                     originalFilename, file.getSize(), operatorName);
             
             // 2. 上传文件到存储服务
-            String fileUrl = fileStorageService
+            uploadedFileUrl = fileStorageService
                 .upload(new ByteArrayInputStream(file.getBytes()), originalFilename)
                 .withMetadata("category", "plugin")
                 .withMetadata("uploadBy", operatorName)
@@ -251,19 +268,21 @@ public class ApplicationManagementService {
                 .onError(e -> log.error("应用包文件上传失败", e))
                 .get();
             
-            if (fileUrl == null || fileUrl.isEmpty()) {
+            if (uploadedFileUrl == null || uploadedFileUrl.isEmpty()) {
                 return Result.error("文件上传失败");
             }
             
-            log.info("应用包文件上传成功: fileUrl={}", fileUrl);
+            log.info("应用包文件上传成功: fileUrl={}", uploadedFileUrl);
             
-            // 2. 委托给 InstallOrchestrator 执行安装
+            // 3. 委托给 InstallOrchestrator 执行安装
             Result<PluginPackageInstallResult> installResult = 
-                    installOrchestrator.installFromUrl(fileUrl, operatorName);
+                    // 本地上传安装：不从应用商店下载表权限数据
+                    installOrchestrator.installFromUrl(uploadedFileUrl, operatorName, false, installConfig);
             
             if (!installResult.isSuccess()) {
                 operationLogger.logFailure(tempApp, "INSTALL", "上传并安装应用", 
                         operatorId, operatorName, installResult.getErrorMessage(), startTime);
+                deleteUploadedPluginArtifactSilently(uploadedFileUrl);
                 return Result.error(installResult.getErrorMessage());
             }
             
@@ -272,9 +291,31 @@ public class ApplicationManagementService {
             
         } catch (Exception e) {
             log.error("上传并安装应用失败", e);
+            deleteUploadedPluginArtifactSilently(uploadedFileUrl);
             operationLogger.logFailure(tempApp, "INSTALL", "上传并安装应用", 
                     operatorId, operatorName, "异常: " + e.getMessage(), startTime);
             return Result.error("上传并安装应用失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 上传安装失败时删除对象存储中的插件包，避免残留占用空间。
+     */
+    private void deleteUploadedPluginArtifactSilently(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return;
+        }
+        try {
+            Result<Boolean> del = fileStorageService.delete(fileUrl).execute();
+            if (del.isSuccess() && Boolean.TRUE.equals(del.getData())) {
+                log.info("安装失败，已删除上传的插件包存储文件: {}", fileUrl);
+            } else if (del.isSuccess()) {
+                log.warn("安装失败，删除上传文件返回 false（可能已不存在）: {}", fileUrl);
+            } else {
+                log.warn("安装失败，删除上传文件未成功: url={}, msg={}", fileUrl, del.getErrorMessage());
+            }
+        } catch (Exception ex) {
+            log.warn("安装失败，删除上传文件异常（忽略）: {}", fileUrl, ex);
         }
     }
     
@@ -290,9 +331,46 @@ public class ApplicationManagementService {
      */
     public Result<PluginPackageInstallResult> installApplicationFromAppStore(
             String pluginId, String version, String operatorName) {
-        return installOrchestrator.installFromAppStore(pluginId, version, operatorName);
+        return installApplicationFromAppStore(pluginId, version, operatorName, null);
     }
-    
+
+    public Result<PluginPackageInstallResult> installApplicationFromAppStore(
+            String pluginId, String version, String operatorName, Map<String, Object> installConfig) {
+        return installOrchestrator.installFromAppStore(pluginId, version, operatorName, installConfig);
+    }
+
+    public Result<List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata>> getRemoteInstallConfigMetadata(String pluginId) {
+        try {
+            return Result.success(appStoreApiService.getPluginInstallConfigMetadataFromJar(pluginId));
+        } catch (Exception e) {
+            log.error("获取远程安装前配置元数据失败: pluginId={}", pluginId, e);
+            return Result.error("获取安装前配置元数据失败: " + e.getMessage());
+        }
+    }
+
+    public Result<List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata>> getUploadInstallConfigMetadata(MultipartFile file) {
+        java.nio.file.Path tmpJarPath = null;
+        try {
+            if (file == null || file.isEmpty()) {
+                return Result.error("文件不能为空");
+            }
+            tmpJarPath = java.nio.file.Files.createTempFile("plugin-upload-install-config-", ".jar");
+            file.transferTo(tmpJarPath);
+            return Result.success(appStoreApiService.parseInstallConfigMetadataFromJar(tmpJarPath));
+        } catch (Exception e) {
+            log.error("获取上传安装前配置元数据失败", e);
+            return Result.error("获取安装前配置元数据失败: " + e.getMessage());
+        } finally {
+            if (tmpJarPath != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(tmpJarPath);
+                } catch (Exception e) {
+                    log.warn("清理上传安装前配置临时文件失败: {}", tmpJarPath, e);
+                }
+            }
+        }
+    }
+
     // ==================== 升级相关（委托给 UpgradeOrchestrator） ====================
     
     /**
@@ -326,6 +404,8 @@ public class ApplicationManagementService {
     public Result<Void> startApplication(Long id, String operatorName) {
         long startTime = System.currentTimeMillis();
         SysApplication application = null;
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
+        String resolvedOperatorId = OperatorContextHelper.getOperatorId();
         
         try {
             application = persistenceService.findById(id);
@@ -334,18 +414,18 @@ public class ApplicationManagementService {
             }
             
             String packageId = application.getPluginId();
-            log.info("启动应用: id={}, packageId={}, operator={}", id, packageId, operatorName);
+            log.info("启动应用: id={}, packageId={}, operator={}", id, packageId, resolvedOperatorName);
             
             Result<?> result = pluginPackageLifecycle.start(packageId);
             
             if (result.isSuccess()) {
-                persistenceService.updateStatus(id, 1, operatorName);
+                persistenceService.updateStatus(id, 1, resolvedOperatorName);
                 operationLogger.logSuccess(application, "START", "启动应用", 
-                        "admin", operatorName, "启动成功", startTime);
+                        resolvedOperatorId, resolvedOperatorName, "启动成功", startTime);
                 return Result.success();
             } else {
                 operationLogger.logFailure(application, "START", "启动应用", 
-                        "admin", operatorName, "启动失败: " + result.getErrorMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "启动失败: " + result.getErrorMessage(), startTime);
                 return Result.error("启动应用失败: " + result.getErrorMessage());
             }
             
@@ -353,7 +433,7 @@ public class ApplicationManagementService {
             log.error("启动应用失败: id={}", id, e);
             if (application != null) {
                 operationLogger.logFailure(application, "START", "启动应用", 
-                        "admin", operatorName, "异常: " + e.getMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "异常: " + e.getMessage(), startTime);
             }
             return Result.error("启动应用失败: " + e.getMessage());
         }
@@ -365,6 +445,8 @@ public class ApplicationManagementService {
     public Result<Void> stopApplication(Long id, String operatorName) {
         long startTime = System.currentTimeMillis();
         SysApplication application = null;
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
+        String resolvedOperatorId = OperatorContextHelper.getOperatorId();
         
         try {
             application = persistenceService.findById(id);
@@ -373,18 +455,18 @@ public class ApplicationManagementService {
             }
             
             String packageId = application.getPluginId();
-            log.info("停止应用: id={}, packageId={}, operator={}", id, packageId, operatorName);
+            log.info("停止应用: id={}, packageId={}, operator={}", id, packageId, resolvedOperatorName);
             
             Result<?> result = pluginPackageLifecycle.stop(packageId);
             
             if (result.isSuccess()) {
-                persistenceService.updateStatus(id, 0, operatorName);
+                persistenceService.updateStatus(id, 0, resolvedOperatorName);
                 operationLogger.logSuccess(application, "STOP", "停止应用", 
-                        "admin", operatorName, "停止成功", startTime);
+                        resolvedOperatorId, resolvedOperatorName, "停止成功", startTime);
                 return Result.success();
             } else {
                 operationLogger.logFailure(application, "STOP", "停止应用", 
-                        "admin", operatorName, "停止失败: " + result.getErrorMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "停止失败: " + result.getErrorMessage(), startTime);
                 return Result.error("停止应用失败: " + result.getErrorMessage());
             }
             
@@ -392,7 +474,7 @@ public class ApplicationManagementService {
             log.error("停止应用失败: id={}", id, e);
             if (application != null) {
                 operationLogger.logFailure(application, "STOP", "停止应用", 
-                        "admin", operatorName, "异常: " + e.getMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "异常: " + e.getMessage(), startTime);
             }
             return Result.error("停止应用失败: " + e.getMessage());
         }
@@ -404,6 +486,8 @@ public class ApplicationManagementService {
     public Result<Void> restartApplication(Long id, String operatorName) {
         long startTime = System.currentTimeMillis();
         SysApplication application = null;
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
+        String resolvedOperatorId = OperatorContextHelper.getOperatorId();
         
         try {
             application = persistenceService.findById(id);
@@ -412,17 +496,17 @@ public class ApplicationManagementService {
             }
             
             String packageId = application.getPluginId();
-            log.info("重启应用: id={}, packageId={}, operator={}", id, packageId, operatorName);
+            log.info("重启应用: id={}, packageId={}, operator={}", id, packageId, resolvedOperatorName);
             
             Result<?> result = pluginPackageLifecycle.restart(packageId);
             
             if (result.isSuccess()) {
                 operationLogger.logSuccess(application, "RESTART", "重启应用", 
-                        "admin", operatorName, "重启成功", startTime);
+                        resolvedOperatorId, resolvedOperatorName, "重启成功", startTime);
                 return Result.success();
             } else {
                 operationLogger.logFailure(application, "RESTART", "重启应用", 
-                        "admin", operatorName, "重启失败: " + result.getErrorMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "重启失败: " + result.getErrorMessage(), startTime);
                 return Result.error("重启应用失败: " + result.getErrorMessage());
             }
             
@@ -430,7 +514,7 @@ public class ApplicationManagementService {
             log.error("重启应用失败: id={}", id, e);
             if (application != null) {
                 operationLogger.logFailure(application, "RESTART", "重启应用", 
-                        "admin", operatorName, "异常: " + e.getMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "异常: " + e.getMessage(), startTime);
             }
             return Result.error("重启应用失败: " + e.getMessage());
         }
@@ -577,7 +661,7 @@ public class ApplicationManagementService {
             
             ApplicationConfigDTO config = new ApplicationConfigDTO();
             
-            // 从 extension_config JSON 字段中解析配置（嵌套格式）
+            // 从 extension_config JSON 解析（推荐拍平键；历史数据可能为嵌套，GET 出口仍会 nestedToFlat）
             Map<String, Object> allConfig = new HashMap<>();
             if (application.getExtensionConfig() != null && !application.getExtensionConfig().isEmpty()) {
                 try {
@@ -595,10 +679,13 @@ public class ApplicationManagementService {
                 allConfig = new HashMap<>();
             }
             
-            // 从总配置中还原通用应用配置字段
-            Object autoLoadVal = allConfig.get("autoLoad");
-            if (autoLoadVal != null) {
-                config.setAutoLoad(parseBoolean(autoLoadVal));
+            Object autoLoadAdminVal = allConfig.get("autoLoadAdmin");
+            if (autoLoadAdminVal != null) {
+                config.setAutoLoadAdmin(parseBoolean(autoLoadAdminVal));
+            }
+            Object autoLoadConsumerVal = allConfig.get("autoLoadConsumer");
+            if (autoLoadConsumerVal != null) {
+                config.setAutoLoadConsumer(parseBoolean(autoLoadConsumerVal));
             }
             
             Object loadOnStartupVal = allConfig.get("loadOnStartup");
@@ -657,52 +744,63 @@ public class ApplicationManagementService {
                 }
             }
             
-            // extension_config JSON 中统一保存：
-            // - 通用应用配置：autoLoad / loadOnStartup / startPriority / startDelay / description
-            // - 插件扩展配置：extensionConfig
-            Map<String, Object> nestedConfig = config.getExtensionConfig();
-            if (nestedConfig == null) {
-                nestedConfig = new HashMap<>();
+            // extension_config JSON 与 GET /applications/{id}/config、PluginConfigLoader 约定一致：
+            // 使用「拍平」结构持久化（键如 appstore.storeUrl），不再 flatToNested。
+            // 否则会把带点号的键收成嵌套对象，与前端提交的 extensionConfig 不一致，且 PluginConfigLoader
+            // 从 DB 读出的嵌套 Map 与 plugin.yml 展平结果合并时行为混乱。
+            Map<String, Object> flatExtensionConfig = config.getExtensionConfig();
+            if (flatExtensionConfig == null) {
+                flatExtensionConfig = new HashMap<>();
             }
-            
-            // 合并通用配置字段到同一个 Map 中，确保它们也被持久化到 extension_config
-            if (config.getAutoLoad() != null) {
-                nestedConfig.put("autoLoad", config.getAutoLoad());
+
+            Map<String, Object> flatToPersist = new LinkedHashMap<>(flatExtensionConfig);
+
+            // DTO 顶层字段覆盖 extensionConfig 中同名键（请求体常同时带两份）
+            if (config.getAutoLoadAdmin() != null) {
+                flatToPersist.put("autoLoadAdmin", config.getAutoLoadAdmin());
+            }
+            if (config.getAutoLoadConsumer() != null) {
+                flatToPersist.put("autoLoadConsumer", config.getAutoLoadConsumer());
             }
             if (config.getLoadOnStartup() != null) {
-                nestedConfig.put("loadOnStartup", config.getLoadOnStartup());
+                flatToPersist.put("loadOnStartup", config.getLoadOnStartup());
             }
             if (config.getStartPriority() != null) {
-                nestedConfig.put("startPriority", config.getStartPriority());
+                flatToPersist.put("startPriority", config.getStartPriority());
             }
             if (config.getStartDelay() != null) {
-                nestedConfig.put("startDelay", config.getStartDelay());
+                flatToPersist.put("startDelay", config.getStartDelay());
             }
             if (config.getDescription() != null) {
-                nestedConfig.put("description", config.getDescription());
+                flatToPersist.put("description", config.getDescription());
             }
-            
-            // 直接转换为 JSON 字符串（嵌套格式）
+
             ObjectMapper mapper = new ObjectMapper();
-            String configJson = mapper.writeValueAsString(nestedConfig);
-            
+            String configJson = mapper.writeValueAsString(flatToPersist);
+
+            String operatorId = OperatorContextHelper.getOperatorId();
+            String operatorName = OperatorContextHelper.getOperatorName();
+
             // 更新配置
-            boolean updated = persistenceService.updateExtensionConfig(id, configJson, "admin");
-            
+            boolean updated = persistenceService.updateExtensionConfig(id, configJson, operatorName);
+
             if (updated) {
-                log.info("应用配置更新成功: id={}, configKeys={}", id, nestedConfig.keySet());
-                operationLogger.logConfigUpdate(application, "admin", "admin", "SUCCESS", 
-                        "配置更新成功", oldConfig, nestedConfig, startTime);
+                log.info("应用配置更新成功: id={}, configKeys={}", id, flatToPersist.keySet());
+                operationLogger.logConfigUpdate(application, operatorId, operatorName, "SUCCESS",
+                        "配置更新成功", oldConfig, flatToPersist, startTime);
                 return Result.success();
             } else {
-                operationLogger.logConfigUpdate(application, "admin", "admin", "FAIL", 
-                        "更新数据库失败", oldConfig, nestedConfig, startTime);
+                operationLogger.logConfigUpdate(application, operatorId, operatorName, "FAIL",
+                        "更新数据库失败", oldConfig, flatToPersist, startTime);
                 return Result.error("更新应用配置失败");
             }
         } catch (Exception e) {
             log.error("更新应用配置失败: id={}", id, e);
             if (application != null) {
-                operationLogger.logConfigUpdate(application, "admin", "admin", "FAIL", 
+                operationLogger.logConfigUpdate(application,
+                        OperatorContextHelper.getOperatorId(),
+                        OperatorContextHelper.getOperatorName(),
+                        "FAIL",
                         "异常: " + e.getMessage(), oldConfig, null, startTime);
             }
             return Result.error("更新应用配置失败: " + e.getMessage());
@@ -731,8 +829,8 @@ public class ApplicationManagementService {
         dto.setIsDefault(application.getIsDefault());
         dto.setInstallTime(application.getInstallTime());
         dto.setUpdateTime(application.getUpdateTime());
-        dto.setCreateBy(application.getCreateBy());
-        dto.setUpdateBy(application.getUpdateBy());
+        dto.setCreateBy(application.getCreatedBy());
+        dto.setUpdateBy(application.getUpdatedBy());
         dto.setNamespaceCode(application.getNamespaceCode());
 
         // 聚合应用扩展信息
@@ -741,9 +839,11 @@ public class ApplicationManagementService {
                 || Boolean.TRUE.equals(extConfig.get("aggregateApp"));
         dto.setAggregateApp(aggregateApp);
         dto.setAggregatedPluginIds(parseStringList(extConfig.get("aggregatedPluginIds")));
-        dto.setHasFrontend(Boolean.TRUE.equals(extConfig.get("hasFrontend")));
+        dto.setSurfaceAdmin(Boolean.TRUE.equals(extConfig.get("surfaceAdmin")));
+        dto.setSurfaceConsumer(Boolean.TRUE.equals(extConfig.get("surfaceConsumer")));
+        dto.setAutoLoadAdmin(Boolean.TRUE.equals(extConfig.get("autoLoadAdmin")));
+        dto.setAutoLoadConsumer(Boolean.TRUE.equals(extConfig.get("autoLoadConsumer")));
         dto.setAggregateListOrder(parseIntObject(extConfig.get("aggregateListOrder")));
-        dto.setAutoLoad(Boolean.TRUE.equals(extConfig.get("autoLoad")));
         
         // 设置计算字段：应用类型文本
         if ("integrated".equals(application.getApplicationType())) {
@@ -804,8 +904,10 @@ public class ApplicationManagementService {
 
             Map<String, Object> extConfig = new HashMap<>();
             extConfig.put("aggregateApp", true);
-            extConfig.put("hasFrontend", true);
-            extConfig.put("autoLoad", Boolean.TRUE.equals(request.getAutoLoad()));
+            extConfig.put("surfaceAdmin", true);
+            extConfig.put("surfaceConsumer", false);
+            extConfig.put("autoLoadAdmin", Boolean.TRUE.equals(request.getAutoLoad()));
+            extConfig.put("autoLoadConsumer", false);
             extConfig.put("aggregatedPluginIds", pluginIds);
             int listOrder = request.getAggregateListOrder() != null ? request.getAggregateListOrder() : 1000;
             extConfig.put("aggregateListOrder", listOrder);
@@ -832,8 +934,6 @@ public class ApplicationManagementService {
                 app.setIsDefault(0);
                 app.setInstallTime(LocalDateTime.now());
                 app.setUpdateTime(LocalDateTime.now());
-                app.setCreateBy(operatorName != null ? operatorName : "admin");
-                app.setUpdateBy(operatorName != null ? operatorName : "admin");
                 app.setExtensionConfig(extJson);
                 app.setIcon(iconToStore);
                 int rows = applicationDao.insertApplication(app);
@@ -857,7 +957,7 @@ public class ApplicationManagementService {
                     request.getDescription(),
                     iconToStore,
                     extJson,
-                    operatorName != null ? operatorName : "admin"
+                    OperatorContextHelper.resolveOperatorName(operatorName)
             );
             if (rows <= 0) {
                 return Result.error("更新聚合应用失败");

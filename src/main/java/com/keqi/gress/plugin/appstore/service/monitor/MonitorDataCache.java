@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.monitor;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.MonitorCacheDao;
 import com.keqi.gress.plugin.appstore.domain.entity.PluginMonitorCache;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMonitorStatus;
@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 public class MonitorDataCache {
     
-    @Inject
+    @Autowired
     private MonitorCacheDao cacheDao;
     
     /** 缓存过期时间（毫秒）- 5秒 */
@@ -88,7 +88,7 @@ public class MonitorDataCache {
             PluginMonitorCache cache = PluginMonitorCache.builder()
                     .cacheType(CACHE_TYPE_ALL)
                     .cacheData(cacheData)
-                    .createTime(currentTime)
+                    .cacheCreateTime(currentTime)
                     .expireTime(expireTime)
                     .build();
             
@@ -163,7 +163,7 @@ public class MonitorDataCache {
                     .pluginId(pluginId)
                     .cacheType(CACHE_TYPE_SINGLE)
                     .cacheData(cacheData)
-                    .createTime(currentTime)
+                    .cacheCreateTime(currentTime)
                     .expireTime(expireTime)
                     .build();
             

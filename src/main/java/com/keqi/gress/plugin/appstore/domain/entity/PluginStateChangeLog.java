@@ -1,12 +1,12 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
-import com.keqi.gress.plugin.api.database.annotation.IdType;
 import com.keqi.gress.plugin.api.database.annotation.TableField;
-import com.keqi.gress.plugin.api.database.annotation.TableId;
 import com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -17,12 +17,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @TableName("appstore_plugin_state_change_log")
-public class PluginStateChangeLog {
-    
-    /** 主键ID */
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class PluginStateChangeLog extends BaseEntity {
     
     /** 插件ID */
     @TableField("plugin_id")

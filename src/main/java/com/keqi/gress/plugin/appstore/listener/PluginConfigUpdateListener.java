@@ -1,8 +1,8 @@
 package com.keqi.gress.plugin.appstore.listener;
 
 import  com.keqi.gress.common.event.Event;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.service.ApplicationConfigUpdateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 public class PluginConfigUpdateListener {
     
-    @Inject
+    @Autowired
     private ApplicationConfigUpdateService applicationConfigUpdateService;
     
     /**

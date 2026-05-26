@@ -1,7 +1,7 @@
 package com.keqi.gress.plugin.appstore.dao;
 
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.plugin.api.database.page.IPage;
 import  com.keqi.gress.plugin.api.service.PluginLambdaDataSource;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplicationOperationLog;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ApplicationOperationLogDao {
 
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginLambdaDataSource dataSource;
 
     /**

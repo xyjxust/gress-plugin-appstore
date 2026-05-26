@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.middleware;
 
 import  com.keqi.gress.common.event.Event;
 import  com.keqi.gress.common.event.EventDispatcher;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.common.sse.SseMessage;
 import  com.keqi.gress.common.sse.SseMessageEvent;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 public class MiddlewareInstallSsePublisher {
 
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private EventDispatcher<Event<?>> eventDispatcher;
 
     private static final String BUSINESS_TYPE = "MIDDLEWARE_INSTALL";

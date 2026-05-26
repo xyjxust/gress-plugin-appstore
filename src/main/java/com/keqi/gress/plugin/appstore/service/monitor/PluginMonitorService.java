@@ -3,8 +3,8 @@ package com.keqi.gress.plugin.appstore.service.monitor;
 import com.keqi.gress.common.model.Result;
 import com.keqi.gress.common.plugin.PluginPackageLifecycle;
 import com.keqi.gress.common.plugin.PluginPackageMetadataResult;
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.MonitorHistoryDao;
 import com.keqi.gress.plugin.appstore.dto.monitor.MonitorOverview;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMemoryInfo;
@@ -27,19 +27,19 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PluginMonitorService {
     
-    @Inject
+    @Autowired
     private PluginStatusCollector statusCollector;
     
-    @Inject
+    @Autowired
     private PluginMemoryCollector memoryCollector;
     
-    @Inject
+    @Autowired
     private MonitorDataCache monitorCache;
     
-    @Inject
+    @Autowired
     private MonitorHistoryDao historyDao;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginPackageLifecycle pluginLifecycle;
     
     /** 异步收集内存信息的超时时间（毫秒） */
@@ -80,18 +80,20 @@ public class PluginMonitorService {
                                 PluginMemoryInfo memInfo = memoryCollector.collectMemoryInfo(status.getPluginId());
                                 if (memInfo == null) {
                                     // 内存信息不可用，使用错误处理器提供默认值
-                                    memInfo = MonitorErrorHandler.handleMemoryUnavailable(status.getPluginId());
+                                    status.setMemoryInfo(MonitorErrorHandler.handleMemoryUnavailable(status.getPluginId()));
+                                } else {
+                                    status.setMemoryInfo(MonitorErrorHandler.toMemoryInfoMap(memInfo));
                                 }
-                                status.setMemoryInfo(memInfo);
                                 
                                 // 检查内存告警
-                                if (memInfo.getUsedMemory() != null) {
-                                    boolean isWarning = memoryCollector.isMemoryWarning(memInfo.getUsedMemory());
+                                Long usedMemory = status.getMemoryInfo() != null ? (Long) status.getMemoryInfo().get("usedMemory") : null;
+                                if (usedMemory != null) {
+                                    boolean isWarning = memoryCollector.isMemoryWarning(usedMemory);
                                     status.setIsMemoryWarning(isWarning);
                                     if (isWarning) {
                                         log.warn("插件内存使用超过阈值: pluginId={}, usedMemory={}, threshold={}", 
                                                 status.getPluginId(), 
-                                                memInfo.getFormattedMemory(),
+                                                status.getMemoryInfo().get("formattedMemory"),
                                                 memoryCollector.formatMemorySize(memoryCollector.getMemoryWarningThreshold()));
                                     }
                                 }
@@ -168,14 +170,14 @@ public class PluginMonitorService {
             if (status.getLoaded() != null && status.getLoaded()) {
                 try {
                     PluginMemoryInfo memInfo = memoryCollector.collectMemoryInfo(pluginId);
-                    if (memInfo == null) {
-                        memInfo = MonitorErrorHandler.handleMemoryUnavailable(pluginId);
-                    }
-                    detail.setMemoryInfo(memInfo);
+                    detail.setMemoryInfo(memInfo == null
+                        ? MonitorErrorHandler.handleMemoryUnavailable(pluginId)
+                        : MonitorErrorHandler.toMemoryInfoMap(memInfo));
                     
                     // 检查内存告警
-                    if (memInfo.getUsedMemory() != null) {
-                        boolean isWarning = memoryCollector.isMemoryWarning(memInfo.getUsedMemory());
+                    Long usedMemory = detail.getMemoryInfo() != null ? (Long) detail.getMemoryInfo().get("usedMemory") : null;
+                    if (usedMemory != null) {
+                        boolean isWarning = memoryCollector.isMemoryWarning(usedMemory);
                         status.setIsMemoryWarning(isWarning);
                     }
                     

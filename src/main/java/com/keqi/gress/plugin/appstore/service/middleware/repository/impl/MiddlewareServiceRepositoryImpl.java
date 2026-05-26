@@ -2,8 +2,8 @@ package com.keqi.gress.plugin.appstore.service.middleware.repository.impl;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.plugin.api.service.PluginLambdaDataSource;
 import com.keqi.gress.plugin.appstore.domain.entity.MiddlewareServiceEntity;
 import com.keqi.gress.plugin.appstore.service.middleware.repository.MiddlewareServiceRepository;
@@ -22,7 +22,7 @@ public class MiddlewareServiceRepositoryImpl implements MiddlewareServiceReposit
     
     //private static final Log log = LogFactory.get(MiddlewareServiceRepositoryImpl.class);
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginLambdaDataSource dataSource;
     
     @Override

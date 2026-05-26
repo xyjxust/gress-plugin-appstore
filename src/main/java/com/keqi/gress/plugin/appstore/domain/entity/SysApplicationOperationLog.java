@@ -1,23 +1,19 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
-import  com.keqi.gress.plugin.api.database.annotation.IdType;
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
-import  com.keqi.gress.plugin.api.database.annotation.TableId;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 
 /**
  * 应用操作日志
  * 用于记录应用的各种操作，包括启动、停止、重启、配置更新等
  */
 @Data
-@TableName("sys_application_operation_log")
-public class SysApplicationOperationLog {
-
-    @TableId(type = IdType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+@TableName("appstore_application_operation_log")
+public class SysApplicationOperationLog extends BaseEntity {
 
     /** 关联的应用ID */
     @TableField("application_id")
@@ -75,7 +71,4 @@ public class SysApplicationOperationLog {
     @TableField("client_ip")
     private String clientIp;
 
-    /** 创建时间 */
-    @TableField("create_time")
-    private LocalDateTime createTime = LocalDateTime.now();
 }

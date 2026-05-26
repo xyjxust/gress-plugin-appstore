@@ -1,13 +1,16 @@
 package com.keqi.gress.plugin.appstore.service;
 
 import com.alibaba.fastjson2.JSON;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
+import com.keqi.gress.common.plugin.PluginConfigMetadataProvider;
 import  com.keqi.gress.common.utils.ConfigUtils;
 import com.keqi.gress.plugin.appstore.dao.ApplicationDao;
+import com.keqi.gress.plugin.appstore.support.PluginUiExtensionConfigFactory;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +23,11 @@ import java.util.Map;
 @Service
 public class ApplicationConfigUpdateService {
     
-    @Inject
+    @Autowired
     private ApplicationDao applicationDao;
+
+    @Autowired(required = false)
+    private PluginConfigMetadataProvider pluginConfigMetadataProvider;
     
     /**
      * 安装时更新配置（完全覆盖）
@@ -50,13 +56,10 @@ public class ApplicationConfigUpdateService {
                 return false;
             }
             
-            // 将拍平的配置转换为嵌套结构
-            Map<String, Object> nestedConfig = ConfigUtils.flatToNested(pluginYmlConfig);
-            // 安装时也强制写入扩展点标记/页面标记，避免被覆盖导致缺失
-            applyExtensionFlags(nestedConfig, nestedConfig);
-            
-            // 安装时直接覆盖配置
-            String newConfigJson = JSON.toJSONString(nestedConfig);
+            Map<String, Object> flatConfig = buildInstallMergedConfig(pluginId, application, pluginYmlConfig);
+            applyExtensionFlags(flatConfig, pluginYmlConfig);
+
+            String newConfigJson = JSON.toJSONString(flatConfig);
             int updated = applicationDao.updateApplicationExtensionConfig(
                     application.getId(), 
                     newConfigJson, 
@@ -65,7 +68,7 @@ public class ApplicationConfigUpdateService {
             
             if (updated > 0) {
                 log.info("安装时更新应用配置成功: pluginId={}, configKeys={}", 
-                        pluginId, nestedConfig.keySet());
+                        pluginId, flatConfig.keySet());
                 return true;
             } else {
                 log.warn("安装时更新应用配置失败: pluginId={}", pluginId);
@@ -105,21 +108,17 @@ public class ApplicationConfigUpdateService {
                 return false;
             }
             
-            // 获取现有配置（嵌套结构）
             String existingConfigJson = application.getExtensionConfig();
             Map<String, Object> existingConfig = parseConfigToMap(existingConfigJson);
-            
-            // 将拍平的新配置转换为嵌套结构
-            Map<String, Object> newNestedConfig = ConfigUtils.flatToNested(pluginYmlConfig);
-            
-            // 增量合并配置（只添加新 key，不覆盖已存在的 key）
-            Map<String, Object> mergedConfig = ConfigUtils.incrementalMerge(existingConfig, newNestedConfig);
+            Map<String, Object> existingFlat = ConfigUtils.nestedToFlat(existingConfig);
 
-            // 前端扩展点标记以新版本为准（强制覆盖），升级后可能新增/移除了 widget/panel
-            applyExtensionFlags(mergedConfig, newNestedConfig);
+            Map<String, Object> newFlat = ConfigUtils.nestedToFlat(pluginYmlConfig);
 
-            // 更新配置
-            String newConfigJson = JSON.toJSONString(mergedConfig);
+            Map<String, Object> mergedFlat = ConfigUtils.incrementalMerge(existingFlat, newFlat);
+
+            applyExtensionFlags(mergedFlat, pluginYmlConfig);
+
+            String newConfigJson = JSON.toJSONString(mergedFlat);
             int updated = applicationDao.updateApplicationExtensionConfig(
                     application.getId(), 
                     newConfigJson, 
@@ -128,7 +127,7 @@ public class ApplicationConfigUpdateService {
             
             if (updated > 0) {
                 log.info("升级时更新应用配置成功: pluginId={}, 新增keys={}", 
-                        pluginId, getNewKeys(existingConfig, newNestedConfig));
+                        pluginId, getNewKeys(existingFlat, newFlat));
                 return true;
             } else {
                 log.warn("升级时更新应用配置失败: pluginId={}", pluginId);
@@ -201,71 +200,67 @@ public class ApplicationConfigUpdateService {
     }
 
     /**
-     * 从新配置中提取 hasWidget / hasPanel 标记，强制覆盖到合并后的配置中。
-     * 升级时这些标记必须以新版本 plugin-ui.yml 为准，不能保留旧值。
-     * 同时根据标记自动计算 autoLoad。
-     *
-     * @param mergedConfig 增量合并后的配置（会被就地修改）
-     * @param newConfig    新版本的嵌套配置
+     * 从新版本 plugin-ui 配置提取 surfaces / autoLoad / widget / panel，强制写入合并后的 extension_config 顶层。
      */
     @SuppressWarnings("unchecked")
     private void applyExtensionFlags(Map<String, Object> mergedConfig, Map<String, Object> newConfig) {
-        // 从新配置的 plugin 节点提取标记
         boolean hasWidget = false;
-        Boolean yamlHasPanel = null;
-        Boolean pluginAutoLoad = null;
-        boolean hasPanel;
-        boolean hasFrontend = false;
+        boolean hasPanel = false;
 
         Object pluginNode = newConfig.get("plugin");
         if (pluginNode instanceof Map) {
             Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
-            hasWidget = Boolean.TRUE.equals(pluginMap.get("hasWidget"));
-            if (pluginMap.containsKey("hasPanel")) {
-                yamlHasPanel = pluginMap.get("hasPanel") instanceof Boolean
-                        ? (Boolean) pluginMap.get("hasPanel")
-                        : Boolean.parseBoolean(String.valueOf(pluginMap.get("hasPanel")));
+            if (pluginMap.get("hasWidget") != null) {
+                hasWidget = Boolean.parseBoolean(String.valueOf(pluginMap.get("hasWidget")));
             }
-            if (pluginMap.containsKey("autoLoad")) {
-                pluginAutoLoad = pluginMap.get("autoLoad") instanceof Boolean
-                        ? (Boolean) pluginMap.get("autoLoad")
-                        : Boolean.parseBoolean(String.valueOf(pluginMap.get("autoLoad")));
+            if (pluginMap.get("hasPanel") != null) {
+                hasPanel = Boolean.parseBoolean(String.valueOf(pluginMap.get("hasPanel")));
             }
         }
 
-        // menus/routes 任一非空，则认为存在前端页面
-        Object menusObj = newConfig.get("menus");
-        if (menusObj instanceof List && !((List<?>) menusObj).isEmpty()) {
-            hasFrontend = true;
-        } else {
-            Object routesObj = newConfig.get("routes");
-            if (routesObj instanceof List && !((List<?>) routesObj).isEmpty()) {
-                hasFrontend = true;
-            }
+        PluginUiExtensionConfigFactory.putExtensionFlags(mergedConfig, newConfig, hasWidget, hasPanel);
+
+        log.info("升级时强制更新扩展点标记: surfaceAdmin={}, surfaceConsumer={}, autoLoadAdmin={}, autoLoadConsumer={}, hasWidget={}, hasPanel={}",
+                mergedConfig.get("surfaceAdmin"), mergedConfig.get("surfaceConsumer"),
+                mergedConfig.get("autoLoadAdmin"), mergedConfig.get("autoLoadConsumer"),
+                hasWidget, hasPanel);
+    }
+
+    private Map<String, Object> buildInstallMergedConfig(
+            String pluginId,
+            SysApplication application,
+            Map<String, Object> pluginYmlConfig) {
+        Map<String, Object> merged = new LinkedHashMap<>();
+
+        Map<String, Object> existingConfig = parseConfigToMap(application.getExtensionConfig());
+        if (existingConfig != null && !existingConfig.isEmpty()) {
+            merged.putAll(ConfigUtils.nestedToFlat(existingConfig));
         }
 
-        if (pluginAutoLoad != null) {
-            // 有显式 autoLoad：优先使用它
-            boolean autoLoad = pluginAutoLoad;
-            if (yamlHasPanel != null) {
-                hasPanel = yamlHasPanel;
-            } else {
-                // 没有 hasPanel 时推断：panel-only 更合理
-                hasPanel = autoLoad && !hasWidget;
-            }
-            mergedConfig.put("autoLoad", autoLoad);
-        } else {
-            // 兼容旧版：autoLoad = hasWidget || hasPanel
-            hasPanel = yamlHasPanel != null ? yamlHasPanel : false;
-            mergedConfig.put("autoLoad", hasWidget || hasPanel);
+        Map<String, Object> currentFlatConfig = getCurrentPluginFlatConfig(pluginId);
+        if (currentFlatConfig != null && !currentFlatConfig.isEmpty()) {
+            merged.putAll(currentFlatConfig);
         }
 
-        // 强制覆盖
-        mergedConfig.put("hasWidget", hasWidget);
-        mergedConfig.put("hasPanel", hasPanel);
-        mergedConfig.put("hasFrontend", hasFrontend);
+        Map<String, Object> pluginYmlFlatConfig = ConfigUtils.nestedToFlat(pluginYmlConfig);
+        if (pluginYmlFlatConfig != null && !pluginYmlFlatConfig.isEmpty()) {
+            merged.putAll(pluginYmlFlatConfig);
+        }
 
-        log.info("升级时强制更新扩展点标记: hasWidget={}, hasPanel={}, autoLoad={}",
-                hasWidget, hasPanel, mergedConfig.get("autoLoad"));
+        return merged;
+    }
+
+    private Map<String, Object> getCurrentPluginFlatConfig(String pluginId) {
+        if (pluginConfigMetadataProvider == null || pluginId == null || pluginId.isBlank()) {
+            return new LinkedHashMap<>();
+        }
+        try {
+            Map<String, Object> flatConfig = pluginConfigMetadataProvider.getPluginPackageFlatConfig(pluginId);
+            return flatConfig != null ? new LinkedHashMap<>(flatConfig) : new LinkedHashMap<>();
+        } catch (Exception e) {
+            log.warn("获取插件当前拍平配置失败，继续保留已有 extension_config: pluginId={}, error={}",
+                    pluginId, e.getMessage());
+            return new LinkedHashMap<>();
+        }
     }
 }

@@ -1,15 +1,24 @@
 package com.keqi.gress.plugin.appstore.contoller;
 
 import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
+import com.keqi.gress.plugin.api.ui.annotation.PluginAction;
+import com.keqi.gress.plugin.api.ui.annotation.PluginMenu;
 import com.keqi.gress.plugin.appstore.domain.entity.NodeInfoEntity;
 import com.keqi.gress.plugin.appstore.service.NodeManagementService;
 import com.keqi.gress.plugin.appstore.service.node.repository.NodeInfoRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +35,12 @@ import java.util.Map;
 @RequestMapping("/nodes")
 @Valid
 @Slf4j
+@PluginMenu(id = "nodes", name = "节点管理", managementEnabled = true)
 public class NodeManagementController {
-    @Inject(required = false)
+    @Autowired(required = false)
     private NodeManagementService nodeManagementService;
 
-    @Inject(required = false)
+    @Autowired(required = false)
     private NodeInfoRepository nodeInfoRepository;
 
     @GetMapping
@@ -57,6 +67,7 @@ public class NodeManagementController {
     }
 
     @PostMapping
+    @PluginAction(id = "create", name = "新增节点")
     public Result<NodeManagementService.NodeInfo> save(@RequestBody NodeDTO dto) {
         if (nodeManagementService == null) {
             return Result.error("节点管理服务不可用");
@@ -64,7 +75,19 @@ public class NodeManagementController {
         return nodeManagementService.saveNode(toNodeInfo(dto));
     }
 
+    @PutMapping("/{nodeId}")
+    @PluginAction(id = "edit", name = "编辑节点", managementEnabled = true, actionCode = "UPDATE")
+    public Result<NodeManagementService.NodeInfo> update(
+            @PathVariable String nodeId, @RequestBody NodeDTO dto) {
+        if (nodeManagementService == null) {
+            return Result.error("节点管理服务不可用");
+        }
+        dto.nodeId = nodeId;
+        return nodeManagementService.saveNode(toNodeInfo(dto));
+    }
+
     @DeleteMapping("/{nodeId}")
+    @PluginAction(id = "delete", name = "删除节点", managementEnabled = true, actionCode = "DELETE")
     public Result<Void> delete(@PathVariable String nodeId) {
         if (nodeManagementService == null) {
             return Result.error("节点管理服务不可用");
@@ -73,6 +96,7 @@ public class NodeManagementController {
     }
 
     @PostMapping("/{nodeId}/test")
+    @PluginAction(id = "test", name = "测试连接", managementEnabled = true, actionCode = "EXECUTE")
     public Result<Boolean> test(@PathVariable String nodeId) {
         if (nodeManagementService == null) {
             return Result.error("节点管理服务不可用");

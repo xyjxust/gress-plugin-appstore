@@ -1,11 +1,11 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
-import  com.keqi.gress.plugin.api.database.annotation.IdType;
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
-import  com.keqi.gress.plugin.api.database.annotation.TableId;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
@@ -13,12 +13,9 @@ import java.time.LocalDateTime;
  * 系统应用实体
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("sys_application")
-public class SysApplication {
-    
-    /** 应用ID */
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class SysApplication extends BaseEntity {
     
     /** 应用代码（唯一标识） */
     @TableField("application_code")
@@ -56,22 +53,6 @@ public class SysApplication {
     @TableField("install_time")
     private LocalDateTime installTime;
     
-    /** 更新时间 */
-    @TableField("update_time")
-    private LocalDateTime updateTime;
-    
-    /** 创建人 */
-    @TableField("create_by")
-    private String createBy;
-    
-    /** 更新人 */
-    @TableField("update_by")
-    private String updateBy;
-    
-    /** 命名空间代码 */
-    @TableField("namespace_code")
-    private String namespaceCode;
-    
     @Schema(description = "应用类型（integrated:集成应用 plugin:插件应用）")
     @TableField("application_type")
     private String applicationType;
@@ -84,6 +65,21 @@ public class SysApplication {
     @Schema(description = "插件类型（多个类型用逗号分隔，如：TRIGGER,TASK,APPLICATION）")
     @TableField("plugin_type")
     private String pluginType;
+
+    /** 客户端类型（B/C） */
+    @Schema(description = "客户端类型（B/C）")
+    @TableField("client_type")
+    private String clientType;
+
+    /** 是否开启预加载（0/1） */
+    @Schema(description = "是否开启预加载（0/1）")
+    @TableField("preload_enabled")
+    private Integer preloadEnabled;
+
+    /** 应用过滤标签（JSON array string，如：[\"iam\",\"security\"]） */
+    @Schema(description = "应用过滤标签（JSON array string，如：[\"iam\",\"security\"]）")
+    @TableField("tags")
+    private String tags;
     
     /** 应用图标 */
     @Schema(description = "应用图标")

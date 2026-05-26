@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * 插件监控状态 DTO
  * 用于展示插件的基本运行状态信息
@@ -37,7 +39,7 @@ public class PluginMonitorStatus {
     private Long uptime;
     
     /** 内存信息 */
-    private PluginMemoryInfo memoryInfo;
+    private Map<String, Object> memoryInfo;
     
     /** 是否有错误 */
     private Boolean hasError;

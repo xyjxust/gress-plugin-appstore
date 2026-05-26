@@ -1,12 +1,14 @@
 package com.keqi.gress.plugin.appstore.contoller;
 
 import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
-import com.keqi.gress.plugin.api.cache.annotation.PluginCacheable;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
+import com.keqi.gress.plugin.api.ui.annotation.PluginAction;
+import com.keqi.gress.plugin.api.ui.annotation.PluginMenu;
 import com.keqi.gress.plugin.appstore.config.AppStoreConfig;
 import com.keqi.gress.plugin.appstore.dto.*;
 import com.keqi.gress.plugin.appstore.service.ApplicationManagementService;
+import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -20,19 +22,23 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/applications")
 @Valid
+@PluginMenu(id = "applications", name = "应用管理", managementEnabled = true)
 public class ApplicationManagementController {
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
 
    // private final Log log = LogFactory.get(ApplicationManagementService.class);
     
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private ApplicationManagementService applicationManagementService;
     
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private com.keqi.gress.plugin.appstore.service.AppStoreApiService appStoreApiService;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private  com.keqi.gress.common.plugin.PluginConfigMetadataProvider pluginConfigMetadataProvider;
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private AppStoreConfig appStoreConfig;
     
     /**
@@ -45,7 +51,10 @@ public class ApplicationManagementController {
              @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) String applicationType,
-            @RequestParam(required = false) String pluginId) {
+            @RequestParam(required = false) String pluginId,
+            @RequestParam(required = false) String clientType,
+            @RequestParam(required = false) Integer preloadEnabled,
+            @RequestParam(required = false) String tag) {
         
         log.info("查询应用列表1: page={}, size={}, keyword={}, status={}, applicationType={}, pluginId={}",
                 page, size, keyword, status, applicationType, pluginId);
@@ -59,6 +68,9 @@ public class ApplicationManagementController {
         request.setStatus(status);
         request.setApplicationType(applicationType);
         request.setPluginId(pluginId);
+        request.setClientType(clientType);
+        request.setPreloadEnabled(preloadEnabled);
+        request.setTag(tag);
         
         Result<PageResult<ApplicationDTO>> result = applicationManagementService.queryApplications(request);
         
@@ -76,45 +88,23 @@ public class ApplicationManagementController {
     }
 
     /**
-     * 查询聚合应用列表
+     * 获取应用过滤标签（分类）
+     * 数据来源：appstore-admin 的 Category 配置
      */
-    @GetMapping("/aggregates")
-    public Result<java.util.List<ApplicationDTO>> listAggregates() {
-        return applicationManagementService.listAggregateApplications();
+    @GetMapping("/categories")
+    public Result<java.util.List<AppStoreCategoryDTO>> listCategories() {
+        return Result.success(appStoreApiService.getCategories());
     }
 
     /**
-     * 查询可聚合插件列表
+     * 获取业务标签（按类型 key 过滤）
      */
-    @GetMapping("/aggregates/available-plugins")
-    public Result<java.util.List<ApplicationDTO>> listAggregatablePlugins() {
-        return applicationManagementService.listAggregatablePlugins();
+    @GetMapping("/tags")
+    public Result<java.util.List<AppStoreCategoryDTO>> listTags(
+            @RequestParam(required = false) String typeKey) {
+        return Result.success(appStoreApiService.getTags(typeKey));
     }
 
-    /**
-     * 创建聚合应用
-     */
-    @PostMapping("/aggregates")
-    public Result<Void> createAggregate(@RequestBody AggregateApplicationRequest request) {
-        return applicationManagementService.createAggregateApplication(request, "admin");
-    }
-
-    /**
-     * 更新聚合应用
-     */
-    @PutMapping("/aggregates/{id}")
-    public Result<Void> updateAggregate(@PathVariable Long id, @RequestBody AggregateApplicationRequest request) {
-        return applicationManagementService.updateAggregateApplication(id, request, "admin");
-    }
-
-    /**
-     * 删除聚合应用
-     */
-    @DeleteMapping("/aggregates/{id}")
-    public Result<Void> deleteAggregate(@PathVariable Long id) {
-        return applicationManagementService.deleteAggregateApplication(id, "admin");
-    }
-    
     /**
      * 检查远程版本
      */
@@ -178,7 +168,10 @@ public class ApplicationManagementController {
      * 升级应用
      */
     @PostMapping("/{id}/upgrade")
+    @PluginAction(id = "upgrade", name = "升级", managementEnabled = true, actionCode = "MANAGE")
     public Result<Void> upgradeApplication(@PathVariable Long id, @RequestBody ApplicationUpgradeRequest request) {
+        request.setOperatorId(OperatorContextHelper.resolveOperatorId(request.getOperatorId()));
+        request.setOperatorName(OperatorContextHelper.resolveOperatorName(request.getOperatorName()));
         log.info("升级应用: id={}, targetVersion={}, operator={}", 
                 id, request.getTargetVersion(), request.getOperatorName());
         return applicationManagementService.upgradeApplication(id, request);
@@ -189,6 +182,8 @@ public class ApplicationManagementController {
      */
     @PostMapping("/{id}/rollback")
     public Result<Void> rollbackApplication(@PathVariable Long id, @RequestBody ApplicationUpgradeRequest request) {
+        request.setOperatorId(OperatorContextHelper.resolveOperatorId(request.getOperatorId()));
+        request.setOperatorName(OperatorContextHelper.resolveOperatorName(request.getOperatorName()));
         log.info("降级应用: id={}, targetVersion={}, operator={}",
                 id, request.getTargetVersion(), request.getOperatorName());
         return applicationManagementService.rollbackApplication(id, request);
@@ -196,19 +191,21 @@ public class ApplicationManagementController {
     
     /**
      * 卸载应用
-     * <p>请求体可选：部分客户端对 DELETE 不带 body；未传时操作人默认为 admin。</p>
+     * <p>请求体可选：部分客户端对 DELETE 不带 body；未传时自动从上下文补全操作人。</p>
      */
     @DeleteMapping("/{id}")
+    @PluginAction(id = "uninstall", name = "卸载", managementEnabled = true, actionCode = "DELETE")
     public Result<Void> uninstallApplication(
             @PathVariable Long id,
             @RequestBody(required = false) ApplicationUninstallRequest request) {
+        Result<Void> defaultAppCheck = validateNotDefaultApplication(id, "卸载");
+        if (defaultAppCheck != null) {
+            return defaultAppCheck;
+        }
+
         ApplicationUninstallRequest body = request != null ? request : new ApplicationUninstallRequest();
-        if (body.getOperatorId() == null || body.getOperatorId().isEmpty()) {
-            body.setOperatorId("admin");
-        }
-        if (body.getOperatorName() == null || body.getOperatorName().isEmpty()) {
-            body.setOperatorName("admin");
-        }
+        body.setOperatorId(OperatorContextHelper.resolveOperatorId(body.getOperatorId()));
+        body.setOperatorName(OperatorContextHelper.resolveOperatorName(body.getOperatorName()));
         log.info("卸载应用: id={}, operator={}, reason={}",
                 id, body.getOperatorName(), body.getReason());
         return applicationManagementService.uninstallApplication(id, body);
@@ -218,18 +215,27 @@ public class ApplicationManagementController {
      * 启用应用（启动插件包）
      */
     @PostMapping("/{id}/enable")
+    @PluginAction(id = "enable", name = "启用", managementEnabled = true, actionCode = "ENABLE")
     public Result<Void> enableApplication(@PathVariable Long id) {
-        log.info("启动应用: id={}", id);
-        return applicationManagementService.startApplication(id, "admin");
+        String operatorName = OperatorContextHelper.getOperatorName();
+        log.info("启动应用: id={}, operator={}", id, operatorName);
+        return applicationManagementService.startApplication(id, operatorName);
     }
     
     /**
      * 禁用应用（停止插件包）
      */
     @PostMapping("/{id}/disable")
+    @PluginAction(id = "disable", name = "禁用", managementEnabled = true, actionCode = "DISABLE")
     public Result<Void> disableApplication(@PathVariable Long id) {
-        log.info("停止应用: id={}", id);
-        return applicationManagementService.stopApplication(id, "admin");
+        Result<Void> defaultAppCheck = validateNotDefaultApplication(id, "停止");
+        if (defaultAppCheck != null) {
+            return defaultAppCheck;
+        }
+
+        String operatorName = OperatorContextHelper.getOperatorName();
+        log.info("停止应用: id={}, operator={}", id, operatorName);
+        return applicationManagementService.stopApplication(id, operatorName);
     }
     
     /**
@@ -237,41 +243,82 @@ public class ApplicationManagementController {
      */
     @PostMapping("/{id}/restart")
     public Result<Void> restartApplication(@PathVariable Long id, @RequestBody(required = false) java.util.Map<String, String> body) {
-        String operatorName = body != null ? body.get("operatorName") : "admin";
+        String operatorName = OperatorContextHelper.resolveOperatorName(body != null ? body.get("operatorName") : null);
         log.info("重启应用: id={}, operator={}", id, operatorName);
         return applicationManagementService.restartApplication(id, operatorName);
+    }
+
+    private Result<Void> validateNotDefaultApplication(Long id, String action) {
+        Result<ApplicationDTO> detailResult = applicationManagementService.getApplicationDetail(id);
+        if (!detailResult.isSuccess()) {
+            return Result.error(detailResult.getErrorMessage());
+        }
+
+        ApplicationDTO application = detailResult.getData();
+        if (application != null && Integer.valueOf(1).equals(application.getIsDefault())) {
+            return Result.error("默认应用不允许" + action);
+        }
+        return null;
     }
     
     /**
      * 上传并安装应用包
      */
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
+    @PluginAction(id = "upload", name = "上传安装")
     public Result<Void> uploadAndInstall(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false, defaultValue = "admin") String operatorId,
-            @RequestParam(required = false, defaultValue = "admin") String operatorName) {
+            @RequestParam(required = false) String installConfig,
+            @RequestParam(required = false) String operatorId,
+            @RequestParam(required = false) String operatorName) {
+        java.util.Map<String, Object> installConfigMap;
+        try {
+            installConfigMap = parseInstallConfig(installConfig);
+        } catch (IllegalArgumentException e) {
+            return Result.error(e.getMessage());
+        }
+
+        String resolvedOperatorId = OperatorContextHelper.resolveOperatorId(operatorId);
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
         
         log.info("上传并安装应用包: fileName={}, size={}, operator={}", 
-                file.getOriginalFilename(), file.getSize(), operatorName);
+                file.getOriginalFilename(), file.getSize(), resolvedOperatorName);
         
-        return applicationManagementService.uploadAndInstall(file, operatorId, operatorName);
+        return applicationManagementService.uploadAndInstall(
+                file,
+                resolvedOperatorId,
+                resolvedOperatorName,
+                installConfigMap);
+    }
+
+    @PostMapping(value = "/upload/install-config/metadata", consumes = "multipart/form-data")
+    public Result<java.util.List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata>> getUploadInstallConfigMetadata(
+            @RequestParam("file") MultipartFile file) {
+        log.info("获取上传应用安装前配置元数据: fileName={}", file.getOriginalFilename());
+        return applicationManagementService.getUploadInstallConfigMetadata(file);
     }
     
     /**
      * 从远程应用商店安装应用
      */
     @PostMapping("/remote/install")
+    @PluginAction(id = "remote-install", name = "从应用商店安装")
     public Result<Void> installRemoteApplication(
-            @RequestParam String pluginId,
-            @RequestParam(required = false, defaultValue = "admin") String operatorId,
-            @RequestParam(required = false, defaultValue = "admin") String operatorName) {
+            @RequestBody RemoteApplicationInstallRequest request) {
+        if (request == null || request.getPluginId() == null || request.getPluginId().isBlank()) {
+            return Result.error("pluginId 不能为空");
+        }
+        String resolvedOperatorId = OperatorContextHelper.resolveOperatorId(request.getOperatorId());
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(request.getOperatorName());
+        String pluginId = request.getPluginId();
         
-        log.info("从远程应用商店安装应用: pluginId={}, operator={}", pluginId, operatorName);
+        log.info("从远程应用商店安装应用: pluginId={}, operator={}", pluginId, resolvedOperatorName);
         
         try {
             // 使用带依赖处理的安装流程：先根据远程详情解析依赖并安装依赖，再安装主应用
             Result< com.keqi.gress.common.plugin.PluginPackageInstallResult> installResult =
-                    applicationManagementService.installApplicationFromAppStore(pluginId, null, operatorName);
+                    applicationManagementService.installApplicationFromAppStore(
+                            pluginId, null, resolvedOperatorName, request.getInstallConfig());
 
             if (!installResult.isSuccess()) {
                 String errorMsg = "安装应用失败: " + installResult.getErrorMessage();
@@ -279,7 +326,8 @@ public class ApplicationManagementController {
                 return Result.error(errorMsg);
             }
 
-            log.info("应用安装成功: pluginId={}, operator={}", pluginId, operatorName);
+            log.info("应用安装成功: pluginId={}, operatorId={}, operator={}",
+                    pluginId, resolvedOperatorId, resolvedOperatorName);
             return Result.success();
             
         } catch (Exception e) {
@@ -287,6 +335,13 @@ public class ApplicationManagementController {
             log.error("从远程应用商店安装应用失败: pluginId={}, error={}", pluginId, e.getMessage(), e);
             return Result.error(errorMsg);
         }
+    }
+
+    @GetMapping("/remote/{pluginId}/install-config/metadata")
+    public Result<java.util.List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata>> getRemoteInstallConfigMetadata(
+            @PathVariable String pluginId) {
+        log.info("获取远程应用安装前配置元数据: pluginId={}", pluginId);
+        return applicationManagementService.getRemoteInstallConfigMetadata(pluginId);
     }
     
     /**
@@ -344,7 +399,7 @@ public class ApplicationManagementController {
                 try {
                     java.util.Map<String, Object> flatConfig = 
                          com.keqi.gress.common.utils.ConfigUtils.nestedToFlat(config.getExtensionConfig());
-                    log.info("转换为拍平格式: {}", flatConfig);
+
                     config.setExtensionConfig(flatConfig);
                 } catch (Exception e) {
                     log.warn("转换配置为拍平格式失败", e);
@@ -368,50 +423,25 @@ public class ApplicationManagementController {
     }
     
     /**
-     * 查询应用操作日志
-     */
-    @GetMapping("/{id}/operation-logs")
-    public Result<PageResult<ApplicationOperationLogDTO>> getApplicationOperationLogs(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) String operationType) {
-        
-        log.info("查询应用操作日志: id={}, page={}, size={}, operationType={}", id, page, size, operationType);
-        return applicationManagementService.getApplicationOperationLogs(id, page, size, operationType);
-    }
-    
-    /**
-     * 查询所有应用操作日志（全局查询）
-     */
-    @GetMapping("/operation-logs")
-    public Result<PageResult<ApplicationOperationLogDTO>> getAllOperationLogs(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) String operationType,
-            @RequestParam(required = false) String operatorName,
-            @RequestParam(required = false) String applicationName,
-            @RequestParam(required = false) String status) {
-        
-        log.info("查询所有应用操作日志: page={}, size={}, operationType={}, operatorName={}, applicationName={}, status={}", 
-                page, size, operationType, operatorName, applicationName, status);
-        return applicationManagementService.getAllOperationLogs(page, size, operationType, operatorName, applicationName, status);
-    }
-    
-    /**
      * 查询远程应用商店应用列表
      */
     @GetMapping("/remote")
+    @PluginAction(id = "refresh-remote", name = "刷新远程列表")
     public Result<PageResult<ApplicationDTO>> queryRemoteApplications(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String priceType) {
         
-        log.info("查询远程应用列表: page={}, size={}, keyword={}", page, size, keyword);
+        log.info("查询远程应用列表: page={}, size={}, keyword={}, category={}, tag={}, priceType={}",
+                page, size, keyword, category, tag, priceType);
         
         try {
             // 获取远程应用列表（使用新的分页方法）
-            PageResult<ApplicationDTO> remotePageResult = appStoreApiService.getApplicationsPage(page, size, keyword);
+            PageResult<ApplicationDTO> remotePageResult =
+                appStoreApiService.getApplicationsPage(page, size, keyword, null, category, tag, priceType);
             
             if (remotePageResult == null || remotePageResult.getItems() == null) {
                 return Result.success(createEmptyPageResult(page, size));
@@ -457,6 +487,96 @@ public class ApplicationManagementController {
         } catch (Exception e) {
             log.error("查询远程应用列表失败", e);
             return Result.error("查询远程应用列表失败: " + e.getMessage());
+        }
+    }
+
+    private java.util.Map<String, Object> parseInstallConfig(String installConfigJson) {
+        if (installConfigJson == null || installConfigJson.isBlank()) {
+            return java.util.Collections.emptyMap();
+        }
+        try {
+            return OBJECT_MAPPER.readValue(
+                    installConfigJson,
+                    new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new IllegalArgumentException("安装前配置格式不正确", e);
+        }
+    }
+
+    /**
+     * 查询远程应用商店应用详情
+     */
+    @GetMapping("/remote/{pluginId}")
+    public Result<ApplicationDTO> getRemoteApplicationDetail(@PathVariable String pluginId) {
+        try {
+            ApplicationDTO remote = appStoreApiService.getApplicationDetail(pluginId);
+            if (remote == null) {
+                return Result.error("未找到远程应用: " + pluginId);
+            }
+
+            // 获取本地已安装应用，补齐 installStatus/localVersion
+            ApplicationQueryRequest localRequest = new ApplicationQueryRequest();
+            localRequest.setPage(1);
+            localRequest.setSize(1000);
+            Result<PageResult<ApplicationDTO>> localResult = applicationManagementService.queryApplications(localRequest);
+
+            ApplicationDTO localApp = null;
+            if (localResult.isSuccess() && localResult.getData() != null) {
+                for (ApplicationDTO a : localResult.getData().getItems()) {
+                    if (pluginId.equals(a.getPluginId())) {
+                        localApp = a;
+                        break;
+                    }
+                }
+            }
+
+            if (localApp == null) {
+                remote.setInstallStatus("NOT_INSTALLED");
+                remote.setLocalVersion(null);
+            } else {
+                remote.setLocalVersion(localApp.getPluginVersion());
+                if (isVersionNewer(remote.getPluginVersion(), localApp.getPluginVersion())) {
+                    remote.setInstallStatus("UPGRADABLE");
+                } else {
+                    remote.setInstallStatus("INSTALLED");
+                }
+            }
+
+            return Result.success(remote);
+        } catch (Exception e) {
+            log.error("查询远程应用详情失败: pluginId={}", pluginId, e);
+            return Result.error("查询远程应用详情失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 查询远程应用商店版本发布列表（时间线）
+     */
+    @GetMapping("/remote/{pluginId}/versions")
+    public Result<java.util.List<com.keqi.gress.plugin.appstore.dto.AppStorePackageVersionDTO>> getRemoteApplicationVersions(
+        @PathVariable String pluginId
+    ) {
+        return Result.success(appStoreApiService.getApplicationVersions(pluginId));
+    }
+
+    /**
+     * 下载远程应用包（指定版本）
+     */
+    @GetMapping("/remote/{pluginId}/versions/{version}/download")
+    public org.springframework.http.ResponseEntity<byte[]> downloadRemoteApplicationByVersion(
+        @PathVariable String pluginId,
+        @PathVariable String version
+    ) {
+        try {
+            com.keqi.gress.plugin.appstore.service.AppStoreApiService.DownloadedFile file =
+                appStoreApiService.downloadApplicationBytes(pluginId, version);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", file.getFileName());
+            return new org.springframework.http.ResponseEntity<>(file.getBytes(), headers, org.springframework.http.HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("下载远程应用包失败: pluginId={}, version={}", pluginId, version, e);
+            return org.springframework.http.ResponseEntity.internalServerError().build();
         }
     }
     

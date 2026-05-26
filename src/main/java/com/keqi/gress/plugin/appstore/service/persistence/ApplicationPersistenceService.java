@@ -3,17 +3,20 @@ package com.keqi.gress.plugin.appstore.service.persistence;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import  com.keqi.gress.common.plugin.PluginPackageInstallResult;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import com.keqi.gress.common.plugin.PluginConfigMetadataProvider;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.plugin.api.service.PluginLambdaDataSource;
 import com.keqi.gress.plugin.appstore.dao.ApplicationDao;
 import com.keqi.gress.plugin.appstore.dao.ApplicationUpgradeLogDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplicationUpgradeLog;
 import com.keqi.gress.plugin.appstore.service.AppStoreApiService;
+import com.keqi.gress.plugin.appstore.support.PluginUiExtensionConfigFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,17 +37,20 @@ public class ApplicationPersistenceService {
     
    // private static final Log log = LogFactory.get(ApplicationPersistenceService.class);
     
-    @Inject
+    @Autowired
     private ApplicationDao applicationDao;
     
-    @Inject
+    @Autowired
     private ApplicationUpgradeLogDao applicationUpgradeLogDao;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginLambdaDataSource dataSource;
     
-    @Inject
+    @Autowired
     private AppStoreApiService appStoreApiService;
+
+    @Autowired(required = false)
+    private PluginConfigMetadataProvider pluginConfigMetadataProvider;
     
     /**
      * 根据ID查找应用
@@ -117,8 +123,7 @@ public class ApplicationPersistenceService {
             application.setIsDefault(0);
             application.setInstallTime(LocalDateTime.now());
             application.setUpdateTime(LocalDateTime.now());
-            application.setCreateBy(operatorName);
-            application.setUpdateBy(operatorName);
+  
             
             // 设置插件类型
             if (installInfo.getPluginTypes() != null && !installInfo.getPluginTypes().isEmpty()) {
@@ -130,62 +135,27 @@ public class ApplicationPersistenceService {
                 log.warn("未检测到插件类型，使用默认值 APPLICATION: pluginId={}", packageId);
             }
 
-            // 构建 extension_config：根据 hasWidget / hasPanel / autoLoad 标记
+            // 构建 extension_config：surfaces / autoLoad.{admin,consumer} / hasWidget / hasPanel
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, Object> extConfig = new java.util.HashMap<>();
                 boolean hasWidget = installInfo.isHasWidget();
                 boolean hasPanel = installInfo.isHasPanel();
 
-                // 尽量从 plugin-ui.yml 的 plugin 节点读取 autoLoad（旧版只有 hasPanel 时仍能兼容）
-                Boolean pluginAutoLoad = null;
-                Boolean yamlHasPanel = null;
                 Map<String, Object> pluginYmlConfig = installInfo.getPluginYmlConfig();
                 Object pluginNode = pluginYmlConfig != null ? pluginYmlConfig.get("plugin") : null;
                 if (pluginNode instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
-                    pluginAutoLoad = pluginMap.containsKey("autoLoad") ? parseBoolean(pluginMap.get("autoLoad")) : null;
-                    yamlHasPanel = pluginMap.containsKey("hasPanel") ? parseBoolean(pluginMap.get("hasPanel")) : null;
-                }
-
-                // 有菜单/路由的插件才认为“有前端页面”
-                boolean hasFrontend = false;
-                if (pluginYmlConfig != null) {
-                    Object menusObj = pluginYmlConfig.get("menus");
-                    if (menusObj instanceof List && !((List<?>) menusObj).isEmpty()) {
-                        hasFrontend = true;
+                    if (pluginMap.containsKey("hasPanel")) {
+                        hasPanel = parseBoolean(pluginMap.get("hasPanel"));
                     }
-                    if (!hasFrontend) {
-                        Object routesObj = pluginYmlConfig.get("routes");
-                        if (routesObj instanceof List && !((List<?>) routesObj).isEmpty()) {
-                            hasFrontend = true;
-                        }
+                    if (pluginMap.containsKey("hasWidget")) {
+                        hasWidget = parseBoolean(pluginMap.get("hasWidget"));
                     }
                 }
 
-                boolean autoLoad;
-                if (pluginAutoLoad != null) {
-                    autoLoad = pluginAutoLoad;
-                    if (yamlHasPanel != null) {
-                        hasPanel = yamlHasPanel;
-                    } else {
-                        // 如果只给了 autoLoad 而没有 hasPanel，则推断：panel-only 更合理
-                        hasPanel = autoLoad && !hasWidget;
-                    }
-                } else {
-                    // 兼容旧版：autoLoad 由 hasPanel/hasWidget 计算
-                    if (yamlHasPanel != null) {
-                        hasPanel = yamlHasPanel;
-                    }
-                    autoLoad = hasPanel || hasWidget;
-                }
-
-                // 有面板或小组件的插件需要自动加载前端 JS
-                extConfig.put("autoLoad", autoLoad);
-                extConfig.put("hasPanel", hasPanel);
-                extConfig.put("hasWidget", hasWidget);
-                extConfig.put("hasFrontend", hasFrontend);
+                PluginUiExtensionConfigFactory.putExtensionFlags(extConfig, pluginYmlConfig, hasWidget, hasPanel);
 
                 // 完整性校验信息（Marketplace SHA-256 + 安装前后校验）
                 try {
@@ -212,8 +182,9 @@ public class ApplicationPersistenceService {
                 }
 
                 application.setExtensionConfig(objectMapper.writeValueAsString(extConfig));
-                log.info("设置扩展配置: pluginId={}, autoLoad={}, hasPanel={}, hasWidget={}",
-                        packageId, autoLoad, hasPanel, hasWidget);
+                log.info("设置扩展配置: pluginId={}, surfaceAdmin={}, surfaceConsumer={}, autoLoadAdmin={}, autoLoadConsumer={}, hasPanel={}, hasWidget={}",
+                        packageId, extConfig.get("surfaceAdmin"), extConfig.get("surfaceConsumer"),
+                        extConfig.get("autoLoadAdmin"), extConfig.get("autoLoadConsumer"), hasPanel, hasWidget);
             } catch (Exception e) {
                 log.warn("构建 extension_config 失败: pluginId={}, error={}", packageId, e.getMessage());
             }
@@ -265,7 +236,7 @@ public class ApplicationPersistenceService {
                     String tableName = permissionInfo.getTableName().toLowerCase();
                     
                     // 检查是否已存在
-                    String checkSql = "SELECT COUNT(*) as cnt FROM sys_plugin_table_permission WHERE plugin_id = #{pluginId} AND table_name = #{tableName}";
+                    String checkSql = "SELECT COUNT(*) as cnt FROM appstore_plugin_table_permission WHERE plugin_id = #{pluginId} AND table_name = #{tableName}";
                     List<Map<String, Object>> checkResult = dataSource.dynamicSql(checkSql)
                             .param("pluginId", pluginId)
                             .param("tableName", tableName)
@@ -281,7 +252,7 @@ public class ApplicationPersistenceService {
                     
                     // 插入新的表权限记录
                     String insertSql = """
-                        INSERT INTO sys_plugin_table_permission 
+                        INSERT INTO appstore_plugin_table_permission 
                         (plugin_id, table_name, allowed_operations, is_readonly, description, enabled, 
                          create_time, update_time, create_by, update_by)
                         VALUES (#{pluginId}, #{tableName}, #{allowedOperations}, #{isReadonly}, #{description}, #{enabled}, 
@@ -375,7 +346,53 @@ public class ApplicationPersistenceService {
     }
 
     /**
-     * 兼容 plugin-ui.yml 中布尔字段解析（SnakeYAML/JSON 可能返回 Boolean 或字符串）。
+     * 追加并持久化安装前配置到 extension_config。
+     */
+    public boolean mergeExtensionConfigByPluginId(String pluginId, Map<String, Object> extraConfig, String operatorName) {
+        if (pluginId == null || pluginId.isBlank() || extraConfig == null || extraConfig.isEmpty()) {
+            return false;
+        }
+
+        SysApplication application = applicationDao.getApplicationByPluginId(pluginId);
+        if (application == null) {
+            log.warn("未找到应用记录，无法合并安装配置: pluginId={}", pluginId);
+            return false;
+        }
+
+        try {
+            Map<String, Object> merged = new LinkedHashMap<>();
+            Map<String, Object> existing = parseExtensionConfig(application);
+            if (existing != null && !existing.isEmpty()) {
+                merged.putAll(existing);
+            }
+            merged.putAll(resolveEffectiveConfig(pluginId, extraConfig));
+
+            String configJson = new ObjectMapper().writeValueAsString(merged);
+            return updateExtensionConfig(application.getId(), configJson, operatorName);
+        } catch (Exception e) {
+            log.error("合并安装配置失败: pluginId={}", pluginId, e);
+            return false;
+        }
+    }
+
+    private Map<String, Object> resolveEffectiveConfig(String pluginId, Map<String, Object> fallbackConfig) {
+        if (pluginConfigMetadataProvider == null) {
+            return fallbackConfig;
+        }
+        try {
+            Map<String, Object> flatConfig = pluginConfigMetadataProvider.getPluginPackageFlatConfig(pluginId);
+            if (flatConfig != null && !flatConfig.isEmpty()) {
+                return flatConfig;
+            }
+        } catch (Exception e) {
+            log.warn("获取插件当前配置快照失败，回退到安装表单原始配置: pluginId={}, error={}",
+                    pluginId, e.getMessage());
+        }
+        return fallbackConfig;
+    }
+
+    /**
+     * 兼容插件清单 YAML 中布尔字段解析（SnakeYAML/JSON 可能返回 Boolean 或字符串）。
      */
     private Boolean parseBoolean(Object value) {
         if (value == null) {
@@ -387,8 +404,6 @@ public class ApplicationPersistenceService {
         return Boolean.parseBoolean(String.valueOf(value));
     }
 }
-
-
 
 
 

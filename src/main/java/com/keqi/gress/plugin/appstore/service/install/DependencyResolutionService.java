@@ -12,8 +12,8 @@ import  com.keqi.gress.common.plugin.PluginPackageMetadataResult;
 import com.keqi.gress.plugin.appstore.service.ApplicationInstallService;
 import com.keqi.gress.plugin.appstore.service.persistence.ApplicationPersistenceService;
 
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,16 +32,26 @@ import org.apache.commons.lang3.StringUtils;
 public class DependencyResolutionService {
     private static final Log log = LogFactory.get(DependencyResolutionService.class);
 
-    @Inject(source = Inject.BeanSource.SPRING)
+    private enum InstallStage {
+        RESOLVE_APP_DETAIL,
+        CHECK_DEPENDENCIES,
+        DOWNLOAD_DEPENDENCY,
+        UPGRADE_DEPENDENCY,
+        INSTALL_DEPENDENCY,
+        DOWNLOAD_MAIN_PLUGIN,
+        INSTALL_MAIN_PLUGIN
+    }
+
+    @Autowired
     private PluginPackageLifecycle pluginPackageLifecycle;
 
-    @Inject
+    @Autowired
     private AppStoreApiService appStoreApiService;
     
-    @Inject
+    @Autowired
     private ApplicationInstallService applicationInstallService;
     
-    @Inject
+    @Autowired
     private ApplicationPersistenceService persistenceService;
 
     /**
@@ -160,8 +170,23 @@ public class DependencyResolutionService {
      * @param operator   操作人
      */
     public Result<Void> ensureDependenciesInstalled(String pluginId, String version, String operator) {
-        java.util.List<String> newlyInstalledDeps = new java.util.ArrayList<>();  // 记录本次新安装的依赖
-        
+        DependencyChangeSet changeSet = new DependencyChangeSet();
+        java.util.List<String> dependencyChain = new java.util.ArrayList<>();
+        dependencyChain.add(formatNode(pluginId, version, null));
+        Result<Void> result = ensureDependenciesInstalled(pluginId, version, operator, changeSet, dependencyChain);
+        if (!result.isSuccess()) {
+            rollbackDependencyChangeSet(changeSet, operator);
+            return Result.error(result.getErrorMessage() + "（已回滚本次依赖变更）");
+        }
+        return result;
+    }
+
+    private Result<Void> ensureDependenciesInstalled(
+            String pluginId,
+            String version,
+            String operator,
+            DependencyChangeSet changeSet,
+            java.util.List<String> dependencyChain) {
         try {
             // 获取应用详情（含依赖信息）
             ApplicationDTO appDetail = appStoreApiService.getApplicationVersionDetail(pluginId, version);
@@ -206,28 +231,31 @@ public class DependencyResolutionService {
                     // 下载并升级依赖
                     String depFileUrl = appStoreApiService.downloadApplication(depPluginId, targetVersion);
                     if (depFileUrl == null || depFileUrl.isEmpty()) {
-                        String msg = "依赖下载失败: " + depPluginId + "@" + targetVersion;
+                        String msg = formatFailure(
+                                InstallStage.DOWNLOAD_DEPENDENCY,
+                                dependencyChain,
+                                depPluginId,
+                                targetVersion,
+                                depVersionRange,
+                                "从应用商店下载依赖包失败");
                         log.error(msg);
-                        
-                        // 安装失败，执行智能回滚
-                        log.warn("检测到依赖下载失败，开始回滚本次新安装的 {} 个依赖...", newlyInstalledDeps.size());
-                        rollbackNewlyInstalled(newlyInstalledDeps, operator);
-                        
-                        return Result.error(msg + "（已回滚本次安装的依赖）");
+                        return Result.error(msg);
                     }
-                    
+
+                    changeSet.getUpgradedBeforeVersion().putIfAbsent(depPluginId, installedVersion);
                     Result<com.keqi.gress.common.plugin.PluginPackageUpgradeResult> upgradeResult =
                             applicationInstallService.upgradeApplication(depPluginId, depFileUrl, null, null);
                     
                     if (!upgradeResult.isSuccess()) {
-                        String msg = "依赖升级失败: " + depPluginId + " - " + upgradeResult.getErrorMessage();
+                        String msg = formatFailure(
+                                InstallStage.UPGRADE_DEPENDENCY,
+                                dependencyChain,
+                                depPluginId,
+                                targetVersion,
+                                depVersionRange,
+                                upgradeResult.getErrorMessage());
                         log.error(msg);
-                        
-                        // 升级失败，执行智能回滚
-                        log.warn("检测到依赖升级失败，开始回滚本次新安装的 {} 个依赖...", newlyInstalledDeps.size());
-                        rollbackNewlyInstalled(newlyInstalledDeps, operator);
-                        
-                        return Result.error(msg + "（已回滚本次安装的依赖）");
+                        return Result.error(msg);
                     }
                     
                     log.info("依赖升级成功: pluginId={}, from={}, to={}", depPluginId, installedVersion, targetVersion);
@@ -236,38 +264,38 @@ public class DependencyResolutionService {
                 
                 // 未安装，递归安装依赖（含其依赖链）
                 log.info("开始安装依赖插件（含其依赖链）: pluginId={}, version={}", depPluginId, depVersion);
+                java.util.List<String> childChain = appendChain(
+                        dependencyChain,
+                        formatNode(depPluginId, depVersion, depVersionRange));
                 Result<PluginPackageInstallResult> depResult = 
-                        installWithDependencies(depPluginId, depVersion, operator);
+                        installWithDependencies(depPluginId, depVersion, operator, null, changeSet, true, false, childChain);
                 
                 if (!depResult.isSuccess()) {
-                    String msg = "依赖插件安装失败: " + depPluginId + " - " + depResult.getErrorMessage();
+                    String msg = formatFailure(
+                            InstallStage.INSTALL_DEPENDENCY,
+                            dependencyChain,
+                            depPluginId,
+                            depVersion,
+                            depVersionRange,
+                            depResult.getErrorMessage());
                     log.error(msg);
-                    
-                    // 安装失败，执行智能回滚
-                    log.warn("检测到依赖安装失败，开始回滚本次新安装的 {} 个依赖...", newlyInstalledDeps.size());
-                    rollbackNewlyInstalled(newlyInstalledDeps, operator);
-                    
-                    return Result.error(msg + "（已回滚本次安装的依赖）");
+                    return Result.error(msg);
                 }
-                
-                // 安装成功，记录到新安装列表
-                newlyInstalledDeps.add(depPluginId);
-                log.info("依赖安装成功并已记录: pluginId={}, 当前新安装数量={}", depPluginId, newlyInstalledDeps.size());
             }
 
-            log.info("所有依赖检查完成，本次新安装 {} 个依赖", newlyInstalledDeps.size());
+            log.info("所有依赖检查完成，本次累计新安装 {} 个依赖", changeSet.getNewlyInstalled().size());
             return Result.success();
             
         } catch (Exception e) {
-            String msg = "检查并安装依赖失败: pluginId=" + pluginId +
-                    ", version=" + version + ", error=" + e.getMessage();
+            String msg = formatFailure(
+                    InstallStage.CHECK_DEPENDENCIES,
+                    dependencyChain,
+                    pluginId,
+                    version,
+                    null,
+                    e.getMessage());
             log.error(msg, e);
-            
-            // 异常时也要回滚
-            log.warn("检测到异常，开始回滚本次新安装的 {} 个依赖...", newlyInstalledDeps.size());
-            rollbackNewlyInstalled(newlyInstalledDeps, operator);
-            
-            return Result.error(msg + "（已回滚本次安装的依赖）");
+            return Result.error(msg);
         }
     }
 
@@ -286,6 +314,8 @@ public class DependencyResolutionService {
     public Result<DependencyChangeSet> ensureDependenciesUpgradedWithRollback(
             String pluginId, String version, String operator) {
         DependencyChangeSet changeSet = new DependencyChangeSet();
+        java.util.List<String> dependencyChain = new java.util.ArrayList<>();
+        dependencyChain.add(formatNode(pluginId, version, null));
 
         try {
             ApplicationDTO appDetail = appStoreApiService.getApplicationVersionDetail(pluginId, version);
@@ -316,16 +346,24 @@ public class DependencyResolutionService {
                 if (installedVersion == null) {
                     // 未安装：安装依赖（会递归处理其依赖链；内部失败会回滚它自己的 newlyInstalled）
                     log.info("升级场景：依赖未安装，开始安装: pluginId={}, version={}", depPluginId, depTargetVersion);
+                    java.util.List<String> childChain = appendChain(
+                            dependencyChain,
+                            formatNode(depPluginId, depTargetVersion, depVersionRange));
                     Result<PluginPackageInstallResult> installResult =
-                            installWithDependencies(depPluginId, depTargetVersion, operator);
+                            installWithDependencies(depPluginId, depTargetVersion, operator, null, changeSet, true, false, childChain);
                     if (!installResult.isSuccess()) {
-                        String msg = "升级场景依赖安装失败: " + depPluginId + " - " + installResult.getErrorMessage();
+                        String msg = formatFailure(
+                                InstallStage.INSTALL_DEPENDENCY,
+                                dependencyChain,
+                                depPluginId,
+                                depTargetVersion,
+                                depVersionRange,
+                                installResult.getErrorMessage());
                         log.error(msg);
                         // 回滚本次已完成的依赖变更
                         rollbackDependencyChangeSet(changeSet, operator);
                         return Result.error(msg + "（已回滚本次依赖变更）");
                     }
-                    changeSet.getNewlyInstalled().add(depPluginId);
                     continue;
                 }
 
@@ -527,6 +565,26 @@ public class DependencyResolutionService {
      */
     public Result<PluginPackageInstallResult> installWithDependencies(
             String pluginId, String version, String operatorName) {
+        return installWithDependencies(pluginId, version, operatorName, null);
+    }
+
+    public Result<PluginPackageInstallResult> installWithDependencies(
+            String pluginId, String version, String operatorName, java.util.Map<String, Object> installConfig) {
+        java.util.List<String> dependencyChain = new java.util.ArrayList<>();
+        dependencyChain.add(formatNode(pluginId, version, null));
+        return installWithDependencies(
+                pluginId, version, operatorName, installConfig, new DependencyChangeSet(), false, true, dependencyChain);
+    }
+
+    private Result<PluginPackageInstallResult> installWithDependencies(
+            String pluginId,
+            String version,
+            String operatorName,
+            java.util.Map<String, Object> installConfig,
+            DependencyChangeSet changeSet,
+            boolean recordAsDependencyInstall,
+            boolean rollbackOnFailure,
+            java.util.List<String> dependencyChain) {
         try {
             log.info("开始从应用商店安装应用（含依赖链）: pluginId={}, version={}, operator={}", 
                     pluginId, version, operatorName);
@@ -534,7 +592,13 @@ public class DependencyResolutionService {
             // 1. 检查版本是否已安装（支持版本范围）
             ApplicationDTO appDetail = appStoreApiService.getApplicationVersionDetail(pluginId, version);
             if (appDetail == null) {
-                String msg = "获取应用详情失败: " + pluginId;
+                String msg = formatFailure(
+                        InstallStage.RESOLVE_APP_DETAIL,
+                        dependencyChain,
+                        pluginId,
+                        version,
+                        null,
+                        "获取应用详情失败");
                 log.error(msg);
                 return Result.error(msg);
             }
@@ -553,11 +617,13 @@ public class DependencyResolutionService {
             
             // 2. 获取应用详情（含依赖）已在上面获取
             
-            // 3. 递归安装所有依赖（内部已支持智能回滚）
-            Result<Void> depResult = ensureDependenciesInstalled(pluginId, version, operatorName);
+            // 3. 递归安装所有依赖（统一登记到总变更集）
+            Result<Void> depResult = ensureDependenciesInstalled(pluginId, version, operatorName, changeSet, dependencyChain);
             if (!depResult.isSuccess()) {
-                // 依赖安装失败时，已在 ensureDependenciesInstalled 内部完成回滚
-                return Result.error("依赖安装失败: " + depResult.getErrorMessage());
+                if (rollbackOnFailure) {
+                    rollbackDependencyChangeSet(changeSet, operatorName);
+                }
+                return Result.error(depResult.getErrorMessage());
             }
             
             // 4. 从应用商店下载主应用包
@@ -565,8 +631,17 @@ public class DependencyResolutionService {
             String fileUrl = appStoreApiService.downloadApplication(pluginId, version);
             
             if (fileUrl == null || fileUrl.isEmpty()) {
-                String errorMsg = "从应用商店下载应用包失败";
+                String errorMsg = formatFailure(
+                        InstallStage.DOWNLOAD_MAIN_PLUGIN,
+                        dependencyChain,
+                        pluginId,
+                        version,
+                        null,
+                        "从应用商店下载主插件包失败");
                 log.error(errorMsg);
+                if (rollbackOnFailure) {
+                    rollbackDependencyChangeSet(changeSet, operatorName);
+                }
                 return Result.error(errorMsg);
             }
             
@@ -574,20 +649,37 @@ public class DependencyResolutionService {
             
             // 5. 安装应用
             Result<PluginPackageInstallResult> installResult = 
-                    applicationInstallService.installApplication(fileUrl, appDetail.getSha256());
+                    applicationInstallService.installApplication(fileUrl, appDetail.getSha256(), installConfig);
             
             if (!installResult.isSuccess()) {
-                log.error("安装应用失败: {}", installResult.getErrorMessage());
-                return installResult;
+                String errorMsg = formatFailure(
+                        InstallStage.INSTALL_MAIN_PLUGIN,
+                        dependencyChain,
+                        pluginId,
+                        version,
+                        null,
+                        installResult.getErrorMessage());
+                log.error(errorMsg);
+                if (rollbackOnFailure) {
+                    rollbackDependencyChangeSet(changeSet, operatorName);
+                }
+                return Result.error(errorMsg);
             }
             
             PluginPackageInstallResult installInfo = installResult.getData();
+            if (recordAsDependencyInstall) {
+                recordNewlyInstalled(changeSet, pluginId);
+            }
             log.info("应用安装成功: packageId={}, version={}", 
                     installInfo.getPackageId(), installInfo.getVersion());
             
             // 6. 保存应用信息到数据库
             try {
                 persistenceService.saveApplication(installInfo, operatorName);
+                if (installConfig != null && !installConfig.isEmpty()) {
+                    persistenceService.mergeExtensionConfigByPluginId(
+                            installInfo.getPackageId(), installConfig, operatorName);
+                }
             } catch (Exception e) {
                 log.warn("保存应用信息到数据库失败，但插件已安装成功: packageId={}", 
                         installInfo.getPackageId(), e);
@@ -605,17 +697,65 @@ public class DependencyResolutionService {
             return installResult;
             
         } catch (Exception e) {
+            String errorMsg = formatFailure(
+                    InstallStage.INSTALL_MAIN_PLUGIN,
+                    dependencyChain,
+                    pluginId,
+                    version,
+                    null,
+                    e.getMessage());
             log.error("从应用商店安装应用失败: pluginId={}, version={}", pluginId, version, e);
-            return Result.error("安装应用失败: " + e.getMessage());
+            if (rollbackOnFailure) {
+                rollbackDependencyChangeSet(changeSet, operatorName);
+            }
+            return Result.error(errorMsg);
         }
     }
+
+    private void recordNewlyInstalled(DependencyChangeSet changeSet, String pluginId) {
+        if (changeSet == null || pluginId == null || pluginId.isBlank()) {
+            return;
+        }
+        if (!changeSet.getNewlyInstalled().contains(pluginId)) {
+            changeSet.getNewlyInstalled().add(pluginId);
+            log.info("依赖安装成功并已登记到总变更集: pluginId={}, totalNewlyInstalled={}",
+                    pluginId, changeSet.getNewlyInstalled().size());
+        }
+    }
+
+    private java.util.List<String> appendChain(java.util.List<String> dependencyChain, String nextNode) {
+        java.util.List<String> chain = new java.util.ArrayList<>(dependencyChain);
+        chain.add(nextNode);
+        return chain;
+    }
+
+    private String formatNode(String pluginId, String version, String versionRange) {
+        String versionText = StringUtils.isNotBlank(version) ? version : "?";
+        if (StringUtils.isNotBlank(versionRange)) {
+            return pluginId + "@" + versionText + " [range=" + versionRange + "]";
+        }
+        return pluginId + "@" + versionText;
+    }
+
+    private String formatFailure(
+            InstallStage stage,
+            java.util.List<String> dependencyChain,
+            String pluginId,
+            String version,
+            String versionRange,
+            String reason) {
+        String requirement = formatNode(pluginId, version, versionRange);
+        String chainText = dependencyChain == null || dependencyChain.isEmpty()
+                ? requirement
+                : String.join(" -> ", dependencyChain);
+        String detail = StringUtils.isNotBlank(reason) ? reason : "未知错误";
+        return "依赖安装失败"
+                + " [阶段=" + stage.name()
+                + ", 目标=" + requirement
+                + ", 链路=" + chainText
+                + "]: " + detail;
+    }
 }
-
-
-
-
-
-
 
 
 

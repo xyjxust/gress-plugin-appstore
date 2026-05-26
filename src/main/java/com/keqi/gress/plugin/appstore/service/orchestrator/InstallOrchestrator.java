@@ -1,16 +1,15 @@
 package com.keqi.gress.plugin.appstore.service.orchestrator;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.PluginPackageInstallResult;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.service.ApplicationInstallService;
 import com.keqi.gress.plugin.appstore.service.install.DependencyResolutionService;
 import com.keqi.gress.plugin.appstore.service.persistence.ApplicationPersistenceService;
 import com.keqi.gress.plugin.appstore.service.logging.ApplicationOperationLogger;
+import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,16 +37,16 @@ public class InstallOrchestrator {
     
     //private static final Log log = LogFactory.get(InstallOrchestrator.class);
     
-    @Inject
+    @Autowired
     private DependencyResolutionService dependencyResolutionService;
     
-    @Inject
+    @Autowired
     private ApplicationInstallService applicationInstallService;
     
-    @Inject
+    @Autowired
     private ApplicationPersistenceService persistenceService;
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogger operationLogger;
     
     /**
@@ -58,21 +57,43 @@ public class InstallOrchestrator {
      * @return 安装结果
      */
     public Result<PluginPackageInstallResult> installFromUrl(String fileUrl, String operatorName) {
+        return installFromUrl(fileUrl, operatorName, true, null);
+    }
+
+    /**
+     * 从URL安装应用
+     *
+     * @param fileUrl 文件URL
+     * @param operatorName 操作员名称
+     * @param syncTablePermissions 是否同步应用商店表权限
+     * @return 安装结果
+     */
+    public Result<PluginPackageInstallResult> installFromUrl(String fileUrl, String operatorName, boolean syncTablePermissions) {
+        return installFromUrl(fileUrl, operatorName, syncTablePermissions, null);
+    }
+
+    public Result<PluginPackageInstallResult> installFromUrl(
+            String fileUrl,
+            String operatorName,
+            boolean syncTablePermissions,
+            java.util.Map<String, Object> installConfig) {
         long startTime = System.currentTimeMillis();
         SysApplication tempApp = null;
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
+        String resolvedOperatorId = OperatorContextHelper.getOperatorId();
         
         try {
-            log.info("开始从URL安装应用: fileUrl={}, operator={}", fileUrl, operatorName);
+            log.info("开始从URL安装应用: fileUrl={}, operator={}", fileUrl, resolvedOperatorName);
             
             // 1. 执行安装（通过 ApplicationInstallService）
             Result<PluginPackageInstallResult> installResult = 
-                    applicationInstallService.installApplication(fileUrl);
+                    applicationInstallService.installApplication(fileUrl, null, installConfig);
             
             if (!installResult.isSuccess()) {
                 log.error("安装应用失败: {}", installResult.getErrorMessage());
                 tempApp = createTempApp("unknown", "unknown");
                 operationLogger.logFailure(tempApp, "INSTALL", "安装应用", 
-                        "admin", operatorName, "安装失败: " + installResult.getErrorMessage(), 
+                        resolvedOperatorId, resolvedOperatorName, "安装失败: " + installResult.getErrorMessage(), 
                         startTime);
                 return installResult;
             }
@@ -84,19 +105,28 @@ public class InstallOrchestrator {
             // 2. 保存应用信息到数据库
             SysApplication application = null;
             try {
-                application = persistenceService.saveApplication(installInfo, operatorName);
+                application = persistenceService.saveApplication(installInfo, resolvedOperatorName);
+                if (installInfo != null && installInfo.getPackageId() != null
+                        && installConfig != null && !installConfig.isEmpty()) {
+                    persistenceService.mergeExtensionConfigByPluginId(
+                            installInfo.getPackageId(), installConfig, resolvedOperatorName);
+                }
             } catch (Exception e) {
                 log.warn("保存应用信息到数据库失败，但插件已安装成功: packageId={}", 
                         installInfo.getPackageId(), e);
             }
             
-            // 3. 从应用商店获取表权限并保存
-            try {
-                persistenceService.saveTablePermissionsFromAppStore(
-                        installInfo.getPackageId(), operatorName);
-            } catch (Exception e) {
-                log.warn("获取并保存表权限失败，但插件已安装成功: packageId={}", 
-                        installInfo.getPackageId(), e);
+            // 3. （可选）从应用商店获取表权限并保存
+            if (syncTablePermissions) {
+                try {
+                    persistenceService.saveTablePermissionsFromAppStore(
+                            installInfo.getPackageId(), resolvedOperatorName);
+                } catch (Exception e) {
+                    log.warn("获取并保存表权限失败，但插件已安装成功: packageId={}",
+                            installInfo.getPackageId(), e);
+                }
+            } else {
+                log.info("跳过表权限同步（本地上传安装）: packageId={}", installInfo.getPackageId());
             }
             
             // 4. 记录成功日志
@@ -104,7 +134,7 @@ public class InstallOrchestrator {
                 application = createTempApp(installInfo.getPackageId(), installInfo.getPackageId());
             }
             operationLogger.logSuccess(application, "INSTALL", "安装应用", 
-                    "admin", operatorName, 
+                    resolvedOperatorId, resolvedOperatorName,
                     String.format("安装成功，版本: %s", installInfo.getVersion()), 
                     startTime);
             
@@ -114,7 +144,7 @@ public class InstallOrchestrator {
             log.error("从URL安装应用失败: fileUrl={}", fileUrl, e);
             if (tempApp != null) {
                 operationLogger.logFailure(tempApp, "INSTALL", "安装应用", 
-                        "admin", operatorName, "异常: " + e.getMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, "异常: " + e.getMessage(), startTime);
             }
             return Result.error("安装应用失败: " + e.getMessage());
         }
@@ -130,20 +160,28 @@ public class InstallOrchestrator {
      */
     public Result<PluginPackageInstallResult> installFromAppStore(
             String pluginId, String version, String operatorName) {
+        return installFromAppStore(pluginId, version, operatorName, null);
+    }
+
+    public Result<PluginPackageInstallResult> installFromAppStore(
+            String pluginId, String version, String operatorName, java.util.Map<String, Object> installConfig) {
         long startTime = System.currentTimeMillis();
         SysApplication tempApp = createTempApp(pluginId, pluginId);
+        String resolvedOperatorName = OperatorContextHelper.resolveOperatorName(operatorName);
+        String resolvedOperatorId = OperatorContextHelper.getOperatorId();
         
         try {
             log.info("开始从应用商店安装应用（含依赖）: pluginId={}, version={}, operator={}", 
-                    pluginId, version, operatorName);
+                    pluginId, version, resolvedOperatorName);
             
             // 通过依赖安装器执行完整的依赖链安装（含下载、安装、持久化）
             Result<PluginPackageInstallResult> result = 
-                    dependencyResolutionService.installWithDependencies(pluginId, version, operatorName);
+                    dependencyResolutionService.installWithDependencies(
+                            pluginId, version, resolvedOperatorName, installConfig);
             
             if (!result.isSuccess()) {
                 operationLogger.logFailure(tempApp, "INSTALL", "安装应用", 
-                        "admin", operatorName, result.getErrorMessage(), startTime);
+                        resolvedOperatorId, resolvedOperatorName, result.getErrorMessage(), startTime);
                 return result;
             }
             
@@ -153,9 +191,9 @@ public class InstallOrchestrator {
             if (application == null) {
                 application = tempApp;
             }
-            
+
             operationLogger.logSuccess(application, "INSTALL", "安装应用", 
-                    "admin", operatorName, 
+                    resolvedOperatorId, resolvedOperatorName,
                     String.format("安装成功（含依赖），版本: %s", installInfo.getVersion()), 
                     startTime);
             
@@ -164,7 +202,7 @@ public class InstallOrchestrator {
         } catch (Exception e) {
             log.error("从应用商店安装应用失败: pluginId={}, version={}", pluginId, version, e);
             operationLogger.logFailure(tempApp, "INSTALL", "安装应用", 
-                    "admin", operatorName, "异常: " + e.getMessage(), startTime);
+                    resolvedOperatorId, resolvedOperatorName, "异常: " + e.getMessage(), startTime);
             return Result.error("安装应用失败: " + e.getMessage());
         }
     }
@@ -179,9 +217,6 @@ public class InstallOrchestrator {
         return app;
     }
 }
-
-
-
 
 
 

@@ -7,8 +7,8 @@ import  com.keqi.gress.common.plugin.PluginPackageInstallResult;
 import  com.keqi.gress.common.plugin.PluginPackageLifecycle;
 import  com.keqi.gress.common.plugin.PluginPackageUninstallResult;
 import  com.keqi.gress.common.plugin.PluginPackageUpgradeResult;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.common.storage.FileStorageService;
 import com.keqi.gress.plugin.appstore.dto.ApplicationUpgradeRequest;
 import com.keqi.gress.plugin.appstore.service.security.JarSignatureVerifier;
@@ -32,16 +32,16 @@ public class ApplicationInstallService {
     
     private static final Log log = LogFactory.get(ApplicationInstallService.class);
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginPackageLifecycle pluginPackageLifecycle;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private FileStorageService fileStorageService;
 
-    @Inject
+    @Autowired
     private com.keqi.gress.plugin.appstore.config.AppStoreConfig appStoreConfig;
 
-    @Inject(source = Inject.BeanSource.PLUGIN)
+    @Autowired
     private AppStoreApiService appStoreApiService;
 
     private final JarSignatureVerifier jarSignatureVerifier = new JarSignatureVerifier();
@@ -96,7 +96,7 @@ public class ApplicationInstallService {
      * @return 安装结果（包含插件包信息）
      */
     public Result<PluginPackageInstallResult> installApplication(String fileUrl) {
-        return installApplication(fileUrl, null);
+        return installApplication(fileUrl, null, null);
     }
 
     /**
@@ -106,6 +106,18 @@ public class ApplicationInstallService {
      * @param expectedSha256 期望 SHA-256（来自 Marketplace），为空则跳过
      */
     public Result<PluginPackageInstallResult> installApplication(String fileUrl, String expectedSha256) {
+        return installApplication(fileUrl, expectedSha256, null);
+    }
+
+    /**
+     * 安装应用（带期望 SHA-256 校验与安装前配置）
+     *
+     * @param fileUrl 文件存储URL
+     * @param expectedSha256 期望 SHA-256（来自 Marketplace），为空则跳过
+     * @param installConfig 安装前配置（拍平格式）
+     */
+    public Result<PluginPackageInstallResult> installApplication(
+            String fileUrl, String expectedSha256, java.util.Map<String, Object> installConfig) {
         boolean verifySignatureEnabled = appStoreConfig != null
                 && appStoreConfig.getSecurity() != null
                 && Boolean.TRUE.equals(appStoreConfig.getSecurity().getVerifySignature());
@@ -160,7 +172,7 @@ public class ApplicationInstallService {
                 }
 
                 // 2. 调用插件生命周期管理器安装
-                Result<PluginPackageInstallResult> result = pluginPackageLifecycle.install(tempFile);
+                Result<PluginPackageInstallResult> result = pluginPackageLifecycle.install(tempFile, installConfig);
                 
                 if (result.isSuccess()) {
                     PluginPackageInstallResult installResult = result.getData();

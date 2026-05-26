@@ -4,8 +4,8 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.PluginPackageUpgradeResult;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
 import com.keqi.gress.plugin.appstore.dto.ApplicationUpgradeRequest;
@@ -42,19 +42,19 @@ public class UpgradeOrchestrator {
     
   //  private static final Log log = LogFactory.get(UpgradeOrchestrator.class);
     
-    @Inject
+    @Autowired
     private ApplicationPersistenceService persistenceService;
     
-    @Inject
+    @Autowired
     private DependencyResolutionService dependencyResolutionService;
     
-    @Inject
+    @Autowired
     private AppStoreApiService appStoreApiService;
     
-    @Inject
+    @Autowired
     private ApplicationInstallService applicationInstallService;
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogger operationLogger;
     
     /**

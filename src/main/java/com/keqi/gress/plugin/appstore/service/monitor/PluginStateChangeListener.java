@@ -1,7 +1,7 @@
 package com.keqi.gress.plugin.appstore.service.monitor;
 
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dao.MonitorHistoryDao;
 import com.keqi.gress.plugin.appstore.domain.entity.PluginStateChangeLog;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class PluginStateChangeListener {
     
-    @Inject
+    @Autowired
     private MonitorHistoryDao historyDao;
     
     /**

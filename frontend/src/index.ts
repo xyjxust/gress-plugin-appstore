@@ -12,8 +12,12 @@ import OperationLog from './views/OperationLog.vue'
 import MiddlewareManagement from './views/MiddlewareManagement.vue'
 import NodeManagement from './views/NodeManagement.vue'
 import PluginMonitorDashboard from './views/PluginMonitorDashboard.vue'
+import StackDeployment from './views/StackDeployment.vue'
 import PluginStatsWidget from './widgets/PluginStatsWidget.vue'
 import AppstoreTestSharedField from './components/shared/AppstoreTestSharedField.vue'
+import ApplicationPopselect from './components/shared/ApplicationPopselect.vue'
+import DeveloperPortalHome from './views/developer-portal/DeveloperPortalHome.vue'
+import DeveloperCenterShell from './views/developer-portal/DeveloperCenterShell.vue'
 
 // 不再需要全局类型声明，使用统一的 __GRESS_PLUGIN__ 全局变量
 
@@ -77,12 +81,12 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
       PluginPermission.UI_MENU
     ],
 
-    loadStrategy: 'lazy',
+    loadStrategy: 'lazy' as any,
 
     /**
      * 组件注册表（名称 -> 组件实例）
      *
-     * - 后端 plugin-ui.yml 中只写组件名称（如 AppStorePage / AppStoreAdminPage）
+     * - 后端 plugin.yml → plugin.ui.menus 中只写组件名称（如 AppStorePage / AppStoreAdminPage）
      * - 宿主通过 PluginRuntime 获取 manifest.components 后按名称查找组件：
      *   const runtime = getPluginRuntime()
      *   const plugin = runtime.get('appstore')
@@ -94,7 +98,8 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
       OperationLog,
       MiddlewareManagement,
       NodeManagement,
-      PluginMonitorDashboard
+      PluginMonitorDashboard,
+      StackDeployment
     },
 
     extensions: {
@@ -105,6 +110,13 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
           category: 'schema-form.field',
           name: 'AppstoreTestSharedField',
           component: AppstoreTestSharedField,
+        }
+        ,
+        {
+          global: true,
+          category: 'schema-form.field',
+          name: 'ApplicationPopselect',
+          component: ApplicationPopselect,
         }
       ],
       menus: [],
@@ -122,7 +134,7 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
           order: 10
         }
       ]
-    },
+    } as any,
 
     lifecycle: {
       async install(context: any) {
@@ -157,7 +169,8 @@ export default (bridge: any, properties?: AppStoreConfig): PluginManifest<AppSto
           'NIcon',
           'NSwitch',
           'NDescriptions',
-          'NDescriptionsItem'
+          'NDescriptionsItem',
+          'NDivider'
         ]
 
         if (ui && ui.components) {

@@ -4,8 +4,8 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
 import  com.keqi.gress.common.plugin.PluginPackageUninstallResult;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.dto.ApplicationUninstallRequest;
 import com.keqi.gress.plugin.appstore.service.ApplicationInstallService;
@@ -37,13 +37,13 @@ public class UninstallOrchestrator {
     
    // private static final Log log = LogFactory.get(UninstallOrchestrator.class);
     
-    @Inject
+    @Autowired
     private ApplicationPersistenceService persistenceService;
     
-    @Inject
+    @Autowired
     private ApplicationInstallService applicationInstallService;
     
-    @Inject
+    @Autowired
     private ApplicationOperationLogger operationLogger;
     
     /**

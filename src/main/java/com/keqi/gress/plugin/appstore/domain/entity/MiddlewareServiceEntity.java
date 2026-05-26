@@ -1,20 +1,18 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
-import  com.keqi.gress.plugin.api.database.annotation.TableId;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 中间件服务实体类
  */
 @Data
-@TableName("sys_middleware_service")
-public class MiddlewareServiceEntity {
-    
-    @TableId
-    @TableField("id")
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+@TableName("appstore_middleware_service")
+public class MiddlewareServiceEntity extends BaseEntity {
     
     @TableField("service_id")
     private String serviceId;

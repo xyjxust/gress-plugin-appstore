@@ -3,8 +3,8 @@ package com.keqi.gress.plugin.appstore.service.install;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import  com.keqi.gress.common.model.Result;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.common.storage.FileStorageService;
 
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
@@ -26,13 +26,13 @@ public class MiddlewareDependencyInstallerImpl implements MiddlewareDependencyIn
     
     private static final Log log = LogFactory.get(MiddlewareDependencyInstallerImpl.class);
     
-    @Inject
+    @Autowired
     private AppStoreApiService appStoreApiService;
     
-    @Inject
+    @Autowired
     private MiddlewareManagementService middlewareManagementService;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private FileStorageService fileStorageService;
     
     @Override

@@ -30,6 +30,32 @@ export const applicationApi = {
   },
 
   /**
+   * 获取应用分类（用于左侧标签过滤）
+   */
+  getCategories(): Promise<Array<{
+    categoryKey: string
+    categoryName: string
+    description?: string
+    icon?: string
+    displayOrder?: number
+  }>> {
+    return http.get(`${API_BASE}/applications/categories`) as any
+  },
+
+  /**
+   * 获取业务标签（可按类型 key 过滤）
+   */
+  getTags(typeKey?: string): Promise<Array<{
+    categoryKey: string
+    categoryName: string
+    description?: string
+    icon?: string
+    displayOrder?: number
+  }>> {
+    return http.get(`${API_BASE}/applications/tags`, typeKey ? { typeKey } : undefined) as any
+  },
+
+  /**
    * 获取应用详情
    */
   getDetail(id: number): Promise<Application> {
@@ -53,15 +79,15 @@ export const applicationApi = {
   /**
    * 启用应用
    */
-  enable(id: number, operatorName: string): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/enable`, { operatorName }) as any
+  enable(id: number): Promise<void> {
+    return http.post(`${API_BASE}/applications/${id}/enable`) as any
   },
 
   /**
    * 禁用应用
    */
-  disable(id: number, operatorName: string): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/disable`, { operatorName }) as any
+  disable(id: number): Promise<void> {
+    return http.post(`${API_BASE}/applications/${id}/disable`) as any
   },
 
   /**
@@ -69,6 +95,29 @@ export const applicationApi = {
    */
   getRemoteList(params?: ApplicationQueryRequest): Promise<PageResult<Application>> {
     return http.get<PageResult<Application>>(`${API_BASE}/applications/remote`, params) as any
+  },
+
+  /**
+   * 获取远程应用详情（应用商店）
+   */
+  getRemoteDetail(pluginId: string): Promise<Application> {
+    return http.get<Application>(`${API_BASE}/applications/remote/${encodeURIComponent(pluginId)}`) as any
+  },
+
+  /**
+   * 获取远程版本时间线
+   */
+  getRemoteVersions(pluginId: string): Promise<
+    Array<{
+      pluginId: string
+      version: string
+      releaseNotes?: string
+      fileSize?: number
+      uploadTime?: string
+      current?: boolean
+    }>
+  > {
+    return http.get(`${API_BASE}/applications/remote/${encodeURIComponent(pluginId)}/versions`) as any
   },
 
   /**
@@ -80,18 +129,21 @@ export const applicationApi = {
     } as any)
   },
 
+  async getUploadInstallConfigMetadata(formData: FormData): Promise<any[]> {
+    return http.post(`${API_BASE}/applications/upload/install-config/metadata`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } as any)
+  },
+
   /**
    * 从远程应用商店安装应用
    */
-  installRemote(pluginId: string, operatorName: string = 'admin'): Promise<void> {
-    // 使用查询参数传递 pluginId 和 operatorName
-    const params = {
-      pluginId,
-      operatorName
-    }
-    // 构建查询字符串
-    const queryString = new URLSearchParams(params).toString()
-    return http.post(`${API_BASE}/applications/remote/install?${queryString}`) as any
+  installRemote(data: { pluginId: string; installConfig?: Record<string, any> }): Promise<void> {
+    return http.post(`${API_BASE}/applications/remote/install`, data) as any
+  },
+
+  getRemoteInstallConfigMetadata(pluginId: string): Promise<any[]> {
+    return http.get(`${API_BASE}/applications/remote/${encodeURIComponent(pluginId)}/install-config/metadata`) as any
   },
 
   /**
@@ -111,8 +163,8 @@ export const applicationApi = {
   /**
    * 重启应用
    */
-  restart(id: number, operatorName: string = 'admin'): Promise<void> {
-    return http.post(`${API_BASE}/applications/${id}/restart`, { operatorName }) as any
+  restart(id: number): Promise<void> {
+    return http.post(`${API_BASE}/applications/${id}/restart`) as any
   },
 
   /**
@@ -126,7 +178,8 @@ export const applicationApi = {
    * 获取应用配置
    */
   getConfig(id: number): Promise<{
-    autoLoad?: boolean
+    autoLoadAdmin?: boolean
+    autoLoadConsumer?: boolean
     loadOnStartup?: boolean
     startPriority?: number
     startDelay?: number
@@ -140,7 +193,8 @@ export const applicationApi = {
    * 更新应用配置
    */
   updateConfig(id: number, data: {
-    autoLoad?: boolean
+    autoLoadAdmin?: boolean
+    autoLoadConsumer?: boolean
     loadOnStartup?: boolean
     startPriority?: number
     startDelay?: number

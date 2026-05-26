@@ -1,12 +1,10 @@
 package com.keqi.gress.plugin.appstore.dao;
 
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.api.service.PluginLambdaDataSource;
 import com.keqi.gress.plugin.appstore.domain.entity.PluginMonitorCache;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 /**
  * 监控缓存数据访问层
@@ -15,7 +13,7 @@ import java.util.List;
 @Service
 public class MonitorCacheDao {
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginLambdaDataSource dataSource;
     
     /**
@@ -62,7 +60,7 @@ public class MonitorCacheDao {
             // 更新现有记录
             return dataSource.lambdaUpdate(PluginMonitorCache.class)
                     .set(PluginMonitorCache::getCacheData, cache.getCacheData())
-                    .set(PluginMonitorCache::getCreateTime, cache.getCreateTime())
+                    .set(PluginMonitorCache::getCacheCreateTime, cache.getCacheCreateTime())
                     .set(PluginMonitorCache::getExpireTime, cache.getExpireTime())
                     .eq(PluginMonitorCache::getId, existing.getId())
                     .update();

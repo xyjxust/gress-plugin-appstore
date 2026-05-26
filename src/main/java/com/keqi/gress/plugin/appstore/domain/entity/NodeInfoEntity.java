@@ -1,20 +1,18 @@
 package com.keqi.gress.plugin.appstore.domain.entity;
 
 import  com.keqi.gress.plugin.api.database.annotation.TableField;
-import  com.keqi.gress.plugin.api.database.annotation.TableId;
 import  com.keqi.gress.plugin.api.database.annotation.TableName;
+import com.keqi.gress.plugin.api.domain.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 节点信息实体类（持久化）
  */
 @Data
-@TableName("sys_node_info")
-public class NodeInfoEntity {
-
-    @TableId
-    @TableField("id")
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+@TableName("appstore_node_info")
+public class NodeInfoEntity extends BaseEntity {
 
     @TableField("node_id")
     private String nodeId;

@@ -1,0 +1,192 @@
+CREATE TABLE `appstore_application_operation_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `application_id` bigint NOT NULL COMMENT '关联的应用ID',
+  `application_code` varchar(100) DEFAULT NULL COMMENT '应用代码',
+  `application_name` varchar(200) DEFAULT NULL COMMENT '应用名称',
+  `plugin_id` varchar(100) DEFAULT NULL COMMENT '插件ID',
+  `operation_type` varchar(50) NOT NULL COMMENT '操作类型：START, STOP, RESTART, INSTALL, UNINSTALL, UPGRADE, ROLLBACK, CONFIG_UPDATE',
+  `operation_desc` varchar(500) DEFAULT NULL COMMENT '操作描述',
+  `operator_id` varchar(100) DEFAULT NULL COMMENT '操作人ID',
+  `operator_name` varchar(100) DEFAULT NULL COMMENT '操作人名称',
+  `status` varchar(20) NOT NULL COMMENT '操作结果：SUCCESS / FAIL',
+  `message` text COMMENT '失败原因或补充信息',
+  `before_data` text COMMENT '操作前数据（JSON格式）',
+  `after_data` text COMMENT '操作后数据（JSON格式）',
+  `duration` bigint DEFAULT NULL COMMENT '操作耗时（毫秒）',
+  `client_ip` varchar(50) DEFAULT NULL COMMENT '客户端IP',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  KEY `idx_application_id` (`application_id`),
+  KEY `idx_operation_type` (`operation_type`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=646 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='应用操作日志表';
+
+CREATE TABLE `appstore_application_upgrade_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `application_id` bigint DEFAULT NULL,
+  `plugin_id` varchar(255) DEFAULT NULL,
+  `old_version` varchar(100) DEFAULT NULL,
+  `new_version` varchar(100) DEFAULT NULL,
+  `target_version` varchar(100) DEFAULT NULL,
+  `plugin_type` varchar(255) DEFAULT NULL,
+  `operator_name` varchar(100) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  `message` text,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by` varchar(128) DEFAULT NULL,
+  `updated_by` varchar(128) DEFAULT NULL,
+  `namespace_code` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `appstore_plugin_state_change_log` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `plugin_id` varchar(128) NOT NULL COMMENT '插件ID',
+  `old_state` varchar(32) DEFAULT NULL COMMENT '旧状态',
+  `new_state` varchar(32) NOT NULL COMMENT '新状态',
+  `change_time` bigint NOT NULL COMMENT '变更时间戳（毫秒）',
+  `operator` varchar(64) DEFAULT NULL COMMENT '操作人',
+  `reason` text COMMENT '变更原因',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  KEY `idx_plugin_time` (`plugin_id`,`change_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=8076 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='插件状态变更日志表';
+
+CREATE TABLE `appstore_plugin_monitor_snapshot` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `plugin_id` varchar(128) NOT NULL COMMENT '插件ID',
+  `state` varchar(32) NOT NULL COMMENT '插件状态：STARTED, STOPPED, CREATED, DISABLED',
+  `memory_usage` bigint DEFAULT NULL COMMENT '内存使用量（字节）',
+  `timestamp` bigint NOT NULL COMMENT '快照时间戳（毫秒）',
+  `metadata` text COMMENT '额外元数据（JSON格式）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  KEY `idx_plugin_timestamp` (`plugin_id`,`timestamp`),
+  KEY `idx_timestamp` (`timestamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=11347965 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='插件监控快照表';
+
+CREATE TABLE `appstore_plugin_monitor_cache` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `plugin_id` varchar(128) DEFAULT NULL COMMENT '插件ID（单个插件缓存时使用）',
+  `cache_data` longtext NOT NULL COMMENT '缓存数据（JSON格式）',
+  `cache_type` varchar(32) NOT NULL COMMENT '缓存类型：all=所有插件, single=单个插件',
+  `cache_create_time` bigint NOT NULL COMMENT '缓存创建时间（时间戳，毫秒）',
+  `expire_time` bigint NOT NULL COMMENT '过期时间（时间戳，毫秒）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  KEY `idx_cache_type` (`cache_type`),
+  KEY `idx_plugin_id` (`plugin_id`),
+  KEY `idx_expire_time` (`expire_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='插件监控数据缓存表';
+
+CREATE TABLE `appstore_node_info` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `node_id` varchar(128) NOT NULL COMMENT '节点ID（业务唯一）',
+  `name` varchar(255) DEFAULT NULL COMMENT '节点名称',
+  `type` varchar(32) NOT NULL COMMENT '节点类型：local | ssh | docker-api',
+  `description` varchar(512) DEFAULT NULL COMMENT '描述',
+  `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '是否启用',
+  `config` longtext COMMENT '节点配置（JSON）',
+  `created_at` bigint DEFAULT NULL COMMENT '创建时间（epoch ms）',
+  `updated_at` bigint DEFAULT NULL COMMENT '更新时间（epoch ms）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_node_id` (`node_id`),
+  KEY `idx_type` (`type`),
+  KEY `idx_enabled` (`enabled`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='中间件/应用远程部署节点信息';
+
+CREATE TABLE `appstore_middleware_service` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `service_id` varchar(128) NOT NULL COMMENT '服务ID（如 "minio", "etcd"）',
+  `service_type` varchar(64) NOT NULL COMMENT '服务类型',
+  `service_name` varchar(255) NOT NULL COMMENT '服务名称',
+  `container_name` varchar(255) DEFAULT NULL COMMENT 'Docker容器名称',
+  `service_host` varchar(255) NOT NULL DEFAULT 'localhost' COMMENT '服务主机',
+  `service_port` int DEFAULT NULL COMMENT '服务端口',
+  `health_check_url` varchar(512) DEFAULT NULL COMMENT '健康检查URL',
+  `config` json DEFAULT NULL COMMENT '服务配置（密码、连接信息等，JSON格式）',
+  `installed_by` varchar(128) NOT NULL COMMENT '安装者（中间件插件ID）',
+  `reference_count` int NOT NULL DEFAULT '0' COMMENT '引用计数',
+  `status` varchar(32) NOT NULL DEFAULT 'NOT_INSTALLED' COMMENT '服务状态：NOT_INSTALLED, INSTALLING, RUNNING, STOPPED, ERROR, UNKNOWN',
+  `work_dir` varchar(512) DEFAULT NULL COMMENT '工作目录',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_service_id` (`service_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_reference_count` (`reference_count`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='中间件服务表';
+
+CREATE TABLE `appstore_middleware_info` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `middleware_id` varchar(128) NOT NULL COMMENT '中间件ID（通常为 pluginId）',
+  `name` varchar(255) NOT NULL COMMENT '中间件名称',
+  `version` varchar(64) NOT NULL COMMENT '版本号',
+  `category` varchar(64) DEFAULT NULL COMMENT '分类',
+  `shared` tinyint(1) DEFAULT '1' COMMENT '是否共享',
+  `service_host` varchar(255) DEFAULT NULL COMMENT '服务主机',
+  `service_port` int DEFAULT NULL COMMENT '服务端口',
+  `health_check_url` varchar(512) DEFAULT NULL COMMENT '健康检查URL',
+  `status` varchar(32) NOT NULL DEFAULT 'NOT_INSTALLED' COMMENT '状态：NOT_INSTALLED, INSTALLING, RUNNING, STOPPED, ERROR, UNKNOWN',
+  `work_dir` varchar(512) DEFAULT NULL COMMENT '工作目录',
+  `config` json DEFAULT NULL COMMENT '配置信息（JSON格式）',
+  `package_path` varchar(512) DEFAULT NULL COMMENT '插件包路径',
+  `dependencies` text COMMENT '依赖列表（plugin.dependencies格式）',
+  `installed_by` varchar(64) DEFAULT NULL COMMENT '安装人',
+  `installed_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '安装时间',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_middleware_id` (`middleware_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='中间件信息表';
+
+
+
+CREATE TABLE `appstore_middleware_dependency` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `middleware_id` varchar(128) NOT NULL COMMENT '中间件ID',
+  `service_id` varchar(128) NOT NULL COMMENT '依赖的服务ID',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `created_by` varchar(128) DEFAULT NULL COMMENT '创建人',
+  `updated_by` varchar(128) DEFAULT NULL COMMENT '更新人',
+  `namespace_code` varchar(128) DEFAULT NULL COMMENT '命名空间代码',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_middleware_service` (`middleware_id`,`service_id`),
+  KEY `idx_middleware_id` (`middleware_id`),
+  KEY `idx_service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='中间件依赖关系表';

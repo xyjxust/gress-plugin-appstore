@@ -3,24 +3,16 @@
     <!-- 页面头部 -->
     <PageHeader title="应用管理" subtitle="管理已安装的应用插件">
       <template #actions>
-        <n-button v-if="activeTab === 'local'" @click="goToAggregateManagement">
-          <template #icon>
-            <n-icon><component :is="AppsOutline" /></n-icon>
-          </template>
-          聚合应用管理
-        </n-button>
-        <n-button v-if="activeTab === 'local'" type="primary" @click="handleUploadClick">
-          <template #icon>
-            <n-icon><component :is="CloudUploadOutline" /></n-icon>
-          </template>
-          上传应用包
-        </n-button>
-        <n-button :loading="refreshLoading" @click="loadData">
-          <template #icon>
-            <n-icon><component :is="Refresh" /></n-icon>
-          </template>
-          刷新
-        </n-button>
+        <HeaderActions
+          :active-tab="activeTab"
+          :refresh-loading="refreshLoading"
+          :apps-outline="AppsOutline"
+          :cloud-upload-outline="CloudUploadOutline"
+          :refresh="Refresh"
+          @aggregate="goToAggregateManagement"
+          @upload="handleUploadClick"
+          @refresh="loadData"
+        />
       </template>
     </PageHeader>
 
@@ -28,333 +20,90 @@
       <!-- 标签页 -->
       <n-tabs v-model:value="activeTab" type="line" @update:value="handleTabChange">
         <n-tab-pane name="local" tab="我的应用">
-          <!-- 过滤面板 -->
-          <FilterPanel
+          <LocalAppsTab
             v-model:filters="filters"
             v-model:show-advanced="showAdvanced"
             :basic-fields="basicFields"
+            :active-type="filters.typeKey"
+            :type-options="typeOptions"
+            :tag-options="tagOptions"
+            :loading="loading"
+            :table-data="tableData"
+            :pagination="pagination"
+            :apps-outline="AppsOutline"
+            :rocket-outline="RocketOutline"
+            :time-outline="TimeOutline"
+            :ellipsis-horizontal-outline="EllipsisHorizontalOutline"
+            :format-date-time="formatDateTime"
+            :get-application-type-color="getApplicationTypeColor"
+            :get-plugin-types="getPluginTypes"
+            :get-plugin-type-color="getPluginTypeColor"
+            :get-plugin-type-text="getPluginTypeText"
+            :get-more-actions="getMoreActions"
+            :local-app-icon-modifier-class="localAppIconModifierClass"
+            :use-aggregate-icon-img="useAggregateIconImg"
+            :local-app-icon-component="localAppIconComponent"
             @search="handleSearch"
             @reset="handleReset"
+            @select-type="handleSelectType"
+            @select-tag="handleSelectTag"
+            @view-detail="handleViewDetail"
+            @show-upgrade-info="handleShowUpgradeInfo"
+            @show-config="handleShowConfig"
+            @upgrade="handleUpgrade"
+            @restart="handleRestart"
+            @more-action="handleMoreAction"
+            @page-change="handlePageChange"
+            @page-size-change="handlePageSizeChange"
           />
-
-          <!-- 应用列表 -->
-          <div v-if="loading" class="loading-state">
-            <n-spin size="large" />
-          </div>
-
-          <div v-else-if="tableData.length === 0" class="empty-state">
-            <div class="empty-state__icon">
-              <n-icon size="48">
-                <component :is="AppsOutline" />
-              </n-icon>
-            </div>
-            <div class="empty-state__text">
-              {{ filters.keyword ? '未找到匹配的应用' : '暂无应用信息' }}
-            </div>
-          </div>
-
-          <div v-else class="app-list">
-            <n-card
-              v-for="app in tableData"
-              :key="app.id"
-              class="app-card"
-              hoverable
-              @click="handleViewDetail(app)"
-            >
-              <div class="app-header">
-                <div class="app-icon" :class="localAppIconModifierClass(app)">
-                  <img
-                    v-if="useAggregateIconImg(app)"
-                    :src="app.icon!.trim()"
-                    alt=""
-                    class="app-icon__img"
-                  />
-                  <n-icon v-else size="24">
-                    <component :is="localAppIconComponent(app)" />
-                  </n-icon>
-                </div>
-                <div class="app-info">
-                  <div class="app-name">
-                    {{ app.applicationName }}
-                    <n-tag v-if="app.aggregateApp" type="info" size="small" style="margin-left: 8px">
-                      聚合
-                    </n-tag>
-                    <n-tag v-if="app.isDefault === 1" type="warning" size="small" style="margin-left: 8px">
-                      默认
-                    </n-tag>
-                  </div>
-                  <div class="app-code" >{{ app.applicationCode }}</div>
-                </div>
-                <div class="app-status">
-                  <n-tag :type="app.status === 1 ? 'success' : 'error'" size="small">
-                    {{ app.statusText }}
-                  </n-tag>
-                </div>
-              </div>
-
-              <div class="app-body">
-                <div class="app-meta">
-                  <div class="meta-item" v-copy="app.pluginId">
-                    <span class="meta-label">插件ID：</span>
-                    <span class="meta-value" >{{ app.pluginId }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">版本：</span>
-                    <span class="meta-value">{{ app.pluginVersion || '-' }}</span>
-                    <n-tooltip v-if="app.hasNewVersion" placement="top">
-                      <template #trigger>
-                        <n-icon 
-                          size="16" 
-                          color="#f59e0b" 
-                          style="margin-left: 6px; cursor: pointer; vertical-align: middle;"
-                          @click.stop="handleShowUpgradeInfo(app)"
-                        >
-                          <component :is="RocketOutline" />
-                        </n-icon>
-                      </template>
-                      <span>有新版本 {{ app.remoteVersion }} 可升级</span>
-                    </n-tooltip>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">类型：</span>
-                    <n-tag size="small" :type="getApplicationTypeColor(app.applicationType)">
-                      {{ app.applicationTypeText }}
-                    </n-tag>
-                  </div>
-                  <div v-if="app.pluginType" class="meta-item">
-                    <span class="meta-label">插件类型：</span>
-                    <n-space :size="4">
-                      <n-tag 
-                        v-for="type in getPluginTypes(app.pluginType)" 
-                        :key="type" 
-                        size="small" 
-                        :type="getPluginTypeColor(type)"
-                      >
-                        {{ getPluginTypeText(type) }}
-                      </n-tag>
-                    </n-space>
-                  </div>
-                </div>
-
-                <div v-if="app.description" class="app-description">
-                  {{ app.description }}
-                </div>
-              </div>
-
-              <div class="app-footer">
-                <div class="app-time">
-                  <n-icon size="14"><component :is="TimeOutline" /></n-icon>
-                  安装：{{ formatDateTime(app.installTime) }}
-                </div>
-                <div class="app-actions">
-                  <!-- 配置按钮 -->
-                  <n-button
-                    text
-                    type="primary"
-                    size="small"
-                    @click.stop="handleShowConfig(app)"
-                  >
-                    配置
-                  </n-button>
-                  
-                  <!-- 升级按钮（有新版本时显示） -->
-                  <n-button
-                    v-if="app.hasNewVersion"
-                    text
-                    type="warning"
-                    size="small"
-                    :disabled="app.applicationType === 'integrated' || app.aggregateApp"
-                    @click.stop="handleUpgrade(app)"
-                  >
-                    升级
-                  </n-button>
-                  
-                  <!-- 重启按钮 -->
-                  <n-button
-                    text
-                    type="info"
-                    size="small"
-                    :disabled="app.status !== 1"
-                    @click.stop="handleRestart(app)"
-                  >
-                    重启
-                  </n-button>
-                  
-                  <!-- 更多操作下拉菜单 -->
-                  <n-dropdown
-                    :options="getMoreActions(app)"
-                    @select="(key) => handleMoreAction(key, app)"
-                    trigger="click"
-                  >
-                    <n-button text size="small" @click.stop>
-                      <template #icon>
-                        <n-icon><component :is="EllipsisHorizontalOutline" /></n-icon>
-                      </template>
-                    </n-button>
-                  </n-dropdown>
-                </div>
-              </div>
-            </n-card>
-          </div>
-
-          <!-- 分页 -->
-          <div v-if="pagination.itemCount > 0" class="pagination">
-            <n-pagination
-              v-model:page="pagination.page"
-              v-model:page-size="pagination.pageSize"
-              :page-count="Math.ceil(pagination.itemCount / pagination.pageSize)"
-              :page-sizes="pagination.pageSizes"
-              show-size-picker
-              @update:page="handlePageChange"
-              @update:page-size="handlePageSizeChange"
-            />
-          </div>
         </n-tab-pane>
 
         <n-tab-pane name="remote" tab="应用商店">
-          <!-- 远程应用过滤面板 -->
-          <FilterPanel
-            v-model:filters="remoteFilters"
-            v-model:show-advanced="showRemoteAdvanced"
-            :basic-fields="remoteBasicFields"
+          <RemoteDetailInline
+            v-if="remoteDetailVisible"
+            v-model:active-tab="remoteDetailTab"
+            :detail="remoteDetail"
+            :loading="remoteDetailLoading"
+            :installing="remoteDetailInstalling"
+            :upgrading="remoteDetailUpgrading"
+            :versions="remoteDetailVersions"
+            :versions-loading="remoteDetailVersionsLoading"
+            :selected-version="remoteDetailSelectedVersion"
+            :chevron-back-outline="ChevronBackOutline"
+            :extension-puzzle-outline="ExtensionPuzzleOutline"
+            @back="closeRemoteDetail"
+            @install="handleInstallRemote"
+            @upgrade="handleUpgradeRemote"
+            @select-version="handleSelectRemoteDetailVersion"
+            @download="downloadRemoteVersion"
+          />
+          <RemoteStoreTab
+            v-else
+            v-model:remote-filters="remoteFilters"
+            v-model:show-remote-advanced="showRemoteAdvanced"
+            :remote-basic-fields="remoteBasicFields"
+            :remote-loading="remoteLoading"
+            :remote-table-data="remoteTableData"
+            :remote-pagination="remotePagination"
+            :type-options="typeOptions"
+            :tag-options="tagOptions"
+            :apps-outline="AppsOutline"
+            :extension-puzzle-outline="ExtensionPuzzleOutline"
+            :time-outline="TimeOutline"
+            :format-date-time="formatDateTime"
+            :install-remote-loading="installRemoteLoading"
+            :upgrade-remote-loading="upgradeRemoteLoading"
             @search="handleRemoteSearch"
             @reset="handleRemoteReset"
+            @select-category="handleSelectRemoteCategory"
+            @select-tag="handleSelectRemoteTag"
+            @select-price="handleSelectRemotePrice"
+            @view-remote-detail="handleViewRemoteDetail"
+            @install-remote="handleInstallRemote"
+            @upgrade-remote="handleUpgradeRemote"
+            @remote-page-change="handleRemotePageChange"
+            @remote-page-size-change="handleRemotePageSizeChange"
           />
-
-          <!-- 远程应用列表 -->
-          <div v-if="remoteLoading" class="loading-state">
-            <n-spin size="large" />
-          </div>
-
-          <div v-else-if="remoteTableData.length === 0" class="empty-state">
-            <div class="empty-state__icon">
-              <n-icon size="48">
-                <component :is="AppsOutline" />
-              </n-icon>
-            </div>
-            <div class="empty-state__text">
-              {{ remoteFilters.keyword ? '未找到匹配的应用' : '暂无远程应用' }}
-            </div>
-          </div>
-
-          <div v-else class="app-list">
-            <n-card
-              v-for="app in remoteTableData"
-              :key="app.id"
-              class="app-card"
-              hoverable
-              @click="handleViewRemoteDetail(app)"
-            >
-              <div class="app-header">
-                <div class="app-icon app-icon--plugin">
-                  <n-icon size="24">
-                    <component :is="ExtensionPuzzleOutline" />
-                  </n-icon>
-                </div>
-                <div class="app-info">
-                  <div class="app-name">
-                    {{ app.applicationName }}
-                  </div>
-                  <div class="app-code">{{ app.applicationCode }}</div>
-                </div>
-                <div class="app-status">
-                  <n-tag v-if="app.installStatus === 'INSTALLED'" type="success" size="small">
-                    已安装
-                  </n-tag>
-                  <n-tag v-else-if="app.installStatus === 'UPGRADABLE'" type="warning" size="small">
-                    可升级
-                  </n-tag>
-                  <n-tag v-else type="info" size="small">
-                    未安装
-                  </n-tag>
-                </div>
-              </div>
-
-              <div class="app-body">
-                <div class="app-meta">
-                  <div class="meta-item">
-                    <span class="meta-label">插件ID：</span>
-                    <span class="meta-value">{{ app.pluginId }}</span>
-                  </div>
-                  <div class="meta-item">
-                    <span class="meta-label">远程版本：</span>
-                    <span class="meta-value">{{ app.pluginVersion || '-' }}</span>
-                  </div>
-                  <div v-if="app.localVersion" class="meta-item">
-                    <span class="meta-label">本地版本：</span>
-                    <span class="meta-value">{{ app.localVersion }}</span>
-                  </div>
-                  <div v-if="app.author" class="meta-item">
-                    <span class="meta-label">作者：</span>
-                    <span class="meta-value">{{ app.author }}</span>
-                  </div>
-                </div>
-
-                <div v-if="app.description" class="app-description">
-                  {{ app.description }}
-                </div>
-              </div>
-
-              <div class="app-footer">
-                <div class="app-time">
-                  <n-icon size="14"><component :is="TimeOutline" /></n-icon>
-                  更新：{{ formatDateTime(app.updateTime) }}
-                </div>
-                <div class="app-actions">
-                  <n-button
-                    text
-                    type="info"
-                    size="small"
-                    @click.stop="handleViewRemoteDetail(app)"
-                  >
-                    详情
-                  </n-button>
-                  <n-button
-                    v-if="app.installStatus === 'NOT_INSTALLED'"
-                    text
-                    type="success"
-                    size="small"
-                    :loading="installRemoteLoading[app.pluginId]"
-                    @click.stop="handleInstallRemote(app)"
-                  >
-                    安装
-                  </n-button>
-                  <n-button
-                    v-else-if="app.installStatus === 'UPGRADABLE'"
-                    text
-                    type="warning"
-                    size="small"
-                    :loading="upgradeRemoteLoading[app.pluginId]"
-                    @click.stop="handleUpgradeRemote(app)"
-                  >
-                    升级
-                  </n-button>
-                  <n-button
-                    v-else
-                    text
-                    type="default"
-                    size="small"
-                    disabled
-                  >
-                    已安装
-                  </n-button>
-                </div>
-              </div>
-            </n-card>
-          </div>
-
-          <!-- 远程应用分页 -->
-          <div v-if="remotePagination.itemCount > 0" class="pagination">
-            <n-pagination
-              v-model:page="remotePagination.page"
-              v-model:page-size="remotePagination.pageSize"
-              :page-count="Math.ceil(remotePagination.itemCount / remotePagination.pageSize)"
-              :page-sizes="remotePagination.pageSizes"
-              show-size-picker
-              @update:page="handleRemotePageChange"
-              @update:page-size="handleRemotePageSizeChange"
-            />
-          </div>
         </n-tab-pane>
       </n-tabs>
     </div>
@@ -835,29 +584,76 @@
               </n-card>
             </template>
 
-            <!-- 基础配置（折叠面板） -->
-            <n-collapse :default-expanded-names="configMetadata.length === 0 ? ['advanced'] : []" class="config-section">
+            <!-- 高级配置：默认展开，内含「表面/预加载」可视化卡片 -->
+            <n-collapse
+              v-model:expanded-names="configCollapseExpanded"
+              class="config-section config-advanced-collapse"
+            >
               <n-collapse-item title="高级配置" name="advanced">
-                <n-form ref="configFormRef" :model="configForm" label-placement="left" label-width="100" size="small">
-                  <div class="advanced-config-grid">
-                    <n-form-item label="前端页面" path="hasFrontend">
-                      <n-switch v-model:value="configForm.hasFrontend" :disabled="configLoading" size="small">
-                        <template #checked>有</template>
-                        <template #unchecked>无</template>
-                      </n-switch>
-                    </n-form-item>
+                <n-form ref="configFormRef" :model="configForm" label-placement="left" label-width="120" size="small">
+                  <n-card size="small" :bordered="true" class="config-surface-card">
+                    <template #header>
+                      <div class="config-surface-card-header">
+                        <span class="config-surface-card-title">前端表面与预加载</span>
+                        <n-tooltip trigger="hover">
+                          <template #trigger>
+                            <n-text depth="3" style="cursor: help; font-size: 12px;">说明</n-text>
+                          </template>
+                          <div style="max-width: 320px; line-height: 1.5;">
+                            <div><strong>B 端表面</strong>：是否出现在管理端应用列表（<code>GET /applications</code> 已登录）。</div>
+                            <div style="margin-top: 6px;"><strong>C 端表面</strong>：是否具备公网/访客侧前端能力。</div>
+                            <div style="margin-top: 6px;"><strong>预加载(B)</strong>：<code>/applications/bootstrap/admin</code> 是否返回该应用。</div>
+                            <div style="margin-top: 6px;"><strong>预加载(C)</strong>：<code>/applications/bootstrap/consumer</code> 是否返回该应用。</div>
+                          </div>
+                        </n-tooltip>
+                      </div>
+                    </template>
+                    <div class="surface-preload-grid">
+                      <div class="surface-preload-item">
+                        <div class="surface-preload-label">B 端表面（管理端列表）</div>
+                        <n-switch v-model:value="configForm.surfaceAdmin" :disabled="configLoading" size="medium">
+                          <template #checked>开启</template>
+                          <template #unchecked>关闭</template>
+                        </n-switch>
+                        <div class="surface-preload-desc">在应用切换器等管理界面中展示并可授权</div>
+                      </div>
+                      <div class="surface-preload-item">
+                        <div class="surface-preload-label">C 端表面（公网 / 访客）</div>
+                        <n-switch v-model:value="configForm.surfaceConsumer" :disabled="configLoading" size="medium">
+                          <template #checked>开启</template>
+                          <template #unchecked>关闭</template>
+                        </n-switch>
+                        <div class="surface-preload-desc">独立门户、匿名路由等 C 端前端能力</div>
+                      </div>
+                      <div class="surface-preload-item">
+                        <div class="surface-preload-label">管理壳预加载</div>
+                        <n-switch v-model:value="configForm.autoLoadAdmin" :disabled="configLoading" size="medium">
+                          <template #checked>开启</template>
+                          <template #unchecked>关闭</template>
+                        </n-switch>
+                        <div class="surface-preload-desc">登录后宿主初始化时自动拉取该应用前端包</div>
+                      </div>
+                      <div class="surface-preload-item">
+                        <div class="surface-preload-label">C 端预加载</div>
+                        <n-switch v-model:value="configForm.autoLoadConsumer" :disabled="configLoading" size="medium">
+                          <template #checked>开启</template>
+                          <template #unchecked>关闭</template>
+                        </n-switch>
+                        <div class="surface-preload-desc">未登录或访客场景下 bootstrap 时预加载该应用</div>
+                      </div>
+                    </div>
+                    <template #footer>
+                      <n-text depth="3" style="font-size: 12px;">
+                        修改后需保存；与 <code>plugin.yml</code> 中 UI/扩展字段安装时写入的值可在此覆盖。
+                      </n-text>
+                    </template>
+                  </n-card>
 
-                    <n-form-item label="自动加载" path="autoLoad">
-                      <n-switch v-model:value="configForm.autoLoad" :disabled="configLoading" size="small">
-                        <template #checked>开启</template>
-                        <template #unchecked>关闭</template>
-                      </n-switch>
-                    </n-form-item>
-
+                  <div class="advanced-config-grid advanced-config-grid--startup">
                     <n-form-item label="启动时加载" path="loadOnStartup">
                       <n-switch 
                         v-model:value="configForm.loadOnStartup" 
-                        :disabled="configLoading || !configForm.autoLoad"
+                        :disabled="configLoading || !configForm.autoLoadAdmin"
                         size="small"
                       >
                         <template #checked>开启</template>
@@ -870,7 +666,7 @@
                         v-model:value="configForm.startPriority"
                         :min="0"
                         :max="100"
-                        :disabled="configLoading || !configForm.autoLoad"
+                        :disabled="configLoading || !configForm.autoLoadAdmin"
                         size="small"
                         style="width: 120px;"
                       />
@@ -882,7 +678,7 @@
                         :min="0"
                         :max="60000"
                         :step="1000"
-                        :disabled="configLoading || !configForm.autoLoad"
+                        :disabled="configLoading || !configForm.autoLoadAdmin"
                         size="small"
                         style="width: 120px;"
                       />
@@ -902,16 +698,70 @@
 
                   <n-alert type="info" :show-icon="false" size="small" style="margin-top: 12px;">
                     <ul style="margin: 0; padding-left: 20px; font-size: 12px; line-height: 1.6;">
-                      <li>前端页面：该插件是否包含菜单/路由等前端页面能力</li>
-                      <li>自动加载：系统启动时是否自动加载该插件</li>
-                      <li>启动时加载：插件加载后是否立即启动</li>
-                      <li>启动优先级：数值越大越先启动（0-100）</li>
-                      <li>启动延迟：应用启动前的等待时间</li>
+                      <li>「前端表面与预加载」四项写入扩展配置中的 <code>surfaceAdmin</code>、<code>surfaceConsumer</code>、<code>autoLoadAdmin</code>、<code>autoLoadConsumer</code></li>
+                      <li>启动时加载 / 优先级 / 延迟：依赖「管理壳预加载」开启后通常才有意义</li>
                     </ul>
                   </n-alert>
                 </n-form>
               </n-collapse-item>
             </n-collapse>
+          </div>
+        </n-spin>
+      </n-scrollbar>
+    </n-modal>
+
+    <!-- 安装前配置对话框 -->
+    <n-modal
+      v-model:show="showInstallConfigModal"
+      preset="dialog"
+      title="安装前配置"
+      positive-text="开始安装"
+      negative-text="取消"
+      :positive-button-props="{ loading: installConfigSubmitting }"
+      :loading="installConfigSubmitting"
+      :style="{ width: '820px' }"
+      @positive-click="confirmInstallWithConfig"
+    >
+      <n-scrollbar style="max-height: 70vh;">
+        <n-spin :show="installConfigModalLoading">
+          <div class="config-modal-content">
+            <n-card size="small" :bordered="false" class="app-info-card">
+              <div class="app-info-row">
+                <div class="app-info-item">
+                  <span class="info-label">安装对象：</span>
+                  <span class="info-value">{{ installConfigTargetLabel }}</span>
+                </div>
+                <div class="app-info-item">
+                  <span class="info-label">安装方式：</span>
+                  <n-text type="info" class="info-value">
+                    {{ installConfigContext?.mode === 'upload' ? '上传安装' : '远程安装' }}
+                  </n-text>
+                </div>
+              </div>
+            </n-card>
+
+            <n-card
+              v-if="installConfigMetadata.length > 0"
+              size="small"
+              title="安装参数"
+              :bordered="false"
+              class="config-section"
+            >
+              <DynamicFormRenderer
+                ref="installConfigFormRendererRef"
+                v-model="installConfigForm"
+                :metadata="{ fields: installConfigMetadata }"
+              />
+            </n-card>
+
+            <n-alert type="info" :show-icon="false" style="margin-top: 16px;">
+              <template #header>
+                <div style="font-weight: 600;">说明</div>
+              </template>
+              <div style="margin-top: 8px; line-height: 1.7;">
+                这些参数会在插件安装前写入安装流程，并在安装成功后同步持久化到应用扩展配置中。
+              </div>
+            </n-alert>
           </div>
         </n-spin>
       </n-scrollbar>
@@ -982,6 +832,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, getCurrentInstance } from 'vue'
 import { useMessage } from '@keqi.gress/plugin-bridge'
+import HeaderActions from './application-management/components/HeaderActions.vue'
+import LocalAppsTab from './application-management/components/LocalAppsTab.vue'
+import RemoteStoreTab from './application-management/components/RemoteStoreTab.vue'
+import RemoteDetailInline from './application-management/components/RemoteDetailInline.vue'
+import type { FilterFieldConfig } from './application-management/types'
 import {
   NSpace,
   NButton,
@@ -1041,21 +896,31 @@ const TimeOutline = useIcon('TimeOutline')
 const RocketOutline = useIcon('RocketOutline')
 const EllipsisHorizontalOutline = useIcon('EllipsisHorizontalOutline')
 const LayersOutline = useIcon('LayersOutline')
+const ChevronBackOutline = useIcon('ChevronBackOutline')
+
+const categories = ref<Array<{ categoryKey: string; categoryName: string; description?: string }>>([])
+const bizTags = ref<Array<{ categoryKey: string; categoryName: string; description?: string }>>([])
+const typeOptions = computed(() =>
+  (categories.value || [])
+    .filter((c) => c && c.categoryKey && c.categoryName)
+    .map((c) => ({
+      id: c.categoryKey,
+      label: c.categoryName,
+      desc: c.description || ''
+    }))
+)
+const tagOptions = computed(() =>
+  (bizTags.value || [])
+    .filter((c) => c && c.categoryKey && c.categoryName)
+    .map((c) => ({
+      id: c.categoryKey,
+      label: c.categoryName,
+      desc: c.description || ''
+    }))
+)
 
 // FilterFieldConfig 类型定义
-export type FilterFieldType = 'input' | 'select' | 'date' | 'date-range'
-
-export type FilterFieldConfig = {
-  key: string
-  label?: string
-  type?: FilterFieldType
-  placeholder?: string
-  options?: Array<{ label: string; value: unknown }>
-  clearable?: boolean
-  span?: number
-  slotName?: string
-  componentProps?: Record<string, unknown>
-}
+export type { FilterFieldConfig, FilterFieldType } from './application-management/types'
 
 // Message & Dialog
 const message = useMessage()
@@ -1099,18 +964,45 @@ const operationLogsPagination = reactive({
 const remoteLoading = ref(false)
 const remoteTableData = ref<Application[]>([])
 
+// 远程详情（页面内展示，不跳转路由）
+const remoteDetailVisible = ref(false)
+const remoteDetailTab = ref<'intro' | 'version'>('intro')
+const remoteDetailLoading = ref(false)
+const remoteDetail = ref<Application | null>(null)
+const remoteDetailInstalling = computed(() => Boolean(remoteDetail.value?.pluginId && installRemoteLoading.value[remoteDetail.value.pluginId]))
+const remoteDetailUpgrading = computed(() => Boolean(remoteDetail.value?.pluginId && upgradeRemoteLoading.value[remoteDetail.value.pluginId]))
+const remoteDetailVersionsLoading = ref(false)
+const remoteDetailVersions = ref<
+  Array<{
+    pluginId: string
+    version: string
+    releaseNotes?: string
+    fileSize?: number
+    uploadTime?: string
+    current?: boolean
+  }>
+>([])
+const remoteDetailSelectedVersion = ref('')
+
 // 过滤器状态
 const showAdvanced = ref(false)
 const filters = ref({
   keyword: '',
   status: null as number | null,
-  applicationType: null as ApplicationType | null
+  applicationType: null as ApplicationType | null,
+  clientType: null as 'B' | 'C' | null,
+  preloadEnabled: null as 0 | 1 | null,
+  typeKey: '',
+  tag: ''
 })
 
 // 远程应用过滤器状态
 const showRemoteAdvanced = ref(false)
 const remoteFilters = ref({
-  keyword: ''
+  keyword: '',
+  category: '',
+  tag: '',
+  priceType: ''
 })
 
 // Pagination
@@ -1166,6 +1058,23 @@ const uploadRef = ref<UploadInst | null>(null)
 const uploadForm = reactive({})
 const uploadFile = ref<UploadFileInfo | null>(null)
 const uploading = ref(false)
+const showInstallConfigModal = ref(false)
+const installConfigModalLoading = ref(false)
+const installConfigSubmitting = ref(false)
+const installConfigMetadata = ref<any[]>([])
+const installConfigForm = ref<Record<string, any>>({})
+const installConfigFormRendererRef = ref<{ validate: () => Promise<boolean> } | null>(null)
+const installConfigContext = ref<{
+  mode: 'remote' | 'upload'
+  app?: Application | null
+  file?: UploadFileInfo | null
+} | null>(null)
+const installConfigTargetLabel = computed(() => {
+  if (installConfigContext.value?.mode === 'upload') {
+    return installConfigContext.value.file?.name || '-'
+  }
+  return installConfigContext.value?.app?.applicationName || installConfigContext.value?.app?.pluginId || '-'
+})
 
 const AGGREGATE_PAGE = '/plugins/appstore/aggregate-applications'
 
@@ -1219,8 +1128,10 @@ const configLoading = ref(false)
 const configFormRef = ref<FormInst | null>(null)
 const configTargetApp = ref<Application | null>(null)
 const configForm = reactive({
-  hasFrontend: false,
-  autoLoad: false,
+  surfaceAdmin: false,
+  surfaceConsumer: false,
+  autoLoadAdmin: false,
+  autoLoadConsumer: false,
   loadOnStartup: false,
   startPriority: 50,
   startDelay: 0,
@@ -1229,6 +1140,8 @@ const configForm = reactive({
 })
 const configMetadata = ref<any[]>([])
 const configMetadataLoading = ref(false)
+/** 打开配置弹窗时始终展开「高级配置」，避免有扩展元数据时面板默认收起看不到开关 */
+const configCollapseExpanded = ref<string[]>(['advanced'])
 
 // 过滤字段配置
 const basicFields: FilterFieldConfig[] = [
@@ -1259,6 +1172,28 @@ const basicFields: FilterFieldConfig[] = [
       { label: '集成应用', value: 'integrated' },
       { label: '插件应用', value: 'plugin' },
       { label: '聚合应用', value: 'aggregated' }
+    ]
+  },
+  {
+    key: 'clientType',
+    label: '客户端',
+    type: 'select',
+    placeholder: '请选择',
+    options: [
+      { label: '全部', value: null },
+      { label: 'B端', value: 'B' },
+      { label: 'C端', value: 'C' }
+    ]
+  },
+  {
+    key: 'preloadEnabled',
+    label: '预加载',
+    type: 'select',
+    placeholder: '请选择',
+    options: [
+      { label: '全部', value: null },
+      { label: '开启', value: 1 },
+      { label: '关闭', value: 0 }
     ]
   }
 ]
@@ -1304,6 +1239,15 @@ const loadLocalData = async () => {
     if (filters.value.applicationType) {
       params.applicationType = filters.value.applicationType
     }
+    if (filters.value.clientType) {
+      params.clientType = filters.value.clientType
+    }
+    if (filters.value.preloadEnabled !== null) {
+      params.preloadEnabled = filters.value.preloadEnabled
+    }
+    if (filters.value.tag && String(filters.value.tag).trim()) {
+      params.tag = String(filters.value.tag).trim()
+    }
 
     const data = await applicationApi.getList(params)
     tableData.value = data.items
@@ -1328,6 +1272,16 @@ const loadRemoteData = async () => {
       params.keyword = remoteFilters.value.keyword.trim()
     }
 
+    if (remoteFilters.value.category && String(remoteFilters.value.category).trim()) {
+      params.category = String(remoteFilters.value.category).trim()
+    }
+    if (remoteFilters.value.tag && String(remoteFilters.value.tag).trim()) {
+      params.tag = String(remoteFilters.value.tag).trim()
+    }
+    if (remoteFilters.value.priceType && String(remoteFilters.value.priceType).trim()) {
+      params.priceType = String(remoteFilters.value.priceType).trim()
+    }
+
     const data = await applicationApi.getRemoteList(params)
     remoteTableData.value = data.items
     remotePagination.itemCount = data.total
@@ -1348,6 +1302,25 @@ const handleReset = () => {
   filters.value.keyword = ''
   filters.value.status = null
   filters.value.applicationType = null
+  filters.value.clientType = null
+  filters.value.preloadEnabled = null
+  filters.value.typeKey = ''
+  filters.value.tag = ''
+  loadBizTags()
+  pagination.page = 1
+  loadLocalData()
+}
+
+function handleSelectType(typeKey: string) {
+  filters.value.typeKey = typeKey || ''
+  filters.value.tag = ''
+  loadBizTags(filters.value.typeKey)
+  pagination.page = 1
+  loadLocalData()
+}
+
+function handleSelectTag(tagId: string) {
+  filters.value.tag = tagId || ''
   pagination.page = 1
   loadLocalData()
 }
@@ -1359,6 +1332,30 @@ const handleRemoteSearch = () => {
 
 const handleRemoteReset = () => {
   remoteFilters.value.keyword = ''
+  remoteFilters.value.category = ''
+  remoteFilters.value.tag = ''
+  remoteFilters.value.priceType = ''
+  loadBizTags()
+  remotePagination.page = 1
+  loadRemoteData()
+}
+
+function handleSelectRemoteCategory(categoryKey: string) {
+  remoteFilters.value.category = categoryKey || ''
+  remoteFilters.value.tag = ''
+  loadBizTags(remoteFilters.value.category)
+  remotePagination.page = 1
+  loadRemoteData()
+}
+
+function handleSelectRemoteTag(tagKey: string) {
+  remoteFilters.value.tag = tagKey || ''
+  remotePagination.page = 1
+  loadRemoteData()
+}
+
+function handleSelectRemotePrice(priceType: string) {
+  remoteFilters.value.priceType = priceType || ''
   remotePagination.page = 1
   loadRemoteData()
 }
@@ -1439,8 +1436,38 @@ const handleOperationLogsPageSizeChange = (pageSize: number) => {
 }
 
 const handleViewRemoteDetail = async (app: Application) => {
-  currentApplication.value = app
-  showDetailDrawer.value = true
+  remoteDetailVisible.value = true
+  remoteDetailTab.value = 'intro'
+  remoteDetailLoading.value = true
+  try {
+    remoteDetail.value = await applicationApi.getRemoteDetail(app.pluginId)
+    remoteDetailVersionsLoading.value = true
+    remoteDetailVersions.value = await applicationApi.getRemoteVersions(app.pluginId)
+    remoteDetailSelectedVersion.value =
+      remoteDetailVersions.value.find((v) => v.current)?.version ||
+      remoteDetailVersions.value[0]?.version ||
+      remoteDetail.value?.pluginVersion ||
+      ''
+  } finally {
+    remoteDetailLoading.value = false
+    remoteDetailVersionsLoading.value = false
+  }
+}
+
+function closeRemoteDetail() {
+  remoteDetailVisible.value = false
+  remoteDetail.value = null
+  remoteDetailVersions.value = []
+  remoteDetailSelectedVersion.value = ''
+}
+
+function handleSelectRemoteDetailVersion(version: string) {
+  remoteDetailSelectedVersion.value = version
+}
+
+function downloadRemoteVersion(pluginId: string, version: string) {
+  const url = `/plugins/appstore/applications/remote/${encodeURIComponent(pluginId)}/versions/${encodeURIComponent(version)}/download`
+  window.open(url, '_blank')
 }
 
 const handleStart = (app: Application) => {
@@ -1453,7 +1480,7 @@ const confirmStart = async () => {
   
   startLoading.value = true
   try {
-    await applicationApi.enable(confirmTarget.value.id, 'admin')
+    await applicationApi.enable(confirmTarget.value.id)
     message.success('应用已启动，页面即将刷新...')
     showStartConfirm.value = false
     
@@ -1481,7 +1508,7 @@ const confirmStop = async () => {
   
   stopLoading.value = true
   try {
-    await applicationApi.disable(confirmTarget.value.id, 'admin')
+    await applicationApi.disable(confirmTarget.value.id)
     message.success('应用已停止，页面即将刷新...')
     showStopConfirm.value = false
     
@@ -1517,9 +1544,7 @@ const confirmUpgrade = async () => {
   upgradeLoading.value = true
   try {
     await applicationApi.upgrade(currentApplication.value.id, {
-      targetVersion: upgradeForm.targetVersion,
-      operatorId: 'admin',
-      operatorName: 'admin'
+      targetVersion: upgradeForm.targetVersion
     })
     
     message.success('应用升级成功，页面即将刷新...')
@@ -1557,8 +1582,6 @@ const confirmUninstall = async () => {
   uninstallLoading.value = true
   try {
     await applicationApi.uninstall(currentApplication.value.id, {
-      operatorId: 'admin',
-      operatorName: 'admin',
       reason: uninstallForm.reason
     })
     
@@ -1579,28 +1602,92 @@ const confirmUninstall = async () => {
   }
 }
 
-const handleInstallRemote = (app: Application) => {
+const executeRemoteInstall = async (app: Application, installConfig: Record<string, any> = {}) => {
+  installRemoteLoading.value[app.pluginId] = true
+  message.info(`正在安装应用: ${app.applicationName}...`)
+  try {
+    await applicationApi.installRemote({
+      pluginId: app.pluginId,
+      installConfig
+    })
+    if (app.pluginId === 'iam') {
+      message.success('IAM 安装成功，首次初始化已触发。请留意服务日志中的“IAM 首次初始化完成”摘要，页面即将刷新...')
+    } else {
+      message.success('应用安装成功，页面即将刷新...')
+    }
+    setTimeout(() => window.location.reload(), 1500)
+  } catch (error: any) {
+    console.error('远程安装应用失败:', error)
+    message.error(error?.message || '应用安装失败')
+    throw error
+  } finally {
+    installRemoteLoading.value[app.pluginId] = false
+  }
+}
+
+const openInstallConfigModal = (
+  context: { mode: 'remote' | 'upload'; app?: Application | null; file?: UploadFileInfo | null },
+  metadata: any[]
+) => {
+  installConfigContext.value = context
+  installConfigMetadata.value = metadata || []
+  installConfigForm.value = {}
+  showInstallConfigModal.value = true
+}
+
+const handleInstallRemote = async (app: Application) => {
   if (!app.pluginId) {
     message.error('插件ID不能为空')
     return
   }
+
+  installConfigModalLoading.value = true
+  try {
+    const metadata = await applicationApi.getRemoteInstallConfigMetadata(app.pluginId)
+    if (metadata && metadata.length > 0) {
+      openInstallConfigModal({ mode: 'remote', app }, metadata)
+      return
+    }
+  } catch (error: any) {
+    console.error('获取远程安装前配置失败:', error)
+    message.error(error?.message || '获取安装前配置失败')
+    return
+  } finally {
+    installConfigModalLoading.value = false
+  }
   
-  dialog.warning({
+  const dialogReactive = dialog.warning({
     title: '安装应用',
     content: `确定要安装应用 "${app.applicationName}" 吗？`,
     positiveText: '安装',
     negativeText: '取消',
+    positiveButtonProps: {
+      loading: false
+    },
+    negativeButtonProps: {
+      disabled: false
+    },
     onPositiveClick: async () => {
-      installRemoteLoading.value[app.pluginId] = true
-      message.info(`正在安装应用: ${app.applicationName}...`)
+      dialogReactive.positiveButtonProps = {
+        ...dialogReactive.positiveButtonProps,
+        loading: true
+      }
+      dialogReactive.negativeButtonProps = {
+        ...dialogReactive.negativeButtonProps,
+        disabled: true
+      }
       try {
-        await applicationApi.installRemote(app.pluginId, 'admin')
-        message.success('应用安装成功，页面即将刷新...')
-        setTimeout(() => window.location.reload(), 1500)
+        await executeRemoteInstall(app)
       } catch (error: any) {
-
       } finally {
-        installRemoteLoading.value[app.pluginId] = false
+        dialogReactive.positiveButtonProps = {
+          ...dialogReactive.positiveButtonProps,
+          loading: false
+        }
+        dialogReactive.negativeButtonProps = {
+          ...dialogReactive.negativeButtonProps,
+          disabled: false
+        }
       }
     }
   })
@@ -1614,17 +1701,31 @@ const handleUpgradeRemote = (app: Application) => {
   
   const targetVersion = app.pluginVersion || app.remoteVersion || '-'
   
-  dialog.warning({
+  const dialogReactive = dialog.warning({
     title: '升级应用',
     content: `确定要将应用 "${app.applicationName}" 升级到版本 ${targetVersion} 吗？`,
     positiveText: '升级',
     negativeText: '取消',
+    positiveButtonProps: {
+      loading: false
+    },
+    negativeButtonProps: {
+      disabled: false
+    },
     onPositiveClick: async () => {
+      dialogReactive.positiveButtonProps = {
+        ...dialogReactive.positiveButtonProps,
+        loading: true
+      }
+      dialogReactive.negativeButtonProps = {
+        ...dialogReactive.negativeButtonProps,
+        disabled: true
+      }
       upgradeRemoteLoading.value[app.pluginId] = true
       message.info(`正在升级应用: ${app.applicationName}...`)
       try {
         // 升级逻辑：直接安装远程版本
-        await applicationApi.installRemote(app.pluginId, 'admin')
+        await applicationApi.installRemote({ pluginId: app.pluginId })
         
         message.success('应用升级成功，页面即将刷新...')
         
@@ -1635,6 +1736,14 @@ const handleUpgradeRemote = (app: Application) => {
 
       } finally {
         upgradeRemoteLoading.value[app.pluginId] = false
+        dialogReactive.positiveButtonProps = {
+          ...dialogReactive.positiveButtonProps,
+          loading: false
+        }
+        dialogReactive.negativeButtonProps = {
+          ...dialogReactive.negativeButtonProps,
+          disabled: false
+        }
       }
     }
   })
@@ -1723,9 +1832,7 @@ const confirmRollback = async () => {
   rollbackLoading.value = true
   try {
     await applicationApi.rollback(rollbackTargetApp.value.id, {
-      targetVersion: rollbackForm.targetVersion,
-      operatorId: 'admin',
-      operatorName: 'admin'
+      targetVersion: rollbackForm.targetVersion
     })
     
     message.success('应用降级成功，页面即将刷新...')
@@ -1747,15 +1854,29 @@ const confirmRollback = async () => {
 
 // 重启应用
 const handleRestart = (app: Application) => {
-  dialog.warning({
+  const dialogReactive = dialog.warning({
     title: '重启应用',
     content: `确定要重启应用 "${app.applicationName}" 吗？重启过程中应用将暂时不可用。`,
     positiveText: '确定',
     negativeText: '取消',
+    positiveButtonProps: {
+      loading: false
+    },
+    negativeButtonProps: {
+      disabled: false
+    },
     onPositiveClick: async () => {
+      dialogReactive.positiveButtonProps = {
+        ...dialogReactive.positiveButtonProps,
+        loading: true
+      }
+      dialogReactive.negativeButtonProps = {
+        ...dialogReactive.negativeButtonProps,
+        disabled: true
+      }
       restartLoading.value = true
       try {
-        await applicationApi.restart(app.id, 'admin')
+        await applicationApi.restart(app.id)
         message.success('应用重启成功')
         // 刷新列表
         await loadData()
@@ -1763,6 +1884,14 @@ const handleRestart = (app: Application) => {
 
       } finally {
         restartLoading.value = false
+        dialogReactive.positiveButtonProps = {
+          ...dialogReactive.positiveButtonProps,
+          loading: false
+        }
+        dialogReactive.negativeButtonProps = {
+          ...dialogReactive.negativeButtonProps,
+          disabled: false
+        }
       }
     }
   })
@@ -1797,33 +1926,96 @@ const confirmUpload = async () => {
   uploading.value = true
   
   try {
-    const formData = new FormData()
-    formData.append('file', uploadFile.value.file)
-    formData.append('operatorId', 'admin')
-    formData.append('operatorName', 'admin')
+    const metadataFormData = new FormData()
+    metadataFormData.append('file', uploadFile.value.file)
+    const metadata = await applicationApi.getUploadInstallConfigMetadata(metadataFormData)
 
-    console.log('准备上传文件:', {
-      fileName: uploadFile.value.name,
-      fileSize: uploadFile.value.file?.size
-    })
+    if (metadata && metadata.length > 0) {
+      showUploadModal.value = false
+      openInstallConfigModal({ mode: 'upload', file: uploadFile.value }, metadata)
+      return false
+    }
 
-    await applicationApi.uploadAndInstall(formData)
-    
-    message.success('应用包上传并安装成功，页面即将刷新...')
-    showUploadModal.value = false
-    uploadFile.value = null
-    
-    // 延迟刷新页面，让用户看到成功提示
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
-    
+    await executeUploadInstall(uploadFile.value)
     return true
   } catch (error: any) {
-
+    console.error('上传安装应用失败:', error)
+    message.error(error?.message || '上传安装失败')
     return false
   } finally {
     uploading.value = false
+  }
+}
+
+const executeUploadInstall = async (
+  fileInfo: UploadFileInfo,
+  installConfig: Record<string, any> = {}
+) => {
+  if (!fileInfo.file) {
+    throw new Error('上传文件不存在')
+  }
+
+  const formData = new FormData()
+  formData.append('file', fileInfo.file)
+  if (Object.keys(installConfig).length > 0) {
+    formData.append('installConfig', JSON.stringify(installConfig))
+  }
+
+  await applicationApi.uploadAndInstall(formData)
+
+  const fileName = fileInfo.name || ''
+  const isIamPackage = fileName.includes('iam')
+  if (isIamPackage) {
+    message.success('IAM 应用包安装成功，首次初始化已触发。请留意服务日志中的“IAM 首次初始化完成”摘要，页面即将刷新...')
+  } else {
+    message.success('应用包上传并安装成功，页面即将刷新...')
+  }
+  showInstallConfigModal.value = false
+  showUploadModal.value = false
+  uploadFile.value = null
+
+  setTimeout(() => {
+    window.location.reload()
+  }, 1500)
+}
+
+const confirmInstallWithConfig = async () => {
+  if (!installConfigContext.value) {
+    return false
+  }
+
+  if (installConfigMetadata.value.length > 0) {
+    const valid = await installConfigFormRendererRef.value?.validate?.()
+    if (valid === false) {
+      message.error('请先修正安装前配置项')
+      return false
+    }
+  }
+
+  installConfigSubmitting.value = true
+  try {
+    if (installConfigContext.value.mode === 'remote') {
+      if (!installConfigContext.value.app) {
+        message.error('缺少远程应用信息')
+        return false
+      }
+      await executeRemoteInstall(installConfigContext.value.app, installConfigForm.value || {})
+      showInstallConfigModal.value = false
+      return true
+    }
+
+    if (!installConfigContext.value.file) {
+      message.error('缺少上传文件信息')
+      return false
+    }
+
+    await executeUploadInstall(installConfigContext.value.file, installConfigForm.value || {})
+    return true
+  } catch (error: any) {
+    console.error('带安装前配置的安装失败:', error)
+    return false
+  } finally {
+    installConfigSubmitting.value = false
   }
 }
 
@@ -1833,6 +2025,17 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+}
+
+/** 扩展配置里布尔可能是 JSON 布尔或字符串 */
+function boolFromConfigValue(v: unknown): boolean {
+  if (v === true || v === 1) return true
+  if (v === false || v === 0 || v == null || v === '') return false
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase()
+    return s === 'true' || s === '1' || s === 'yes'
+  }
+  return false
 }
 
 // 应用配置相关方法
@@ -1861,9 +2064,12 @@ const handleShowConfig = async (app: Application) => {
   configLoading.value = true
   try {
     const config = await applicationApi.getConfig(app.id)
-    configForm.hasFrontend = config.extensionConfig?.hasFrontend || false
-    configForm.autoLoad = config.autoLoad || false
-    configForm.loadOnStartup = config.loadOnStartup || false
+    const ext = config.extensionConfig || {}
+    configForm.surfaceAdmin = boolFromConfigValue(ext.surfaceAdmin)
+    configForm.surfaceConsumer = boolFromConfigValue(ext.surfaceConsumer)
+    configForm.autoLoadAdmin = boolFromConfigValue(config.autoLoadAdmin ?? ext.autoLoadAdmin)
+    configForm.autoLoadConsumer = boolFromConfigValue(config.autoLoadConsumer ?? ext.autoLoadConsumer)
+    configForm.loadOnStartup = boolFromConfigValue(config.loadOnStartup)
     configForm.startPriority = config.startPriority || 50
     configForm.startDelay = config.startDelay || 0
     configForm.description = config.description || ''
@@ -1878,8 +2084,10 @@ const handleShowConfig = async (app: Application) => {
   } catch (error: any) {
     console.error('加载应用配置失败:', error)
     // 使用默认值
-    configForm.hasFrontend = false
-    configForm.autoLoad = false
+    configForm.surfaceAdmin = false
+    configForm.surfaceConsumer = false
+    configForm.autoLoadAdmin = false
+    configForm.autoLoadConsumer = false
     configForm.loadOnStartup = false
     configForm.startPriority = 50
     configForm.startDelay = 0
@@ -1889,6 +2097,7 @@ const handleShowConfig = async (app: Application) => {
     configLoading.value = false
   }
   
+  configCollapseExpanded.value = ['advanced']
   showConfigModal.value = true
 }
 
@@ -1899,7 +2108,8 @@ const confirmConfig = async () => {
   try {
     // 获取最新的 extensionConfig 值
     const extensionConfigToSave = { ...configForm.extensionConfig }
-    extensionConfigToSave.hasFrontend = configForm.hasFrontend
+    extensionConfigToSave.surfaceAdmin = configForm.surfaceAdmin
+    extensionConfigToSave.surfaceConsumer = configForm.surfaceConsumer
     
     console.log('[ApplicationManagement] 保存配置:', {
       appId: configTargetApp.value.id,
@@ -1909,7 +2119,8 @@ const confirmConfig = async () => {
     })
     
     await applicationApi.updateConfig(configTargetApp.value.id, {
-      autoLoad: configForm.autoLoad,
+      autoLoadAdmin: configForm.autoLoadAdmin,
+      autoLoadConsumer: configForm.autoLoadConsumer,
       loadOnStartup: configForm.loadOnStartup,
       startPriority: configForm.startPriority,
       startDelay: configForm.startDelay,
@@ -2075,8 +2286,23 @@ const formatJson = (jsonStr: string | null): string => {
   }
 }
 
+async function loadBizTags(typeKey?: string) {
+  try {
+    // 默认业务标签类型为 plugin_biz_type；当左侧选中类型时透传 key，便于后端按类型扩展
+    bizTags.value = await applicationApi.getTags(typeKey || 'plugin_biz_type')
+  } catch {
+    bizTags.value = []
+  }
+}
+
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  try {
+    categories.value = await applicationApi.getCategories()
+  } catch {
+    categories.value = []
+  }
+  await loadBizTags()
   loadData()
 })
 </script>
@@ -2100,7 +2326,7 @@ onMounted(() => {
 }
 
 /* 加载和空状态 */
-.loading-state {
+:deep(.loading-state) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2108,7 +2334,7 @@ onMounted(() => {
   padding: 60px;
 }
 
-.empty-state {
+:deep(.empty-state) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2120,23 +2346,23 @@ onMounted(() => {
   gap: 16px;
 }
 
-.empty-state__icon {
+:deep(.empty-state__icon) {
   opacity: 0.5;
 }
 
-.empty-state__text {
+:deep(.empty-state__text) {
   font-size: 14px;
 }
 
 /* 应用列表 */
-.app-list {
+:deep(.app-list) {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 
-.app-card {
+:deep(.app-card) {
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
@@ -2145,19 +2371,19 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.app-card :deep(.n-card) {
+:deep(.app-card) :deep(.n-card) {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.app-card:hover {
+:deep(.app-card:hover) {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   z-index: 2;
 }
 
-.app-card :deep(.n-card__content) {
+:deep(.app-card) :deep(.n-card__content) {
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -2166,14 +2392,14 @@ onMounted(() => {
 }
 
 /* 应用卡片头部 */
-.app-header {
+:deep(.app-header) {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
 }
 
-.app-icon {
+:deep(.app-icon) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2183,22 +2409,22 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.app-icon--integrated {
+:deep(.app-icon--integrated) {
   background: rgba(99, 102, 241, 0.1);
   color: #6366f1;
 }
 
-.app-icon--plugin {
+:deep(.app-icon--plugin) {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
 }
 
-.app-icon--aggregated {
+:deep(.app-icon--aggregated) {
   background: rgba(245, 158, 11, 0.12);
   color: #d97706;
 }
 
-.app-icon__img {
+:deep(.app-icon__img) {
   width: fit-content;
   max-width: 36px;
   max-height: 36px;
@@ -2206,12 +2432,12 @@ onMounted(() => {
   border-radius: 6px;
 }
 
-.app-info {
+:deep(.app-info) {
   flex: 1;
   min-width: 0;
 }
 
-.app-name {
+:deep(.app-name) {
   font-size: 15px;
   font-weight: 600;
   color: #1f2937;
@@ -2223,7 +2449,7 @@ onMounted(() => {
   align-items: center;
 }
 
-.app-code {
+:deep(.app-code) {
   font-size: 12px;
   color: #6b7280;
   font-family: monospace;
@@ -2232,25 +2458,25 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.app-status {
+:deep(.app-status) {
   flex-shrink: 0;
 }
 
 /* 应用卡片主体 */
-.app-body {
+:deep(.app-body) {
   display: flex;
   flex-direction: column;
   gap: 12px;
   flex: 1;
 }
 
-.app-meta {
+:deep(.app-meta) {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.meta-item {
+:deep(.meta-item) {
   font-size: 13px;
   color: #6b7280;
   display: flex;
@@ -2258,29 +2484,30 @@ onMounted(() => {
   gap: 4px;
 }
 
-.meta-label {
+:deep(.meta-label) {
   color: #9ca3af;
 }
 
-.meta-value {
+:deep(.meta-value) {
   color: #1f2937;
   font-family: monospace;
   font-size: 12px;
 }
 
-.app-description {
+:deep(.app-description) {
   font-size: 13px;
   color: #6b7280;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* 应用卡片底部 */
-.app-footer {
+:deep(.app-footer) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2292,20 +2519,20 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.app-time {
+:deep(.app-time) {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.app-actions {
+:deep(.app-actions) {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 /* 分页 */
-.pagination {
+:deep(.pagination) {
   display: flex;
   justify-content: flex-end;
   padding: 16px 0;
@@ -2329,7 +2556,7 @@ onMounted(() => {
     padding: 12px;
   }
 
-  .app-list {
+  :deep(.app-list) {
     grid-template-columns: 1fr;
   }
 }
@@ -2404,11 +2631,63 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
+.config-advanced-collapse :deep(.n-collapse-item__header) {
+  font-weight: 600;
+}
+
+.config-surface-card {
+  margin-bottom: 20px;
+}
+
+.config-surface-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.config-surface-card-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.surface-preload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.surface-preload-item {
+  padding: 14px 14px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--n-border-color);
+  background: var(--n-color-modal);
+}
+
+.surface-preload-label {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: var(--n-text-color);
+}
+
+.surface-preload-desc {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--n-text-color-3);
+}
+
 .advanced-config-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px 24px;
   margin-bottom: 16px;
+}
+
+.advanced-config-grid--startup {
+  margin-top: 4px;
 }
 
 .advanced-config-grid :deep(.n-form-item) {

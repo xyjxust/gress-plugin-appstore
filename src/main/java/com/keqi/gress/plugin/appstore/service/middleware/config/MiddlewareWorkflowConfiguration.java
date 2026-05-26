@@ -1,8 +1,8 @@
 package com.keqi.gress.plugin.appstore.service.middleware.config;
 
 
-import  com.keqi.gress.common.plugin.annotion.Bean;
-import  com.keqi.gress.common.plugin.annotion.Configuration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import com.keqi.gress.plugin.appstore.service.middleware.MiddlewareInstallSsePublisher;
 import com.keqi.gress.plugin.appstore.service.middleware.workflow.MiddlewareWorkflowEngine;
 import com.keqi.gress.plugin.appstore.service.middleware.workflow.WorkflowDefinitionParser;

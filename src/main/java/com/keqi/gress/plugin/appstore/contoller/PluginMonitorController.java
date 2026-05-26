@@ -1,8 +1,10 @@
 package com.keqi.gress.plugin.appstore.contoller;
 
 import com.keqi.gress.common.model.Result;
-import com.keqi.gress.common.plugin.annotion.Inject;
-import com.keqi.gress.common.plugin.annotion.Service;
+import com.keqi.gress.plugin.api.ui.annotation.PluginAction;
+import com.keqi.gress.plugin.api.ui.annotation.PluginMenu;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.keqi.gress.plugin.appstore.dto.monitor.MonitorOverview;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMonitorDetail;
 import com.keqi.gress.plugin.appstore.dto.monitor.PluginMonitorHistory;
@@ -31,9 +33,10 @@ import java.util.List;
 @Service
 @RestController
 @RequestMapping("/monitor")
+@PluginMenu(id = "plugin-monitor", name = "插件监控")
 public class PluginMonitorController {
     
-    @Inject
+    @Autowired
     private PluginMonitorService monitorService;
     
     /**
@@ -51,6 +54,7 @@ public class PluginMonitorController {
      * @return 所有插件的监控状态列表
      */
     @GetMapping("/status")
+    @PluginAction(id = "refresh", name = "刷新")
     public Result<List<PluginMonitorStatus>> getAllPluginStatus() {
         log.info("获取所有插件监控状态");
         
@@ -86,6 +90,7 @@ public class PluginMonitorController {
      * @return 插件详细监控信息
      */
     @GetMapping("/status/{pluginId}")
+    @PluginAction(id = "view-detail", name = "查看详情", managementEnabled = true, actionCode = "VIEW")
     public Result<PluginMonitorDetail> getPluginDetail(@PathVariable String pluginId) {
         log.info("获取插件详细监控信息: pluginId={}", pluginId);
         
@@ -163,6 +168,7 @@ public class PluginMonitorController {
      * @return 插件历史监控数据列表
      */
     @GetMapping("/history/{pluginId}")
+    @PluginAction(id = "view-history", name = "查看历史", managementEnabled = true, actionCode = "VIEW")
     public Result<List<PluginMonitorHistory>> getPluginHistory(
             @PathVariable String pluginId,
             @RequestParam(defaultValue = "1h") String timeRange) {

@@ -1,17 +1,14 @@
 package com.keqi.gress.plugin.appstore.service;
 
-import cn.hutool.log.Log;
-import cn.hutool.log.LogFactory;
 import com.alibaba.fastjson2.JSON;
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.PostConstruct;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  jakarta.annotation.PostConstruct;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.common.storage.FileStorageService;
+import com.keqi.gress.common.utils.ServletPathUtils;
 import com.keqi.gress.plugin.appstore.config.AppStoreConfig;
 import com.keqi.gress.plugin.appstore.dto.ApplicationDTO;
 import com.keqi.gress.plugin.appstore.dto.PageResult;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -30,14 +29,14 @@ import java.util.stream.Collectors;
  * 负责与远程应用商店 API 交互，获取应用信息、下载应用等
  */
 @Slf4j
-@Service(order = 10)
+@Service
 public class AppStoreApiService {
    // private Log log   = LogFactory.get(AppStoreApiService.class);
     
-    @Inject
+    @Autowired
     private AppStoreConfig config;
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private FileStorageService fileStorageService;
     
     private RestTemplate restTemplate;
@@ -102,6 +101,126 @@ public class AppStoreApiService {
     }
     
     /**
+     * 获取分类列表
+     *
+     * 优先走匿名用户端接口：appstore-admin `/plugins/as-admin/anon/categories`
+     * 兜底兼容旧接口：appstore-admin `/categories`
+     */
+    public List<com.keqi.gress.plugin.appstore.dto.AppStoreCategoryDTO> getCategories() {
+        if (config == null || config.getApi() == null) {
+            log.warn("AppStoreConfig 未加载，无法获取分类");
+            return Collections.emptyList();
+        }
+
+        if (!Boolean.TRUE.equals(config.getApi().getEnabled())) {
+            log.debug("API 未启用，返回空分类列表");
+            return Collections.emptyList();
+        }
+
+        try {
+            String base = getConfiguredApiBaseUrl();
+            if (StringUtils.isBlank(base)) return Collections.emptyList();
+            String apiAppstoreRoot = getAnonymousApiBaseUrl(base);
+
+            ResponseEntity<String> response = null;
+
+            // 1) 优先：/plugins/as-admin/anon/categories
+            try {
+                String url = apiAppstoreRoot + "/categories";
+                log.debug("请求分类列表(用户端): {}", url);
+                response = restTemplate.exchange(url, HttpMethod.GET, createGetEntity(url), String.class);
+            } catch (Exception e) {
+                log.debug("请求分类列表(用户端)失败，尝试兜底 /categories", e);
+            }
+
+            // 2) 兜底：/categories（旧 CategoryController）
+            if (response == null || response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                String rootOnly = base;
+                int idx2 = rootOnly.indexOf("/api/appstore");
+                if (idx2 > 0) rootOnly = rootOnly.substring(0, idx2);
+                if (rootOnly.endsWith("/")) rootOnly = rootOnly.substring(0, rootOnly.length() - 1);
+                String url = rootOnly + "/categories";
+                log.debug("请求分类列表(兜底): {}", url);
+                response = restTemplate.exchange(url, HttpMethod.GET, createGetEntity(url), String.class);
+            }
+
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                log.warn("获取分类列表失败: {}", response.getStatusCode());
+                return Collections.emptyList();
+            }
+
+            CategoryListResponse parsed = JSON.parseObject(response.getBody(), CategoryListResponse.class);
+            if (parsed == null || !parsed.success || parsed.data == null) {
+                return Collections.emptyList();
+            }
+
+            return parsed.data.stream()
+                .filter(Objects::nonNull)
+                .filter(it -> it.enabled == null || Boolean.TRUE.equals(it.enabled))
+                .sorted(Comparator.comparingInt(it -> it.displayOrder != null ? it.displayOrder : 9999))
+                .map(it -> com.keqi.gress.plugin.appstore.dto.AppStoreCategoryDTO.builder()
+                    .categoryKey(it.categoryKey)
+                    .categoryName(it.categoryName)
+                    .description(it.description)
+                    .icon(it.icon)
+                    .displayOrder(it.displayOrder)
+                    .enabled(it.enabled)
+                    .build()
+                )
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.warn("获取分类列表失败", e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 获取标签列表（按 tagTypeKey 过滤）
+     *
+     * 来源：appstore-admin `/plugins/as-admin/anon/tags?typeKey=xxx`
+     */
+    public List<com.keqi.gress.plugin.appstore.dto.AppStoreCategoryDTO> getTags(String typeKey) {
+        if (config == null || config.getApi() == null) {
+            return Collections.emptyList();
+        }
+        if (!Boolean.TRUE.equals(config.getApi().getEnabled())) {
+            return Collections.emptyList();
+        }
+        try {
+            String base = getConfiguredApiBaseUrl();
+            if (StringUtils.isBlank(base)) return Collections.emptyList();
+            String apiAppstoreRoot = getAnonymousApiBaseUrl(base);
+
+            String url = apiAppstoreRoot + "/tags";
+            if (StringUtils.isNotBlank(typeKey)) {
+                url += "?typeKey=" + typeKey;
+            }
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, createGetEntity(url), String.class);
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                return Collections.emptyList();
+            }
+            TagListResponse parsed = JSON.parseObject(response.getBody(), TagListResponse.class);
+            if (parsed == null || !parsed.success || parsed.data == null) {
+                return Collections.emptyList();
+            }
+            return parsed.data.stream()
+                .filter(Objects::nonNull)
+                .filter(it -> it.enabled == null || Boolean.TRUE.equals(it.enabled))
+                .map(it -> com.keqi.gress.plugin.appstore.dto.AppStoreCategoryDTO.builder()
+                    .categoryKey(it.tagKey)
+                    .categoryName(it.tagName)
+                    .description(it.description)
+                    .enabled(it.enabled)
+                    .build()
+                )
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.warn("获取标签列表失败, typeKey={}", typeKey, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * 获取应用列表（分页）
      * 
      * @param page 页码
@@ -110,7 +229,7 @@ public class AppStoreApiService {
      * @return 分页结果
      */
     public PageResult<ApplicationDTO> getApplicationsPage(Integer page, Integer size, String keyword) {
-        return getApplicationsPage(page, size, keyword, null);
+        return getApplicationsPage(page, size, keyword, null, null);
     }
     
     /**
@@ -123,6 +242,30 @@ public class AppStoreApiService {
      * @return 分页结果
      */
     public PageResult<ApplicationDTO> getApplicationsPage(Integer page, Integer size, String keyword, String pluginType) {
+        return getApplicationsPage(page, size, keyword, pluginType, null);
+    }
+
+    /**
+     * 获取应用列表（分页，支持按插件类型、分类过滤）
+     *
+     * @param category 分类 key（appstore-admin 的 Category.categoryKey）
+     */
+    public PageResult<ApplicationDTO> getApplicationsPage(Integer page, Integer size, String keyword, String pluginType, String category) {
+        return getApplicationsPage(page, size, keyword, pluginType, category, null, null);
+    }
+
+    /**
+     * 获取应用列表（分页，支持按插件类型、分类、标签、价格过滤）
+     */
+    public PageResult<ApplicationDTO> getApplicationsPage(
+        Integer page,
+        Integer size,
+        String keyword,
+        String pluginType,
+        String category,
+        String tag,
+        String priceType
+    ) {
         // 检查配置是否加载
         if (config == null || config.getApi() == null) {
             log.error("应用商店配置未加载，请检查 plugin.yml 配置");
@@ -136,8 +279,8 @@ public class AppStoreApiService {
         
         try {
             // 修改为 /packages 端点
-            String url = String.format("%s/packages?page=%d&size=%d", 
-                config.getApi().getBaseUrl(), page, size);
+            String url = String.format("%s/packages?page=%d&size=%d",
+                getAnonymousApiBaseUrl(), page, size);
             
             if (keyword != null && !keyword.isEmpty()) {
                 url += "&keyword=" + keyword;
@@ -146,11 +289,22 @@ public class AppStoreApiService {
             if (pluginType != null && !pluginType.isEmpty()) {
                 url += "&pluginType=" + pluginType;
             }
+
+            if (category != null && !category.isEmpty()) {
+                url += "&category=" + category;
+            }
+
+            if (tag != null && !tag.isEmpty()) {
+                url += "&tag=" + tag;
+            }
+
+            if (priceType != null && !priceType.isEmpty()) {
+                url += "&priceType=" + priceType;
+            }
             
             log.debug("请求应用列表: {}", url);
             
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
             
             ResponseEntity<ApplicationListResponse> response = restTemplate.exchange(
                 url,
@@ -187,6 +341,49 @@ public class AppStoreApiService {
         } catch (Exception e) {
             log.error("获取应用列表失败", e);
             return createEmptyPageResult(page, size);
+        }
+    }
+
+    /**
+     * 获取应用发布版本列表（用户端）
+     *
+     * 来源：appstore-admin `/plugins/as-admin/anon/packages/{pluginId}/versions`
+     */
+    public List<com.keqi.gress.plugin.appstore.dto.AppStorePackageVersionDTO> getApplicationVersions(String pluginId) {
+        if (config == null || config.getApi() == null) {
+            return Collections.emptyList();
+        }
+        if (!Boolean.TRUE.equals(config.getApi().getEnabled())) {
+            return Collections.emptyList();
+        }
+
+        try {
+            String base = getAnonymousApiBaseUrl();
+            if (StringUtils.isBlank(base)) return Collections.emptyList();
+            String url = String.format("%s/packages/%s/versions", base, pluginId);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, createGetEntity(url), String.class);
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                return Collections.emptyList();
+            }
+
+            VersionsResponse parsed = JSON.parseObject(response.getBody(), VersionsResponse.class);
+            if (parsed == null || !parsed.success || parsed.data == null) return Collections.emptyList();
+
+            return parsed.data.stream()
+                .filter(Objects::nonNull)
+                .map(v -> com.keqi.gress.plugin.appstore.dto.AppStorePackageVersionDTO.builder()
+                    .pluginId(v.pluginId)
+                    .version(v.version)
+                    .releaseNotes(v.releaseNotes)
+                    .fileSize(v.fileSize)
+                    .uploadTime(v.uploadTime)
+                    .current(v.current)
+                    .build()
+                )
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.warn("获取应用版本列表失败: pluginId={}", pluginId, e);
+            return Collections.emptyList();
         }
     }
     
@@ -236,13 +433,12 @@ public class AppStoreApiService {
         
         try {
             // 修改为 /packages/{pluginId} 端点
-            String url = String.format("%s/packages/%s", 
-                config.getApi().getBaseUrl(), pluginId);
+            String url = String.format("%s/packages/%s",
+                getAnonymousApiBaseUrl(), pluginId);
             
             log.debug("请求应用详情: {}", url);
             
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
             
             ResponseEntity<ApplicationDetailResponse> response = restTemplate.exchange(
                 url,
@@ -290,17 +486,16 @@ public class AppStoreApiService {
         try {
             // /packages/{pluginId}/versions/{version}
             String url = String.format("%s/packages/%s/versions/%s",
-                config.getApi().getBaseUrl(), pluginId, version);
+                getAnonymousApiBaseUrl(), pluginId, version);
 
              if(StringUtils.isBlank(version)){
                  url = String.format("%s/packages/%s",
-                         config.getApi().getBaseUrl(), pluginId);
+                         getAnonymousApiBaseUrl(), pluginId);
              }
 
             log.debug("请求应用版本详情: {}", url);
 
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
 
             ResponseEntity<ApplicationDetailResponse> response = restTemplate.exchange(
                 url,
@@ -348,14 +543,17 @@ public class AppStoreApiService {
         }
         
         try {
-            // 修改为 /packages/{pluginId}/download 端点
-            String url = String.format("%s/packages/%s/download", 
-                config.getApi().getBaseUrl(), pluginId);
+            String token = requestDownloadToken(pluginId, null);
+            if (StringUtils.isBlank(token)) {
+                throw new RuntimeException("获取下载令牌失败");
+            }
+            // 先换 token，再下载
+            String url = String.format("%s/packages/%s/download?token=%s",
+                getAnonymousApiBaseUrl(), pluginId, token);
             
             log.info("下载应用: pluginId={}, url={}", pluginId, url);
             
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
             
             ResponseEntity<byte[]> response = restTemplate.exchange(
                 url,
@@ -424,10 +622,9 @@ public class AppStoreApiService {
 
         try {
             // GET {baseUrl}/signing/trusted-roots
-            String url = String.format("%s/signing/trusted-roots", config.getApi().getBaseUrl());
+            String url = String.format("%s/signing/trusted-roots", getAnonymousApiBaseUrl());
 
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
 
             ResponseEntity<TrustedRootsResponse> response = restTemplate.exchange(
                 url,
@@ -474,14 +671,17 @@ public class AppStoreApiService {
         }
 
         try {
-            // /packages/{pluginId}/versions/{version}/download
-            String url = String.format("%s/packages/%s/versions/%s/download",
-                config.getApi().getBaseUrl(), pluginId, version);
+            String token = requestDownloadToken(pluginId, version);
+            if (StringUtils.isBlank(token)) {
+                throw new RuntimeException("获取下载令牌失败");
+            }
+            // /packages/{pluginId}/versions/{version}/download?token=...
+            String url = String.format("%s/packages/%s/versions/%s/download?token=%s",
+                getAnonymousApiBaseUrl(), pluginId, version, token);
 
             log.info("按版本下载应用: pluginId={}, version={}, url={}", pluginId, version, url);
 
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
 
             ResponseEntity<byte[]> response = restTemplate.exchange(
                 url,
@@ -533,6 +733,42 @@ public class AppStoreApiService {
             throw new RuntimeException(errorMsg, e);
         }
     }
+
+    /**
+     * 按版本下载应用字节（供控制器转发给浏览器下载）
+     */
+    public DownloadedFile downloadApplicationBytes(String pluginId, String version) {
+        if (config == null || config.getApi() == null) {
+            throw new RuntimeException("应用商店配置未加载，请检查 plugin.yml 配置");
+        }
+        if (!Boolean.TRUE.equals(config.getApi().getEnabled())) {
+            throw new RuntimeException("应用商店 API 未启用");
+        }
+        try {
+            String token = requestDownloadToken(pluginId, version);
+            if (StringUtils.isBlank(token)) {
+                throw new RuntimeException("获取下载令牌失败");
+            }
+            String url = String.format("%s/packages/%s/versions/%s/download?token=%s",
+                getAnonymousApiBaseUrl(), pluginId, version, token);
+            ResponseEntity<byte[]> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                createGetEntity(url),
+                byte[].class
+            );
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                throw new RuntimeException("按版本应用下载失败: HTTP " + response.getStatusCode().value());
+            }
+            String fileName = extractFileName(response.getHeaders());
+            if (StringUtils.isBlank(fileName)) {
+                fileName = pluginId + "-" + version + ".jar";
+            }
+            return new DownloadedFile(fileName, response.getBody());
+        } catch (Exception e) {
+            throw new RuntimeException("按版本应用下载失败: " + e.getMessage(), e);
+        }
+    }
     
     /**
      * 获取插件表权限信息
@@ -553,14 +789,13 @@ public class AppStoreApiService {
         }
         
         try {
-            // 调用 /api/appstore/packages/{pluginId}/table-permissions 端点
-            String url = String.format("%s/packages/%s/table-permissions", 
-                config.getApi().getBaseUrl(), pluginId);
+            // 调用 /api/appstore/anon/packages/{pluginId}/table-permissions 端点
+            String url = String.format("%s/packages/%s/table-permissions",
+                getAnonymousApiBaseUrl(), pluginId);
             
             log.debug("请求插件表权限信息: {}", url);
             
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
             
             ResponseEntity<TablePermissionsResponse> response = restTemplate.exchange(
                 url,
@@ -648,21 +883,102 @@ public class AppStoreApiService {
         return null;
     }
     
+    private HttpEntity<Void> createGetEntity(String url) {
+        return new HttpEntity<>(createHeaders("GET", url));
+    }
+
     /**
-     * 创建请求头
+     * 方案A：KeyId + HMAC-SHA256 + timestamp + nonce
+     *
+     * canonical = METHOD \\n PATH \\n RAW_QUERY \\n TIMESTAMP \\n NONCE
      */
-    private HttpHeaders createHeaders() {
+    private HttpHeaders createHeaders(String method, String url) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        
-        // 添加认证密钥
-        String secretKey = config.getApi().getSecretKey();
-        if (secretKey != null && !secretKey.isEmpty()) {
-            headers.set("X-API-Key", secretKey);
+
+//        if (isAnonymousStoreUrl(url)) {
+//            return headers;
+//        }
+
+        String keyId = config.getApi().getKeyId();
+        String secret = config.getApi().getSecretKey();
+        if (StringUtils.isNotBlank(keyId) && StringUtils.isNotBlank(secret)) {
+            long ts = System.currentTimeMillis();
+            String nonce = java.util.UUID.randomUUID().toString().replace("-", "");
+            java.net.URI uri = java.net.URI.create(url);
+            String path = ServletPathUtils.stripContextPath(uri.getPath());
+            String query = uri.getRawQuery();
+            String canonical = method.toUpperCase() + "\n" + path + "\n" + (query == null ? "" : query) + "\n" + ts + "\n" + nonce;
+
+            headers.set("X-AppStore-KeyId", keyId);
+            headers.set("X-AppStore-Timestamp", String.valueOf(ts));
+            headers.set("X-AppStore-Nonce", nonce);
+            headers.set("X-AppStore-Signature", signHmacBase64(secret, canonical));
+            return headers;
         }
-        
+
+        // fallback legacy header
+        String legacy = config.getApi().getSecretKey();
+        if (StringUtils.isNotBlank(legacy)) {
+            headers.set("X-API-Key", legacy);
+        }
         return headers;
+    }
+
+    private String getConfiguredApiBaseUrl() {
+        if (config == null || config.getApi() == null) {
+            return null;
+        }
+        String baseUrl = config.getApi().getBaseUrl();
+        if (StringUtils.isBlank(baseUrl)) {
+            return null;
+        }
+        return baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+    }
+
+    private String getAnonymousApiBaseUrl() {
+        return getAnonymousApiBaseUrl(getConfiguredApiBaseUrl());
+    }
+
+    private String getAnonymousApiBaseUrl(String baseUrl) {
+        if (StringUtils.isBlank(baseUrl)) {
+            return baseUrl;
+        }
+        if (baseUrl.contains("/plugins/as-admin/anon")) {
+            return baseUrl.substring(0, baseUrl.indexOf("/plugins/as-admin/anon")) + "/plugins/as-admin/anon";
+        }
+        if (baseUrl.contains("/plugins/as-admin")) {
+            return baseUrl.substring(0, baseUrl.indexOf("/plugins/as-admin")) + "/plugins/as-admin/anon";
+        }
+        if (baseUrl.contains("/plugins/appstore-admin")) {
+            return baseUrl.substring(0, baseUrl.indexOf("/plugins/appstore-admin")) + "/plugins/as-admin/anon";
+        }
+        if (baseUrl.contains("/api/appstore/anon")) {
+            return baseUrl.substring(0, baseUrl.indexOf("/api/appstore/anon")) + "/plugins/as-admin/anon";
+        }
+        if (baseUrl.contains("/api/appstore")) {
+            return baseUrl.substring(0, baseUrl.indexOf("/api/appstore")) + "/plugins/as-admin/anon";
+        }
+        return baseUrl + "/anon";
+    }
+
+    private boolean isAnonymousStoreUrl(String url) {
+        if (StringUtils.isBlank(url)) {
+            return false;
+        }
+        return url.contains("/plugins/as-admin/anon/");
+    }
+
+    private static String signHmacBase64(String secret, String msg) {
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+            mac.init(new javax.crypto.spec.SecretKeySpec(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] out = mac.doFinal(msg.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.Base64.getEncoder().encodeToString(out);
+        } catch (Exception e) {
+            throw new RuntimeException("sign failed: " + e.getMessage(), e);
+        }
     }
     
     /**
@@ -676,10 +992,76 @@ public class AppStoreApiService {
     }
 
     @Data
+    private static class CategoryListResponse {
+        private boolean success;
+        private String errorMessage;
+        private List<CategoryItem> data;
+    }
+
+    @Data
+    private static class CategoryItem {
+        private Long id;
+        private String categoryName;
+        private String categoryKey;
+        private String description;
+        private String icon;
+        private Integer displayOrder;
+        private Boolean enabled;
+        private Integer pluginCount;
+    }
+
+    @Data
+    private static class TagListResponse {
+        private boolean success;
+        private String errorMessage;
+        private List<TagItem> data;
+    }
+
+    @Data
+    private static class TagItem {
+        private Long id;
+        private String tagName;
+        private String tagKey;
+        private String description;
+        private String tagTypeKey;
+        private Boolean enabled;
+    }
+
+    @Data
+    private static class VersionsResponse {
+        private boolean success;
+        private String errorMessage;
+        private List<VersionItem> data;
+    }
+
+    @Data
+    private static class VersionItem {
+        private String pluginId;
+        private String version;
+        private String releaseNotes;
+        private Long fileSize;
+        private LocalDateTime uploadTime;
+        private Boolean current;
+    }
+
+    @Data
     private static class TrustedRootsResponse {
         private boolean success;
         private String errorMessage;
         private java.util.List<TrustedRootDTO> data;
+    }
+
+    @Data
+    private static class DownloadTokenApiResponse {
+        private boolean success;
+        private String errorMessage;
+        private DownloadTokenData data;
+    }
+
+    @Data
+    private static class DownloadTokenData {
+        private String token;
+        private Long expireAtEpochMs;
     }
 
     /**
@@ -694,6 +1076,13 @@ public class AppStoreApiService {
          */
         private String publicKeyPem;
         private String fingerprintSha256;
+    }
+
+    @Data
+    @lombok.AllArgsConstructor
+    public static class DownloadedFile {
+        private String fileName;
+        private byte[] bytes;
     }
     
     /**
@@ -793,6 +1182,13 @@ public class AppStoreApiService {
      * @return 配置元数据列表
      */
     public java.util.List< com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata> getPluginConfigMetadataFromJar(String pluginId) {
+        return getPluginInstallConfigMetadataFromJar(pluginId);
+    }
+
+    /**
+     * 从远程应用商店的 jar 包中解析安装前配置元数据。
+     */
+    public java.util.List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata> getPluginInstallConfigMetadataFromJar(String pluginId) {
         // 检查配置是否加载
         if (config == null || config.getApi() == null) {
             log.error("应用商店配置未加载，请检查 plugin.yml 配置");
@@ -806,14 +1202,18 @@ public class AppStoreApiService {
         
         java.nio.file.Path tmpJarPath = null;
         try {
-            // 1. 下载 jar 包到临时文件
-            String url = String.format("%s/packages/%s/download", 
-                config.getApi().getBaseUrl(), pluginId);
+            // 1. 先换 token，再下载 jar 包到临时文件
+            String token = requestDownloadToken(pluginId, null);
+            if (StringUtils.isBlank(token)) {
+                log.warn("获取下载令牌失败: pluginId={}", pluginId);
+                return java.util.Collections.emptyList();
+            }
+            String url = String.format("%s/packages/%s/download?token=%s",
+                getAnonymousApiBaseUrl(), pluginId, token);
             
             log.info("下载插件包以解析配置元数据: pluginId={}, url={}", pluginId, url);
             
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            HttpEntity<Void> entity = createGetEntity(url);
             
             ResponseEntity<byte[]> response = restTemplate.exchange(
                 url,
@@ -835,7 +1235,7 @@ public class AppStoreApiService {
             log.debug("插件包已保存到临时文件: {}", tmpJarPath);
             
             // 3. 从 jar 文件中解析配置元数据
-            return parseConfigMetadataFromJar(tmpJarPath);
+            return parseInstallConfigMetadataFromJar(tmpJarPath);
             
         } catch (Exception e) {
             log.error("从 jar 包解析配置元数据失败: pluginId={}", pluginId, e);
@@ -851,6 +1251,35 @@ public class AppStoreApiService {
             }
         }
     }
+
+    /**
+     * 请求短期一次性下载 token
+     */
+    public String requestDownloadToken(String pluginId, String version) {
+        try {
+            String url;
+            if (StringUtils.isNotBlank(version)) {
+                url = String.format("%s/packages/%s/versions/%s/download-token",
+                    getAnonymousApiBaseUrl(), pluginId, version);
+            } else {
+                url = String.format("%s/packages/%s/download-token",
+                    getAnonymousApiBaseUrl(), pluginId);
+            }
+            ResponseEntity<DownloadTokenApiResponse> resp = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                createGetEntity(url),
+                DownloadTokenApiResponse.class
+            );
+            if (resp.getStatusCode() != HttpStatus.OK || resp.getBody() == null) return null;
+            DownloadTokenApiResponse body = resp.getBody();
+            if (body == null || !body.success || body.data == null) return null;
+            return body.data.token;
+        } catch (Exception e) {
+            log.warn("请求下载token失败: pluginId={}, version={}", pluginId, version, e);
+            return null;
+        }
+    }
     
     /**
      * 从 jar 文件中解析配置元数据
@@ -859,108 +1288,56 @@ public class AppStoreApiService {
      * @param jarPath jar 文件路径
      * @return 配置元数据列表
      */
-    private java.util.List< com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata> parseConfigMetadataFromJar(java.nio.file.Path jarPath) {
+    public java.util.List<com.keqi.gress.common.plugin.FormMetadataParser.FieldMetadata> parseInstallConfigMetadataFromJar(java.nio.file.Path jarPath) {
         try {
-            // 从 install-workflow.yml 中读取 configClass
-            String configClassName = parseConfigClassFromWorkflow(jarPath);
-            
-            if (configClassName == null || configClassName.trim().isEmpty()) {
-                log.debug("install-workflow.yml 中未指定 configClass，返回空配置元数据");
+            String pluginClassName = parsePluginClassName(jarPath);
+            if (StringUtils.isBlank(pluginClassName)) {
+                log.debug("plugin.properties 中未找到 plugin.class，返回空安装前配置元数据");
                 return java.util.Collections.emptyList();
             }
-            
-            log.info("从 install-workflow.yml 找到配置类: {}", configClassName);
-            
-            // 直接加载指定的配置类
-            try {
-                java.net.URL jarUrl = jarPath.toUri().toURL();
-                java.net.URLClassLoader classLoader = new java.net.URLClassLoader(
-                    new java.net.URL[]{jarUrl},
-                    Thread.currentThread().getContextClassLoader()
-                );
-                
-                try {
-                    Class<?> configClass = classLoader.loadClass(configClassName);
-                    
-                    // 检查是否是 Input 类型
-                    if ( com.keqi.gress.common.plugin.dto.Input.class.isAssignableFrom(configClass)) {
-                        @SuppressWarnings("unchecked")
-                        Class<? extends  com.keqi.gress.common.plugin.dto.Input> inputClass = 
-                            (Class<? extends  com.keqi.gress.common.plugin.dto.Input>) configClass;
-                        
-                         com.keqi.gress.common.plugin.FormMetadataParser.FormMetadata formMetadata = 
-                             com.keqi.gress.common.plugin.FormMetadataParser.parse(inputClass);
-                        
-                        if (formMetadata != null && formMetadata.getFields() != null && !formMetadata.getFields().isEmpty()) {
-                            log.info("成功从指定配置类解析元数据: className={}, fields={}", configClassName, formMetadata.getFields().size());
-                            return formMetadata.getFields();
-                        } else {
-                            log.warn("配置类 {} 解析后没有字段", configClassName);
-                            return java.util.Collections.emptyList();
-                        }
-                    } else {
-                        log.warn("配置类 {} 不是 Input 类型", configClassName);
-                        return java.util.Collections.emptyList();
-                    }
-                } finally {
-                    classLoader.close();
+
+            try (java.net.URLClassLoader classLoader = new java.net.URLClassLoader(
+                    new java.net.URL[]{jarPath.toUri().toURL()},
+                    Thread.currentThread().getContextClassLoader())) {
+                Class<?> pluginClass = classLoader.loadClass(pluginClassName);
+                com.keqi.gress.common.plugin.annotion.PluginSpec pluginSpec =
+                        pluginClass.getAnnotation(com.keqi.gress.common.plugin.annotion.PluginSpec.class);
+                if (pluginSpec == null || pluginSpec.installInputClass() == com.keqi.gress.common.plugin.annotion.PluginSpec.DefaultInput.class) {
+                    return java.util.Collections.emptyList();
                 }
-            } catch (ClassNotFoundException e) {
-                log.error("无法加载配置类: {}", configClassName, e);
-                return java.util.Collections.emptyList();
-            } catch (Exception e) {
-                log.error("解析配置类失败: {}", configClassName, e);
-                return java.util.Collections.emptyList();
+
+                Class<? extends com.keqi.gress.common.plugin.dto.Input> installInputClass = pluginSpec.installInputClass();
+                com.keqi.gress.common.plugin.FormMetadataParser.FormMetadata formMetadata =
+                        com.keqi.gress.common.plugin.FormMetadataParser.parse(installInputClass);
+                if (formMetadata == null || formMetadata.getFields() == null || formMetadata.getFields().isEmpty()) {
+                    return java.util.Collections.emptyList();
+                }
+
+                log.info("成功解析安装前配置元数据: pluginClass={}, installInputClass={}, fields={}",
+                        pluginClassName, installInputClass.getName(), formMetadata.getFields().size());
+                return formMetadata.getFields();
             }
-            
         } catch (Exception e) {
-            log.error("解析 jar 文件配置元数据失败: jarPath={}", jarPath, e);
+            log.error("解析 jar 文件安装前配置元数据失败: jarPath={}", jarPath, e);
             return java.util.Collections.emptyList();
         }
     }
-    
-    /**
-     * 从 install-workflow.yml 中解析 configClass
-     * 
-     * @param jarPath jar 文件路径
-     * @return 配置类全限定名，如果不存在则返回 null
-     */
-    private String parseConfigClassFromWorkflow(java.nio.file.Path jarPath) {
+
+    private String parsePluginClassName(java.nio.file.Path jarPath) {
         try (java.util.jar.JarFile jarFile = new java.util.jar.JarFile(jarPath.toFile())) {
-            // 查找工作流定义文件（按优先级）
-            String[] candidates = {
-                "install-workflow.yml",
-                "install-workflow.yaml",
-                "workflow.yml",
-                "workflow.yaml"
-            };
-            
-            for (String candidate : candidates) {
-                java.util.jar.JarEntry entry = jarFile.getJarEntry(candidate);
-                if (entry != null) {
-                    try (java.io.InputStream in = jarFile.getInputStream(entry)) {
-                        com.fasterxml.jackson.databind.ObjectMapper yamlMapper = 
-                            new com.fasterxml.jackson.databind.ObjectMapper(
-                                new com.fasterxml.jackson.dataformat.yaml.YAMLFactory()
-                            );
-                        
-                        @SuppressWarnings("unchecked")
-                        java.util.Map<String, Object> workflow = yamlMapper.readValue(in, java.util.Map.class);
-                        
-                        if (workflow != null && workflow.containsKey("configClass")) {
-                            Object configClassObj = workflow.get("configClass");
-                            if (configClassObj != null) {
-                                return configClassObj.toString();
-                            }
-                        }
-                    }
-                }
+            java.util.jar.JarEntry entry = jarFile.getJarEntry("plugin.properties");
+            if (entry == null) {
+                return null;
             }
+            java.util.Properties properties = new java.util.Properties();
+            try (java.io.InputStream in = jarFile.getInputStream(entry)) {
+                properties.load(in);
+            }
+            return properties.getProperty("plugin.class");
         } catch (Exception e) {
-            log.debug("解析 install-workflow.yml 失败: {}", e.getMessage());
+            log.debug("解析 plugin.properties 失败: {}", e.getMessage());
+            return null;
         }
-        
-        return null;
     }
     
 }

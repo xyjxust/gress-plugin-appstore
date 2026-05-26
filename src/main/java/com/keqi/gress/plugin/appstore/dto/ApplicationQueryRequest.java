@@ -13,4 +13,10 @@ public class ApplicationQueryRequest {
     private Integer status;
     private String applicationType;
     private String pluginId;
+    /** 客户端类型（B/C） */
+    private String clientType;
+    /** 是否开启预加载（0/1） */
+    private Integer preloadEnabled;
+    /** 应用过滤标签（单个 tag，用于查询时模糊匹配 JSON 字符串） */
+    private String tag;
 }

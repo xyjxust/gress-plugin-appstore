@@ -23,7 +23,7 @@
       <n-spin :show="aggregateLoading">
         <n-card title="已创建聚合应用" size="small" class="list-card">
           <n-alert type="info" :show-icon="false" class="hint-alert" style="margin-bottom: 12px">
-            可选项仅包含已标记「含前端」的插件（hasFrontend=true）。已被聚合的插件将不再出现在主应用列表中；聚合应用的菜单与路由会自动汇总子插件结果。
+            可选项仅包含已标记「B 端表面」的插件（surfaceAdmin=true）。已被聚合的插件将不再出现在主应用列表中；聚合应用的菜单与路由会自动汇总子插件结果。
           </n-alert>
 
           <div v-if="sortedAggregateList.length === 0" class="empty-hint">暂无聚合应用</div>
@@ -111,7 +111,7 @@
             :options="aggregatablePluginOptions"
             multiple
             filterable
-            placeholder="请选择要聚合的插件（仅 hasFrontend=true）"
+            placeholder="请选择要聚合的插件（仅 surfaceAdmin=true）"
           />
         </n-form-item>
       </n-form>
@@ -254,7 +254,7 @@ function editAggregate(app: Application) {
   aggregateForm.icon = app.icon || ''
   aggregateForm.aggregateListOrder = app.aggregateListOrder ?? 1000
   aggregateForm.pluginIds = Array.isArray(app.aggregatedPluginIds) ? [...app.aggregatedPluginIds] : []
-  aggregateForm.autoLoad = Boolean(app.autoLoad)
+      aggregateForm.autoLoad = Boolean(app.autoLoadAdmin)
   aggregateModalVisible.value = true
 }
 

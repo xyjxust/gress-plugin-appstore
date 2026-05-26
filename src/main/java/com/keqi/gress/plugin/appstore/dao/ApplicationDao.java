@@ -1,7 +1,7 @@
 package com.keqi.gress.plugin.appstore.dao;
 
-import  com.keqi.gress.common.plugin.annotion.Inject;
-import  com.keqi.gress.common.plugin.annotion.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 import  com.keqi.gress.plugin.api.database.page.IPage;
 import  com.keqi.gress.plugin.api.service.PluginLambdaDataSource;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class ApplicationDao {
     
-    @Inject(source = Inject.BeanSource.SPRING)
+    @Autowired
     private PluginLambdaDataSource dataSource;
     
     /**
@@ -25,7 +25,8 @@ public class ApplicationDao {
      * <p>使用 Lambda 链式 API 进行单表分页查询</p>
      */
     public IPage<SysApplication> queryApplicationsPage(Integer page, Integer size, String keyword, 
-                                                     Integer status, String applicationType, String pluginId) {
+                                                     Integer status, String applicationType, String pluginId,
+                                                     String clientType, Integer preloadEnabled, String tag) {
         // 构建查询条件
         var query = dataSource.lambdaQuery(SysApplication.class);
         
@@ -55,6 +56,23 @@ public class ApplicationDao {
         // 插件ID过滤
         if (pluginId != null && !pluginId.trim().isEmpty()) {
             query.eq(SysApplication::getPluginId, pluginId);
+        }
+
+        // 客户端类型过滤（B/C）
+        if (clientType != null && !clientType.trim().isEmpty()) {
+            query.eq(SysApplication::getClientType, clientType.trim());
+        }
+
+        // 预加载开关过滤（0/1）
+        if (preloadEnabled != null) {
+            query.eq(SysApplication::getPreloadEnabled, preloadEnabled);
+        }
+
+        // tag 过滤：tags 存为 JSON array string，按 `"tag"` 进行模糊匹配避免子串误伤
+        if (tag != null && !tag.trim().isEmpty()) {
+            String t = tag.trim().replace("\"", "");
+            String pattern = "%\"" + t + "\"%";
+            query.like(SysApplication::getTags, t);
         }
         
         // 按更新时间倒序，执行分页查询
@@ -95,7 +113,7 @@ public class ApplicationDao {
     public int updateApplicationVersion(Long id, String version, String updateBy) {
         return dataSource.lambdaUpdate(SysApplication.class)
                          .set(SysApplication::getPluginVersion, version)
-                         .set(SysApplication::getUpdateBy, updateBy)
+                         .set(SysApplication::getUpdatedBy, updateBy)
                          .eq(SysApplication::getId, id)
                          .update();
     }
@@ -107,7 +125,7 @@ public class ApplicationDao {
         return dataSource.lambdaUpdate(SysApplication.class)
                          .set(SysApplication::getPluginVersion, version)
                          .set(SysApplication::getPluginType, pluginType)
-                         .set(SysApplication::getUpdateBy, updateBy)
+                         .set(SysApplication::getUpdatedBy, updateBy)
                          .eq(SysApplication::getId, id)
                          .update();
     }
@@ -127,7 +145,7 @@ public class ApplicationDao {
     public int updateApplicationStatus(Long id, Integer status, String updateBy) {
         return dataSource.lambdaUpdate(SysApplication.class)
                          .set(SysApplication::getStatus, status)
-                         .set(SysApplication::getUpdateBy, updateBy)
+                         .set(SysApplication::getUpdatedBy, updateBy)
                          .eq(SysApplication::getId, id)
                          .update();
     }
@@ -145,7 +163,7 @@ public class ApplicationDao {
     public int updateApplicationExtensionConfig(Long id, String extensionConfig, String updateBy) {
         return dataSource.lambdaUpdate(SysApplication.class)
                          .set(SysApplication::getExtensionConfig, extensionConfig)
-                         .set(SysApplication::getUpdateBy, updateBy)
+                         .set(SysApplication::getUpdatedBy, updateBy)
                          .eq(SysApplication::getId, id)
                          .update();
     }
@@ -183,7 +201,7 @@ public class ApplicationDao {
                 .set(SysApplication::getDescription, description)
                 .set(SysApplication::getIcon, icon)
                 .set(SysApplication::getExtensionConfig, extensionConfig)
-                .set(SysApplication::getUpdateBy, updateBy)
+                .set(SysApplication::getUpdatedBy, updateBy)
                 .eq(SysApplication::getId, id)
                 .update();
     }

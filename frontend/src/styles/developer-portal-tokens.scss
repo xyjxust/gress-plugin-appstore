@@ -1,0 +1,49 @@
+/**
+ * 开发者门户 Demo — 设计 token
+ * 间距/圆角与 gress-fronted variables 对齐；门户区用深色 + 青绿强调，与后台浅色区分
+ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap');
+
+.asdp-portal {
+  --asdp-font-display: 'Outfit', system-ui, sans-serif;
+  --asdp-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --asdp-ink: #e8edf5;
+  --asdp-ink-muted: #8b98ab;
+  --asdp-bg-deep: #0b0f14;
+  --asdp-bg-card: rgba(18, 24, 33, 0.72);
+  --asdp-line: rgba(120, 144, 180, 0.18);
+  --asdp-accent: #2dd4bf;
+  --asdp-accent-dim: rgba(45, 212, 191, 0.14);
+  --asdp-glow: rgba(45, 212, 191, 0.35);
+  --asdp-danger: #fb7185;
+  --asdp-space-xs: 4px;
+  --asdp-space-sm: 8px;
+  --asdp-space-md: 12px;
+  --asdp-space-lg: 16px;
+  --asdp-space-xl: 24px;
+  --asdp-space-2xl: 32px;
+  --asdp-radius: 12px;
+  --asdp-radius-lg: 18px;
+  --asdp-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  --asdp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.asdp-dev {
+  --asdp-font-display: 'Outfit', system-ui, sans-serif;
+  --asdp-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --asdp-ink: #1f2329;
+  --asdp-ink-muted: #4e5969;
+  --asdp-bg: #f4f6f9;
+  --asdp-surface: #ffffff;
+  --asdp-line: #e5e6eb;
+  --asdp-accent: #6366f1;
+  --asdp-accent-soft: #e0e7ff;
+  --asdp-space-xs: 4px;
+  --asdp-space-sm: 8px;
+  --asdp-space-md: 12px;
+  --asdp-space-lg: 16px;
+  --asdp-space-xl: 24px;
+  --asdp-space-2xl: 32px;
+  --asdp-radius: 10px;
+  --asdp-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}

@@ -32,8 +32,8 @@ export const middlewareApi = {
     return http.get<HealthCheckResult>(`${API_BASE}/middlewares/${middlewareId}/health`)
   },
 
-  uninstall(middlewareId: string, operatorName: string = 'admin'): Promise<void> {
-    return http.post(`${API_BASE}/middlewares/${middlewareId}/uninstall`, { operatorName })
+  uninstall(middlewareId: string): Promise<void> {
+    return http.post(`${API_BASE}/middlewares/${middlewareId}/uninstall`)
   },
 
   /**
@@ -48,10 +48,9 @@ export const middlewareApi = {
    */
   installRemote(
     pluginId: string,
-    operatorName: string = 'admin',
     opts?: { targetNodeId?: string; executionType?: 'local' | 'ssh' | 'docker-api' }
   ): Promise<MiddlewareInstallResult> {
-    const params = new URLSearchParams({ pluginId, operatorName })
+    const params = new URLSearchParams({ pluginId })
     if (opts?.targetNodeId) params.set('targetNodeId', opts.targetNodeId)
     if (opts?.executionType) params.set('executionType', opts.executionType)
     return http.post<MiddlewareInstallResult>(`${API_BASE}/middlewares/remote/install?${params.toString()}`)
@@ -65,7 +64,7 @@ export const middlewareApi = {
     pluginId: string,
     opts?: { targetNodeId?: string; executionType?: 'local' | 'ssh' | 'docker-api'; config?: Record<string, any> }
   ): Promise<void> {
-    const params = new URLSearchParams({ pluginId, operatorName: 'admin' })
+    const params = new URLSearchParams({ pluginId })
     if (opts?.targetNodeId) params.set('targetNodeId', opts.targetNodeId)
     if (opts?.executionType) params.set('executionType', opts.executionType)
 
@@ -160,4 +159,3 @@ export interface MiddlewareServiceInfo {
   status?: 'RUNNING' | 'STOPPED' | 'ERROR'
   workDir?: string
 }
-
