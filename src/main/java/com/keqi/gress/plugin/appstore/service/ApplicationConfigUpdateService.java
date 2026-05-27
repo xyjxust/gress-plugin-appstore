@@ -207,16 +207,9 @@ public class ApplicationConfigUpdateService {
         boolean hasWidget = false;
         boolean hasPanel = false;
 
-        Object pluginNode = newConfig.get("plugin");
-        if (pluginNode instanceof Map) {
-            Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
-            if (pluginMap.get("hasWidget") != null) {
-                hasWidget = Boolean.parseBoolean(String.valueOf(pluginMap.get("hasWidget")));
-            }
-            if (pluginMap.get("hasPanel") != null) {
-                hasPanel = Boolean.parseBoolean(String.valueOf(pluginMap.get("hasPanel")));
-            }
-        }
+        boolean[] widgetPanel = PluginUiExtensionConfigFactory.resolveWidgetPanelFlags(newConfig, hasWidget, hasPanel);
+        hasWidget = widgetPanel[0];
+        hasPanel = widgetPanel[1];
 
         PluginUiExtensionConfigFactory.putExtensionFlags(mergedConfig, newConfig, hasWidget, hasPanel);
 

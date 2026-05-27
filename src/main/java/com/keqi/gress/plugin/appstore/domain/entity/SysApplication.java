@@ -80,6 +80,11 @@ public class SysApplication extends BaseEntity {
     @Schema(description = "应用过滤标签（JSON array string，如：[\"iam\",\"security\"]）")
     @TableField("tags")
     private String tags;
+
+    /** 依赖的插件 ID 列表（JSON array string，如：[\"iam\",\"verification-channel\"]） */
+    @Schema(description = "依赖的插件 ID 列表（JSON array string）")
+    @TableField("dependency_plugin_ids")
+    private String dependencyPluginIds;
     
     /** 应用图标 */
     @Schema(description = "应用图标")

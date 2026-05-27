@@ -127,19 +127,19 @@
                 </executions>
             </plugin>
 
-            <!-- 2. 将前端构建产物拷贝到 src/main/resources/js 目录 -->
+            <!-- 2. 将前端 UMD 打入 target/classes（打包前写入，避免 jar 缺 js） -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.3.1</version>
                 <executions>
                     <execution>
-                        <id>copy-frontend-to-resources</id>
-                        <phase>generate-resources</phase>
+                        <id>copy-frontend-to-classes</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/js</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/js</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${basedir}/frontend/dist</directory>

@@ -99330,7 +99330,7 @@ ${node.outerHTML}
                         vue.createVNode(_component_n_input, {
                           value: stackForm.value.webImage,
                           "onUpdate:value": _cache[12] || (_cache[12] = ($event) => stackForm.value.webImage = $event),
-                          placeholder: "gress/gress-web:latest"
+                          placeholder: "docker.io/keqi123/gress-web:latest"
                         }, null, 8, ["value"])
                       ]),
                       _: 1
@@ -99343,7 +99343,7 @@ ${node.outerHTML}
                         vue.createVNode(_component_n_input, {
                           value: stackForm.value.frontedImage,
                           "onUpdate:value": _cache[13] || (_cache[13] = ($event) => stackForm.value.frontedImage = $event),
-                          placeholder: "gress/gress-fronted:latest"
+                          placeholder: "docker.io/keqi123/gress-frontend:latest"
                         }, null, 8, ["value"])
                       ]),
                       _: 1

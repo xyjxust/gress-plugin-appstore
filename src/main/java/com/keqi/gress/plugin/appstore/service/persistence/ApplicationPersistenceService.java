@@ -12,10 +12,12 @@ import com.keqi.gress.plugin.appstore.dao.ApplicationUpgradeLogDao;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.domain.entity.SysApplicationUpgradeLog;
 import com.keqi.gress.plugin.appstore.service.AppStoreApiService;
+import com.keqi.gress.plugin.appstore.service.dependency.ApplicationDependencyPluginIdsResolver;
 import com.keqi.gress.plugin.appstore.support.PluginUiExtensionConfigFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,9 @@ public class ApplicationPersistenceService {
 
     @Autowired(required = false)
     private PluginConfigMetadataProvider pluginConfigMetadataProvider;
+
+    @Autowired
+    private ApplicationDependencyPluginIdsResolver dependencyPluginIdsResolver;
     
     /**
      * 根据ID查找应用
@@ -143,17 +148,10 @@ public class ApplicationPersistenceService {
                 boolean hasPanel = installInfo.isHasPanel();
 
                 Map<String, Object> pluginYmlConfig = installInfo.getPluginYmlConfig();
-                Object pluginNode = pluginYmlConfig != null ? pluginYmlConfig.get("plugin") : null;
-                if (pluginNode instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> pluginMap = (Map<String, Object>) pluginNode;
-                    if (pluginMap.containsKey("hasPanel")) {
-                        hasPanel = parseBoolean(pluginMap.get("hasPanel"));
-                    }
-                    if (pluginMap.containsKey("hasWidget")) {
-                        hasWidget = parseBoolean(pluginMap.get("hasWidget"));
-                    }
-                }
+                boolean[] widgetPanel = PluginUiExtensionConfigFactory.resolveWidgetPanelFlags(
+                        pluginYmlConfig, hasWidget, hasPanel);
+                hasWidget = widgetPanel[0];
+                hasPanel = widgetPanel[1];
 
                 PluginUiExtensionConfigFactory.putExtensionFlags(extConfig, pluginYmlConfig, hasWidget, hasPanel);
 
@@ -188,6 +186,11 @@ public class ApplicationPersistenceService {
             } catch (Exception e) {
                 log.warn("构建 extension_config 失败: pluginId={}, error={}", packageId, e.getMessage());
             }
+
+            application.setDependencyPluginIds(
+                    serializeDependencyPluginIds(
+                            dependencyPluginIdsResolver.resolve(
+                                    packageId, installInfo.getVersion(), null, installInfo)));
 
             // 保存到数据库
             int rows = dataSource.insert(application);
@@ -318,6 +321,34 @@ public class ApplicationPersistenceService {
         }
     }
     
+    /**
+     * 安装/升级后刷新 dependency_plugin_ids
+     */
+    public boolean refreshDependencyPluginIds(Long applicationId,
+                                              String pluginId,
+                                              String version,
+                                              String operatorName) {
+        if (applicationId == null || pluginId == null || pluginId.isBlank()) {
+            return false;
+        }
+        List<String> dependencyIds = dependencyPluginIdsResolver.resolve(pluginId, version);
+        String json = serializeDependencyPluginIds(dependencyIds);
+        int rows = applicationDao.updateDependencyPluginIds(applicationId, json, operatorName);
+        log.info("刷新应用依赖插件列表: applicationId={}, pluginId={}, dependencies={}",
+                applicationId, pluginId, dependencyIds);
+        return rows > 0;
+    }
+
+    private String serializeDependencyPluginIds(List<String> dependencyPluginIds) {
+        List<String> normalized = dependencyPluginIds == null ? List.of() : dependencyPluginIds;
+        try {
+            return new ObjectMapper().writeValueAsString(new ArrayList<>(normalized));
+        } catch (Exception e) {
+            log.warn("序列化 dependencyPluginIds 失败", e);
+            return "[]";
+        }
+    }
+
     /**
      * 解析应用的扩展配置
      */

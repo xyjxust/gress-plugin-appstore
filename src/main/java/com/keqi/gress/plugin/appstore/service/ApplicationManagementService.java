@@ -17,6 +17,7 @@ import com.keqi.gress.plugin.appstore.service.orchestrator.InstallOrchestrator;
 import com.keqi.gress.plugin.appstore.service.orchestrator.UpgradeOrchestrator;
 import com.keqi.gress.plugin.appstore.service.orchestrator.UninstallOrchestrator;
 import com.keqi.gress.plugin.appstore.service.persistence.ApplicationPersistenceService;
+import com.keqi.gress.plugin.appstore.service.dependency.ApplicationDependentsGuardService;
 import com.keqi.gress.plugin.appstore.service.logging.ApplicationOperationLogger;
 import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +78,9 @@ public class ApplicationManagementService {
     
     @Autowired
     private ApplicationOperationLogger operationLogger;
+
+    @Autowired
+    private ApplicationDependentsGuardService applicationDependentsGuardService;
     
     @Autowired
     private ApplicationDao applicationDao;
@@ -456,6 +460,13 @@ public class ApplicationManagementService {
             
             String packageId = application.getPluginId();
             log.info("停止应用: id={}, packageId={}, operator={}", id, packageId, resolvedOperatorName);
+
+            Result<Void> dependentsCheck = applicationDependentsGuardService.validateNoDependents(packageId, true);
+            if (!dependentsCheck.isSuccess()) {
+                operationLogger.logFailure(application, "STOP", "停止应用",
+                        resolvedOperatorId, resolvedOperatorName, dependentsCheck.getErrorMessage(), startTime);
+                return Result.error(dependentsCheck.getErrorMessage());
+            }
             
             Result<?> result = pluginPackageLifecycle.stop(packageId);
             
@@ -832,6 +843,9 @@ public class ApplicationManagementService {
         dto.setCreateBy(application.getCreatedBy());
         dto.setUpdateBy(application.getUpdatedBy());
         dto.setNamespaceCode(application.getNamespaceCode());
+        dto.setTags(application.getTags());
+        dto.setDependencyPluginIds(applicationDependentsGuardService.parseDependencyPluginIds(
+                application.getDependencyPluginIds()));
 
         // 聚合应用扩展信息
         Map<String, Object> extConfig = parseExtConfig(application.getExtensionConfig());

@@ -110,10 +110,16 @@ public class ApplicationDTO {
     /** 聚合应用在列表中的排序权重（越小越靠前） */
     private Integer aggregateListOrder;
 
+    /** 应用过滤标签（JSON array string） */
+    private String tags;
+
+    /** 本应用依赖的插件 ID 列表 */
+    private List<String> dependencyPluginIds;
+
     /** Marketplace 提供的 SHA-256（用于安装前后完整性校验） */
     private String sha256;
     
-    /** 依赖信息列表 */
+    /** 依赖信息列表（应用商店元数据） */
     private List<DependencyInfo> dependencies;
     
     /**

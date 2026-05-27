@@ -230,9 +230,9 @@ public class StackDeploymentService {
 
     private String renderCompose(StackConfigEntity stack, StackDeploymentEntity dep, StackTargetEntity target) {
         Integer port = resolveWebPort(stack, target);
-        String webImage = stack.getWebImage() != null && !stack.getWebImage().isBlank() ? stack.getWebImage() : "gress/gress-web:latest";
+        String webImage = stack.getWebImage() != null && !stack.getWebImage().isBlank() ? stack.getWebImage() : "docker.io/keqi123/gress-web:latest";
         Integer frontedPort = resolveFrontedPort(stack, target);
-        String frontedImage = stack.getFrontedImage() != null && !stack.getFrontedImage().isBlank() ? stack.getFrontedImage() : "gress/gress-fronted:latest";
+        String frontedImage = stack.getFrontedImage() != null && !stack.getFrontedImage().isBlank() ? stack.getFrontedImage() : "docker.io/keqi123/gress-frontend:latest";
 
         StringBuilder sb = new StringBuilder();
         sb.append("name: gress-stack-").append(dep.getStackId()).append("\n");

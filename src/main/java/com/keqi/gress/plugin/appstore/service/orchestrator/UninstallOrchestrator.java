@@ -10,6 +10,7 @@ import com.keqi.gress.plugin.appstore.domain.entity.SysApplication;
 import com.keqi.gress.plugin.appstore.dto.ApplicationUninstallRequest;
 import com.keqi.gress.plugin.appstore.service.ApplicationInstallService;
 import com.keqi.gress.plugin.appstore.service.persistence.ApplicationPersistenceService;
+import com.keqi.gress.plugin.appstore.service.dependency.ApplicationDependentsGuardService;
 import com.keqi.gress.plugin.appstore.service.logging.ApplicationOperationLogger;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,6 +46,9 @@ public class UninstallOrchestrator {
     
     @Autowired
     private ApplicationOperationLogger operationLogger;
+
+    @Autowired
+    private ApplicationDependentsGuardService applicationDependentsGuardService;
     
     /**
      * 卸载应用
@@ -79,9 +83,17 @@ public class UninstallOrchestrator {
                         "集成应用不能卸载", startTime);
                 return Result.error("集成应用不能卸载");
             }
+
+            String packageId = application.getPluginId();
+            Result<Void> dependentsCheck = applicationDependentsGuardService.validateNoDependents(packageId, false);
+            if (!dependentsCheck.isSuccess()) {
+                operationLogger.logFailure(application, "UNINSTALL", "卸载应用",
+                        request.getOperatorId(), request.getOperatorName(),
+                        dependentsCheck.getErrorMessage(), startTime);
+                return Result.error(dependentsCheck.getErrorMessage());
+            }
             
             // 4. 调用插件生命周期管理器卸载
-            String packageId = application.getPluginId();
             Result<PluginPackageUninstallResult> uninstallResult = 
                     applicationInstallService.uninstallApplication(packageId);
             

@@ -124,15 +124,11 @@ export const applicationApi = {
    * 上传并安装应用包
    */
   async uploadAndInstall(formData: FormData): Promise<void> {
-    await http.post(`${API_BASE}/applications/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    } as any)
+    await http.post(`${API_BASE}/applications/upload`, formData)
   },
 
   async getUploadInstallConfigMetadata(formData: FormData): Promise<any[]> {
-    return http.post(`${API_BASE}/applications/upload/install-config/metadata`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    } as any)
+    return http.post(`${API_BASE}/applications/upload/install-config/metadata`, formData) as any
   },
 
   /**

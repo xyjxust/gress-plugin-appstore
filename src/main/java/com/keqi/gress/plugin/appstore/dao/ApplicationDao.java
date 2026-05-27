@@ -169,6 +169,48 @@ public class ApplicationDao {
     }
     
     /**
+     * 查询 dependency_plugin_ids 中包含指定插件 ID 的应用
+     */
+    public java.util.List<SysApplication> findByDependencyPluginId(String dependencyPluginId) {
+        if (dependencyPluginId == null || dependencyPluginId.isBlank()) {
+            return java.util.List.of();
+        }
+        String pattern = dependencyLikePattern(dependencyPluginId);
+        return dataSource.lambdaQuery(SysApplication.class)
+                .like(SysApplication::getDependencyPluginIds, pattern)
+                .list();
+    }
+
+    /**
+     * 查询仍启用且 dependency_plugin_ids 中包含指定插件 ID 的应用
+     */
+    public java.util.List<SysApplication> findEnabledByDependencyPluginId(String dependencyPluginId) {
+        if (dependencyPluginId == null || dependencyPluginId.isBlank()) {
+            return java.util.List.of();
+        }
+        String pattern = dependencyLikePattern(dependencyPluginId);
+        return dataSource.lambdaQuery(SysApplication.class)
+                .eq(SysApplication::getStatus, 1)
+                .like(SysApplication::getDependencyPluginIds, pattern)
+                .list();
+    }
+
+    /**
+     * 更新依赖插件 ID 列表
+     */
+    public int updateDependencyPluginIds(Long id, String dependencyPluginIds, String updateBy) {
+        return dataSource.lambdaUpdate(SysApplication.class)
+                .set(SysApplication::getDependencyPluginIds, dependencyPluginIds)
+                .set(SysApplication::getUpdatedBy, updateBy)
+                .eq(SysApplication::getId, id)
+                .update();
+    }
+
+    private String dependencyLikePattern(String pluginId) {
+        return "%\"" + pluginId.trim().replace("\"", "") + "\"%";
+    }
+
+    /**
      * 查询所有应用
      */
     public java.util.List<SysApplication> findAll() {

@@ -175,9 +175,10 @@ public class UpgradeOrchestrator {
             
             boolean updateSuccess = persistenceService.updateVersionAndType(
                     id, newVersion, pluginType, request.getOperatorName());
-            
+
             if (updateSuccess) {
-                log.info("应用升级成功: id={}, pluginId={}, oldVersion={}, newVersion={}, pluginType={}", 
+                persistenceService.refreshDependencyPluginIds(id, pluginId, newVersion, request.getOperatorName());
+                log.info("应用升级成功: id={}, pluginId={}, oldVersion={}, newVersion={}, pluginType={}",
                         id, pluginId, currentVersion, newVersion, pluginType);
                 operationLogger.logSuccess(application, "UPGRADE", 
                         String.format("升级应用从 %s 到 %s", currentVersion, newVersion), 

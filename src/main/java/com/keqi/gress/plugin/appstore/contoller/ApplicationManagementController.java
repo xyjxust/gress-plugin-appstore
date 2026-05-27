@@ -8,6 +8,7 @@ import com.keqi.gress.plugin.api.ui.annotation.PluginMenu;
 import com.keqi.gress.plugin.appstore.config.AppStoreConfig;
 import com.keqi.gress.plugin.appstore.dto.*;
 import com.keqi.gress.plugin.appstore.service.ApplicationManagementService;
+import com.keqi.gress.plugin.appstore.service.dependency.ApplicationDependentsGuardService;
 import com.keqi.gress.plugin.appstore.support.OperatorContextHelper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,9 @@ public class ApplicationManagementController {
     private  com.keqi.gress.common.plugin.PluginConfigMetadataProvider pluginConfigMetadataProvider;
     @Autowired
     private AppStoreConfig appStoreConfig;
+
+    @Autowired
+    private ApplicationDependentsGuardService applicationDependentsGuardService;
     
     /**
      * 查询应用列表
@@ -202,6 +206,10 @@ public class ApplicationManagementController {
         if (defaultAppCheck != null) {
             return defaultAppCheck;
         }
+        Result<Void> dependentsCheck = validateNoPluginDependents(id, false);
+        if (dependentsCheck != null) {
+            return dependentsCheck;
+        }
 
         ApplicationUninstallRequest body = request != null ? request : new ApplicationUninstallRequest();
         body.setOperatorId(OperatorContextHelper.resolveOperatorId(body.getOperatorId()));
@@ -232,6 +240,10 @@ public class ApplicationManagementController {
         if (defaultAppCheck != null) {
             return defaultAppCheck;
         }
+        Result<Void> dependentsCheck = validateNoPluginDependents(id, true);
+        if (dependentsCheck != null) {
+            return dependentsCheck;
+        }
 
         String operatorName = OperatorContextHelper.getOperatorName();
         log.info("停止应用: id={}, operator={}", id, operatorName);
@@ -257,6 +269,26 @@ public class ApplicationManagementController {
         ApplicationDTO application = detailResult.getData();
         if (application != null && Integer.valueOf(1).equals(application.getIsDefault())) {
             return Result.error("默认应用不允许" + action);
+        }
+        return null;
+    }
+
+    /**
+     * @param enabledDependentsOnly true=停用：仅拦截仍启用的依赖方；false=卸载：拦截全部已安装依赖方
+     */
+    private Result<Void> validateNoPluginDependents(Long id, boolean enabledDependentsOnly) {
+        Result<ApplicationDTO> detailResult = applicationManagementService.getApplicationDetail(id);
+        if (!detailResult.isSuccess()) {
+            return Result.error(detailResult.getErrorMessage());
+        }
+        ApplicationDTO application = detailResult.getData();
+        if (application == null || application.getPluginId() == null || application.getPluginId().isBlank()) {
+            return null;
+        }
+        Result<Void> guard = applicationDependentsGuardService.validateNoDependents(
+                application.getPluginId(), enabledDependentsOnly);
+        if (!guard.isSuccess()) {
+            return Result.error(guard.getErrorMessage());
         }
         return null;
     }

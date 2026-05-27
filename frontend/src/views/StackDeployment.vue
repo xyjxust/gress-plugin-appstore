@@ -154,10 +154,10 @@
             <n-input v-model:value="stackForm.runtimeBaseDir" placeholder="/home/gress/a/runtime" />
           </n-form-item>
           <n-form-item label="webImage" path="webImage">
-            <n-input v-model:value="stackForm.webImage" placeholder="gress/gress-web:latest" />
+            <n-input v-model:value="stackForm.webImage" placeholder="docker.io/keqi123/gress-web:latest" />
           </n-form-item>
           <n-form-item label="frontedImage" path="frontedImage">
-            <n-input v-model:value="stackForm.frontedImage" placeholder="gress/gress-fronted:latest" />
+            <n-input v-model:value="stackForm.frontedImage" placeholder="docker.io/keqi123/gress-frontend:latest" />
           </n-form-item>
           <n-form-item label="deployFronted" path="deployFronted">
             <n-select v-model:value="stackForm.deployFronted" :options="boolOptions" />
